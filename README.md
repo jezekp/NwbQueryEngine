@@ -3,4 +3,5 @@ This is a prototype of a query engine used for NeurodataWithoutBorders data form
 
 Getting started:
 install hdfql to your local repo
-mvn install:install-file -Dfile=HdFql.jar -DgroupId=hd5ql -DartifactId=hdf5ql -Dversion=1.0.0 -Dpackaging=jar
+
+mvn install:install-file -Dfile=HDFql.jar -DgroupId=hdfql -DartifactId=hdfql -Dversion=1.0.0 -Dpackaging=jar
