@@ -20,7 +20,12 @@
             <artifactId>saddle-core_2.11</artifactId>
             <version>1.3.4</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/ncsa.hdf/lib-hdf -->
+        <!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.3</version>
+        </dependency>
     </dependencies>
 
 </project>
