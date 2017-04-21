@@ -1,6 +1,7 @@
 package edu.berkeley.nwbqueryengine.connectors;
 
 import ncsa.hdf.object.*;
+import ncsa.hdf.object.h5.H5File;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,19 +26,42 @@ public class HDF5Connector {
         return file;
     }
 
-    public void disconnect(FileFormat fileFormat) throws Exception {
-        fileFormat.close();
-    }
 
-    public static void x(String[] args) throws Exception {
+
+    public static void x()  {
+
+        try {
+            Class fileclass = Class.forName("ncsa.hdf.object.h5.H5File");
+            FileFormat fileformat = (FileFormat)fileclass.newInstance();
+            if (fileformat != null)
+                FileFormat.addFileFormat("HDF5", fileformat);
+        } catch (Throwable err ) {
+            err.printStackTrace();}
+
+        H5File h5file = new H5File(fname);
+        try {
+            h5file.open();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
-        FileFormat testFile = fileFormat.createInstance(fname, FileFormat.READ);
-        testFile.open();
-        Group root = (Group) ((javax.swing.tree.DefaultMutableTreeNode) testFile.getRootNode()).getUserObject();
-        printGroup(root, "");
-        // close file resource
-        testFile.close();
-
+        if (fileFormat == null) {
+            System.err.println("Cannot find HDF5 FileFormat.");
+            return;
+        }
+        try {
+            FileFormat testFile = fileFormat.createInstance(fname, FileFormat.READ);
+            testFile.open();
+            //Group root = (Group) ((javax.swing.tree.DefaultMutableTreeNode) testFile.getRootNode()).getUserObject();
+            Group root = (Group) testFile.get("/");
+            printGroup(root, "");
+            // close file resource
+            testFile.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
