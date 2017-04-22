@@ -7,6 +7,7 @@ package edu.berkeley.nwbqueryengine.query;
  */
 public class Expression {
 
+    private Expression parent;
     private Expression leftSide;
     private Expression rightSide;
     private String operator;
@@ -15,8 +16,13 @@ public class Expression {
     public Expression(String val) {
         this.expressionValue = val;
     }
-    public Expression(String val, String operator) {
+
+    public Expression(String val, Expression parent) {
         this(val);
+        this.parent = parent;
+    }
+    public Expression(String val, String operator, Expression parent) {
+        this(val, parent);
         this.operator = operator;
     }
 
@@ -55,5 +61,13 @@ public class Expression {
     @Override
     public String toString() {
         return expressionValue;
+    }
+
+    public Expression getParent() {
+        return parent;
+    }
+
+    public void setParent(Expression parent) {
+        this.parent = parent;
     }
 }

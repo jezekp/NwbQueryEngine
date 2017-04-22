@@ -120,7 +120,7 @@ public class HDFqlExample
 
 		// create cursor "myCursor" and use it
 		myCursor = new HDFqlCursor();
-		HDFql.cursorUse(myCursor);
+		//HDFql.cursorUse(myCursor);
 
 		HDFql.execute("SHOW LIKE acquisition/timeseries/lick_trace/**");
 

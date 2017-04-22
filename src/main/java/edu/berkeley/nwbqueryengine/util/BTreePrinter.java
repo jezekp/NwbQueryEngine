@@ -39,7 +39,7 @@ public class BTreePrinter {
                 } else {
                     newNodes.add(null);
                     newNodes.add(null);
-                    System.out.print(" ");
+                    System.out.print("");
                 }
 
                 BTreePrinter.printWhitespaces(betweenSpaces);

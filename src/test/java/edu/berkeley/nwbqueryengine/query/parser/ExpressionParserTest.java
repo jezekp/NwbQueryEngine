@@ -24,8 +24,8 @@ class ExpressionParserTest {
         String expressionVal = leftSide.getExpressionValue();
         assertNotNull(expressionVal);
         assertEquals("CellInfo", expressionVal);
-        List<Expression> rightSide = root.getRightSideExpressions();
-        String[] expressions = {"'area'='c1'", "'area'='c2'", "'h'='c3'", "h3=c8"};
+        List<Expression> rightSide = root.leftSideOfExpressions();
+        String[] expressions = {"'area'","'c1'", "'area'","'c2'", "'h'","'c3'", "h3","c8"};
         assertEquals(expressions.length, rightSide.size());
         int i = 0;
         for(Expression item : rightSide) {
