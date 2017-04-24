@@ -19,10 +19,6 @@ public class ExpressionParser {
 
     private Log logger = LogFactory.getLog(getClass());
 
-
-
-
-
     public Query parse(String expression) {
         Expression root = parseInternal(new Expression(expression));
         Query q = new Query(root);

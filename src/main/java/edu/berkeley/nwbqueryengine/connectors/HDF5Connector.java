@@ -2,13 +2,19 @@ package edu.berkeley.nwbqueryengine.connectors;
 
 import com.hdfql.HDFql;
 import edu.berkeley.nwbqueryengine.query.Expression;
+import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
+import edu.berkeley.nwbqueryengine.query.result.NwbResult;
+import edu.berkeley.nwbqueryengine.query.result.Restrictions;
 import ncsa.hdf.object.*;
 import ncsa.hdf.object.h5.H5File;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,11 +29,6 @@ public class HDF5Connector {
     private Log logger = LogFactory.getLog(getClass());
 
 
-    private static String path = "/home/petr-jezek/Data/nwb_datasets/nwbMatlab_DG";
-    private static String file = "ANM184389_20130207.nwb";
-    private static String fname = path + "/" + file;
-
-
     public FileFormat connect(String fileName) throws Exception {
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         FileFormat file = fileFormat.createInstance(fileName, FileFormat.READ);
@@ -35,8 +36,12 @@ public class HDF5Connector {
         return file;
     }
 
-    public String executeQuery(Query q) {
-        HDFql.execute("USE FILE " + fname);
+    public List<NwbResult> executeQuery(Query q, String fname) throws Exception {
+        List<NwbResult> nwbResults = new LinkedList<>();
+        boolean firstRun = true;
+        String useFileQuery = "USE FILE " + fname;
+        logger.debug("Use file query: " + useFileQuery);
+        HDFql.execute(useFileQuery);
         // populate HDFql default cursor with name of the HDF file in use and display it
         logger.debug("File name: " + fname);
         HDFql.execute("SHOW USE FILE");
@@ -51,32 +56,57 @@ public class HDF5Connector {
             HDFql.cursorFirst();
             List<String> showResults = new LinkedList<>();
             while (HDFql.cursorNext() == HDFql.SUCCESS) {
-                String res = HDFql.cursorGetChar();
-                showResults.add(res);
-                logger.debug("Like: " + res + " -- " + HDFql.cursorGetDatatype());
+                String cursorGetChar = HDFql.cursorGetChar();
+                showResults.add(cursorGetChar);
+                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype());
             }
-
-            for (String r : showResults) {
+            List<NwbResult> partialResult = new LinkedList<>();
+            for (String showResult : showResults) {
+                //todo how to do it general? - work with object and try use HDFql.variableGetDataType?
                 double[] values = new double[1];
                 int registeringStatus = HDFql.variableRegister(values);
                 logger.debug("Registering variable: " + registeringStatus);
                 int size = HDFql.variableGetSize(values);
                 logger.debug("Size: " + size);
-                String selectQuery = "SELECT FROM " + r + " INTO MEMORY " + HDFql.variableGetNumber(values);
+                String selectQuery = "SELECT FROM " + showResult + " INTO MEMORY " + HDFql.variableGetNumber(values);
                 logger.debug("Select: " + selectQuery);
                 int selectStatus = HDFql.execute(selectQuery);
                 logger.debug("selectStatus: " + selectStatus);
-                for (int i = 0; i < values.length; i++) {
-                    logger.debug("Value: " + values[i]);
+                for (double tmp : values) {
+                    logger.debug("Value: " + tmp);
                     Expression rightSide = q.getRightSide(item);
-                    logger.debug("RightSide: " + rightSide);
+                    logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
+
+                    ScriptEngineManager mgr = new ScriptEngineManager();
+                    ScriptEngine engine = mgr.getEngineByName("JavaScript");
+                    String exp = StringUtils.strip(tmp + "" + item.getOperator() + "" + rightSide.getExpressionValue());
+                    Object eval = engine.eval(exp);
+                    logger.debug("Expression: " + exp + ", res:" + eval);
+                    if(((Boolean) eval).booleanValue()) {
+                        partialResult.add(new NwbResult(showResult, tmp));
+                    }
+
                 }
                 HDFql.variableUnregister(values);
+            }
+            String operator = item.getParent().getOperator();
+            logger.debug("Operator: " + operator);
+            if(firstRun) {
+                nwbResults.addAll(partialResult);
+                firstRun = false;
+            }
+            if (("\\" + operator).equals(Operators.OR.op())) {
+                logger.debug("...OR....");
+                nwbResults = Restrictions.or(nwbResults, partialResult);
+            }
+            if (operator.equals(Operators.AND.op())) {
+                logger.debug("...AND....");
+                nwbResults = Restrictions.and(nwbResults, partialResult);
             }
         }
 
 
-        return null;
+        return nwbResults;
     }
 
 
@@ -91,7 +121,8 @@ public class HDF5Connector {
             err.printStackTrace();
         }
 
-        H5File h5file = new H5File(fname);
+        //todo filename
+        H5File h5file = new H5File("");
         try {
             h5file.open();
         } catch (Exception e) {
@@ -105,7 +136,8 @@ public class HDF5Connector {
             return;
         }
         try {
-            FileFormat testFile = fileFormat.createInstance(fname, FileFormat.READ);
+            //todo filename
+            FileFormat testFile = fileFormat.createInstance("", FileFormat.READ);
             testFile.open();
             //Group root = (Group) ((javax.swing.tree.DefaultMutableTreeNode) testFile.getRootNode()).getUserObject();
             Group root = (Group) testFile.get("/");

@@ -6,8 +6,12 @@ import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.query.parser.ExpressionParser;
+import edu.berkeley.nwbqueryengine.query.result.NwbResult;
 import edu.berkeley.nwbqueryengine.util.BTreePrinter;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.util.List;
 
 
@@ -18,18 +22,31 @@ import java.util.List;
  */
 public class Main {
 
+    private static String path = "/home/petr-jezek/Data/nwb_datasets/nwbMatlab_DG";
+    private static String file = "ANM184389_20130207.nwb";
+    private static String fname = path + "/" + file;
+
 
     public static void main(String[] args) {
-        System.loadLibrary("HDFql");
-        ExpressionParser p = new ExpressionParser();
-        Query query = p.parse("epochs=('start_time'>'5'&'stop_time'<'10')");
+        try {
 
 
-        BTreePrinter printer = new BTreePrinter();
-        //printer.printNode(expression);
-        //query.leftSideOfExpressions(expression);
-        HDF5Connector connector = new HDF5Connector();
-        connector.executeQuery(query);
+            System.loadLibrary("HDFql");
+            ExpressionParser p = new ExpressionParser();
+            Query query = p.parse("epochs=('start_time'<'200'|'stop_time'>'900')");
+
+
+            BTreePrinter printer = new BTreePrinter();
+            //printer.printNode(expression);
+            //query.leftSideOfExpressions(expression);
+            HDF5Connector connector = new HDF5Connector();
+            List<NwbResult> res =  connector.executeQuery(query, fname);
+            res.forEach(name -> System.out.println(name));
+            System.out.println("Done.... ");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         //HDFqlExample.test();
 /*        try {
@@ -37,8 +54,6 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }*/
-
-System.out.println("Success: " + HDFql.SUCCESS);
 
     }
 
