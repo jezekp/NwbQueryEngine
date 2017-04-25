@@ -15,25 +15,19 @@ public class Query {
 
     private Expression root;
     private Log logger = LogFactory.getLog(getClass());
+    private List<Expression> expressionsLeftSide;
+    private Expression leftSide;
 
     public Query(Expression root) {
         this.root = root;
     }
 
-    public Expression getLeftSide() {
-        List<Expression> expressions = new LinkedList<>();
-        inorder(expressions, root);
-        return expressions.get(0);
-
-    }
-
-    private void inorder(List<Expression> expressions, Expression node) {
-        if (node != null) {
-            inorder(expressions, node.getLeftSide());
-            inorder(expressions, node.getRightSide());
-            logger.debug("[" + node.getExpressionValue() + ", " + node.getOperator() + ", left: (" + node.getLeftSide() + "), right: (" + node.getRightSide() + ")], ");
-            expressions.add(node);
+    public Expression getQueryLeftSide() {
+        if(leftSide == null) {
+            expressionsLeftSide = leftSideOfExpressions();
         }
+        return leftSide;
+
     }
 
     // recursive function to print left view
@@ -43,7 +37,7 @@ public class Query {
 
         // If this is the first node of its level
         if (max_level < level && isLeft && node.getLeftSide() == null && node.getRightSide() == null) {
-            logger.debug("Printing node: " + node.getExpressionValue());
+            logger.debug("[" + node.getExpressionValue() + ", " + node.getOperator() + ", left: (" + node.getLeftSide() + "), right: (" + node.getRightSide() + ")], ");
             res.add(node);
             max_level = level;
         }
@@ -55,10 +49,13 @@ public class Query {
 
     // A wrapper over leftListsViewInternal()
     public List<Expression> leftSideOfExpressions() {
-        List<Expression> res = new LinkedList<>();
-        leftListsViewInternal(res, root, 1, 0, true);
-        res.remove(0);
-        return res;
+        if(expressionsLeftSide == null) {
+            expressionsLeftSide = new LinkedList<>();
+            leftListsViewInternal(expressionsLeftSide, root, 1, 0, true);
+            leftSide = expressionsLeftSide.get(0);
+            expressionsLeftSide.remove(0);
+        }
+        return expressionsLeftSide;
     }
 
     public Expression getRightSide(Expression expression) {
@@ -74,7 +71,7 @@ public class Query {
         return res;
     }
 
-    public Expression getLeftSide(Expression expression) {
+    public Expression getQueryLeftSide(Expression expression) {
         return getReverseSide(expression, true);
     }
 

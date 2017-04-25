@@ -1,19 +1,13 @@
 package edu.berkeley.nwbqueryengine;
 
-import com.hdfql.HDFql;
-import com.hdfql.HDFqlExample;
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
-import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Query;
-import edu.berkeley.nwbqueryengine.query.parser.ExpressionParser;
+import edu.berkeley.nwbqueryengine.query.parser.QueryParser;
 import edu.berkeley.nwbqueryengine.query.result.NwbResult;
 import edu.berkeley.nwbqueryengine.util.BTreePrinter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.util.List;
 
 
@@ -36,7 +30,7 @@ public class Main {
 
 
             System.loadLibrary("HDFql");
-            ExpressionParser p = new ExpressionParser();
+            QueryParser p = new QueryParser();
             //Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
             Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
 

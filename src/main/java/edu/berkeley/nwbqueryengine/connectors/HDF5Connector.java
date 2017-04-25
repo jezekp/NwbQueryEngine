@@ -14,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +49,7 @@ public class HDF5Connector {
         logger.debug("File in use: " + HDFql.cursorGetChar());
         for (Expression item : q.leftSideOfExpressions()) {
             logger.debug("Processing  expression: " + item.getExpressionValue() + " " + item.getOperator());
-            String query = "SHOW LIKE **/" + q.getLeftSide() + "/**/" + StringUtils.strip(item.getExpressionValue().trim(), "''\"\"");
+            String query = "SHOW LIKE **/" + q.getQueryLeftSide() + "/**/" + StringUtils.strip(item.getExpressionValue().trim(), "''\"\"");
             logger.debug(query);
 
             HDFql.execute(query);

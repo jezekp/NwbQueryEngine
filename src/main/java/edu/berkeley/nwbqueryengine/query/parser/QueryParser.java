@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class ExpressionParser {
+public class QueryParser {
 
 
     private Log logger = LogFactory.getLog(getClass());

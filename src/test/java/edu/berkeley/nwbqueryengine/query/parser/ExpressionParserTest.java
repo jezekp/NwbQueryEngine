@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class ExpressionParserTest {
     @Test
     void parse() {
-        ExpressionParser p = new ExpressionParser();
+        QueryParser p = new QueryParser();
         Query root = p.parse("CellInfo=('area'='c1'|'area'='c2'&'h'='c3'|h3=c8)");
 
-        Expression leftSide = root.getLeftSide();
+        Expression leftSide = root.getQueryLeftSide();
         assertNotNull(leftSide);
         String expressionVal = leftSide.getExpressionValue();
         assertNotNull(expressionVal);
