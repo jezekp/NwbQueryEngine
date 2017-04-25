@@ -1,6 +1,7 @@
 package edu.berkeley.nwbqueryengine.connectors;
 
 import com.hdfql.HDFql;
+import com.hdfql.HDFqlConstants;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
@@ -11,6 +12,7 @@ import ncsa.hdf.object.h5.H5File;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import scala.collection.TraversableOnce;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -54,7 +56,6 @@ public class HDF5Connector {
 
             HDFql.execute(query);
 
-            HDFql.cursorFirst();
             List<String> showResults = new LinkedList<>();
             while (HDFql.cursorNext() == HDFql.SUCCESS) {
                 String cursorGetChar = HDFql.cursorGetChar();
@@ -63,17 +64,25 @@ public class HDF5Connector {
             }
             List<NwbResult> partialResult = new LinkedList<>();
             for (String showResult : showResults) {
-                //todo how to do it general? - work with object and try use HDFql.variableGetDataType?
-                double[] values = new double[1];
-                int registeringStatus = HDFql.variableRegister(values);
-                logger.debug("Registering variable: " + registeringStatus);
+                List<Object> values = new LinkedList<>();
+                logger.debug("valuesType: " + values.getClass().getName());
+//                int registeringStatus = HDFql.variableRegister(values);
+//                logger.debug("Registering variable: " + registeringStatus);
                 int size = HDFql.variableGetSize(values);
                 logger.debug("Size: " + size);
-                String selectQuery = "SELECT FROM " + showResult + " INTO MEMORY " + HDFql.variableGetNumber(values);
+                //String selectQuery = "SELECT FROM " + showResult + " INTO MEMORY " + HDFql.variableGetNumber(values);
+                String selectQuery = "SELECT FROM " + showResult;
                 logger.debug("Select: " + selectQuery);
                 int selectStatus = HDFql.execute(selectQuery);
                 logger.debug("selectStatus: " + selectStatus);
-                for (double tmp : values) {
+                while (HDFql.cursorNext() == HDFql.SUCCESS) {
+                    Object value = getValue(HDFql.cursorGetDatatype());
+                    values.add(value);
+                    logger.debug("select dataset: " + HDFql.cursorGetDatatype() + " " + value + ", " + value.getClass().getName());
+                }
+                logger.debug("VariableDataType:" + HDFql.variableGetDatatype(values));
+                logger.debug("objectValue: " + values);
+                for (Object tmp : values) {
                     logger.debug("Value: " + tmp);
                     Expression rightSide = q.getRightSide(item);
                     logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
@@ -83,13 +92,13 @@ public class HDF5Connector {
                     String exp = StringUtils.strip(tmp + "" + item.getOperator() + "" + rightSide.getExpressionValue());
                     Object eval = engine.eval(exp);
                     logger.debug("Expression: " + exp + ", res: " + eval);
-                    if(((Boolean) eval).booleanValue()) {
+                    if (((Boolean) eval).booleanValue()) {
                         logger.debug("Store:  " + exp);
                         partialResult.add(new NwbResult(showResult, tmp));
                     }
 
                 }
-                HDFql.variableUnregister(values);
+//                HDFql.variableUnregister(values);
             }
 
             logger.debug(item + ", AND-OR-Operator: " + operator);
@@ -102,7 +111,7 @@ public class HDF5Connector {
                 logger.debug("...AND....");
                 nwbResults = Restrictions.and(nwbResults, partialResult);
             }
-            if(firstRun) {
+            if (firstRun) {
                 nwbResults.addAll(partialResult);
                 firstRun = false;
             }
@@ -111,6 +120,44 @@ public class HDF5Connector {
 
 
         return nwbResults;
+    }
+
+    private Object getValue(int datatype) {
+        Object res = null;
+        if (datatype == HDFql.TINYINT) {
+            res = HDFql.cursorGetTinyInt();
+        }
+        if (datatype == HDFql.UNSIGNED_TINYINT) {
+            res = HDFql.cursorGetUnsignedTinyInt();
+        }
+        if (datatype == HDFql.SMALLINT) {
+            res = HDFql.cursorGetSmallInt();
+        }
+        if (datatype == HDFql.UNSIGNED_SMALLINT) {
+            res = HDFql.cursorGetUnsignedSmallInt();
+        }
+        if (datatype == HDFql.INT) {
+            res = HDFql.cursorGetInt();
+        }
+        if (datatype == HDFql.UNSIGNED_INT) {
+            res = HDFql.cursorGetUnsignedInt();
+        }
+        if (datatype == HDFql.BIGINT) {
+            res = HDFql.cursorGetBigInt();
+        }
+        if (datatype == HDFql.UNSIGNED_BIGINT) {
+            res = HDFql.cursorGetUnsignedBigInt();
+        }
+        if (datatype == HDFql.DOUBLE) {
+            res = HDFql.cursorGetDouble();
+        }
+        if (datatype == HDFql.FLOAT) {
+            res = HDFql.cursorGetFloat();
+        }
+        if (datatype == HDFql.CHAR) {
+            res = HDFql.cursorGetChar();
+        }
+        return res;
     }
 
 
