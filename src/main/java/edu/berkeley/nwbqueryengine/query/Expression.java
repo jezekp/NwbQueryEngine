@@ -10,7 +10,7 @@ public class Expression {
     private Expression parent;
     private Expression leftSide;
     private Expression rightSide;
-    private String operator;
+    private String operator = "";
     private String expressionValue;
 
     public Expression(String val) {

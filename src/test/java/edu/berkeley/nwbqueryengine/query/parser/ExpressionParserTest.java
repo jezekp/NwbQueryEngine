@@ -24,11 +24,11 @@ class ExpressionParserTest {
         String expressionVal = leftSide.getExpressionValue();
         assertNotNull(expressionVal);
         assertEquals("CellInfo", expressionVal);
-        List<Expression> rightSide = root.leftSideOfExpressions();
-        String[] expressions = {"'area'","'c1'", "'area'","'c2'", "'h'","'c3'", "h3","c8"};
-        assertEquals(expressions.length, rightSide.size());
+        List<Expression> leftSideExpressions = root.leftSideOfExpressions();
+        String[] expressions = {"'area'", "'area'", "'h'", "h3"};
+        assertEquals(expressions.length, leftSideExpressions.size());
         int i = 0;
-        for(Expression item : rightSide) {
+        for(Expression item : leftSideExpressions) {
             assertEquals(item.getExpressionValue(), expressions[i++]);
         }
     }

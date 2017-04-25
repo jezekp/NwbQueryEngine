@@ -8,6 +8,8 @@ import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.query.parser.ExpressionParser;
 import edu.berkeley.nwbqueryengine.query.result.NwbResult;
 import edu.berkeley.nwbqueryengine.util.BTreePrinter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -26,6 +28,8 @@ public class Main {
     private static String file = "ANM184389_20130207.nwb";
     private static String fname = path + "/" + file;
 
+    private static Log logger = LogFactory.getLog(Main.class);
+
 
     public static void main(String[] args) {
         try {
@@ -33,15 +37,15 @@ public class Main {
 
             System.loadLibrary("HDFql");
             ExpressionParser p = new ExpressionParser();
-            Query query = p.parse("epochs=('start_time'<'200'|'stop_time'>'900')");
-
+            //Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
+            Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
 
             BTreePrinter printer = new BTreePrinter();
             //printer.printNode(expression);
             //query.leftSideOfExpressions(expression);
             HDF5Connector connector = new HDF5Connector();
             List<NwbResult> res =  connector.executeQuery(query, fname);
-            res.forEach(name -> System.out.println(name));
+            res.forEach(name -> logger.debug("Have res: " + name));
             System.out.println("Done.... ");
 
         } catch (Exception e) {

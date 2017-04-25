@@ -39,6 +39,7 @@ public class HDF5Connector {
     public List<NwbResult> executeQuery(Query q, String fname) throws Exception {
         List<NwbResult> nwbResults = new LinkedList<>();
         boolean firstRun = true;
+        String operator = "";
         String useFileQuery = "USE FILE " + fname;
         logger.debug("Use file query: " + useFileQuery);
         HDFql.execute(useFileQuery);
@@ -48,7 +49,8 @@ public class HDF5Connector {
         HDFql.cursorFirst();
         logger.debug("File in use: " + HDFql.cursorGetChar());
         for (Expression item : q.leftSideOfExpressions()) {
-            String query = "SHOW LIKE **/" + q.getLeftSide() + "/**/" + StringUtils.strip(item.getExpressionValue(), "'|\"\"");
+            logger.debug("Processing  expression: " + item.getExpressionValue() + " " + item.getOperator());
+            String query = "SHOW LIKE **/" + q.getLeftSide() + "/**/" + StringUtils.strip(item.getExpressionValue().trim(), "''\"\"");
             logger.debug(query);
 
             HDFql.execute(query);
@@ -81,20 +83,18 @@ public class HDF5Connector {
                     ScriptEngine engine = mgr.getEngineByName("JavaScript");
                     String exp = StringUtils.strip(tmp + "" + item.getOperator() + "" + rightSide.getExpressionValue());
                     Object eval = engine.eval(exp);
-                    logger.debug("Expression: " + exp + ", res:" + eval);
+                    logger.debug("Expression: " + exp + ", res: " + eval);
                     if(((Boolean) eval).booleanValue()) {
+                        logger.debug("Store:  " + exp);
                         partialResult.add(new NwbResult(showResult, tmp));
                     }
 
                 }
                 HDFql.variableUnregister(values);
             }
-            String operator = item.getParent().getOperator();
-            logger.debug("Operator: " + operator);
-            if(firstRun) {
-                nwbResults.addAll(partialResult);
-                firstRun = false;
-            }
+
+            logger.debug(item + ", AND-OR-Operator: " + operator);
+
             if (("\\" + operator).equals(Operators.OR.op())) {
                 logger.debug("...OR....");
                 nwbResults = Restrictions.or(nwbResults, partialResult);
@@ -103,6 +103,11 @@ public class HDF5Connector {
                 logger.debug("...AND....");
                 nwbResults = Restrictions.and(nwbResults, partialResult);
             }
+            if(firstRun) {
+                nwbResults.addAll(partialResult);
+                firstRun = false;
+            }
+            operator = item.getParent().getOperator();
         }
 
 
