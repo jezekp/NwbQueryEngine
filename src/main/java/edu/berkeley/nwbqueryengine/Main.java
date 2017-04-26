@@ -31,22 +31,32 @@ public class Main {
     public static void main(String[] args) {
         BufferedReader br = null;
         try {
-
-
             System.loadLibrary("HDFql");
             QueryParser p = new QueryParser();
-           // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
-            //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
-            //Query query = p.parse("processing=(electrode_idx>30)");
-            Query query = p.parse("analysis=(good_trials_whiskers>0)");
-
-            BTreePrinter printer = new BTreePrinter();
+            Query query;
+            if(args.length > 0) {
+                String expression = args[0];
+                logger.debug("Expression: " + expression);
+                // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
+                //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
+                //Query query = p.parse("processing=(electrode_idx>30)");
+                query = p.parse(expression);
+            }
+            else {
+                logger.error("A query has not been given...");
+                query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
+                //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
+                //Query query = p.parse("processing=(electrode_idx>30)");
+            }
             //printer.printNode(expression);
             //query.leftSideOfExpressions(expression);
             HDF5Connector connector = new HDF5Connector();
             List<NwbResult> res =  connector.executeQuery(query, fname);
-            res.forEach(name -> logger.debug("Have res: " + name));
-            System.out.println("Done.... ");
+            res.forEach(name -> {
+                logger.debug("Have res: " + name);
+                System.out.println(name);
+            });
+
 
 //            br = new BufferedReader(new InputStreamReader(System.in));
 //

@@ -28,8 +28,6 @@ import java.util.List;
 public class HDF5Connector {
 
     private Log logger = LogFactory.getLog(getClass());
-
-
     public FileFormat connect(String fileName) throws Exception {
         FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         FileFormat file = fileFormat.createInstance(fileName, FileFormat.READ);
@@ -106,10 +104,12 @@ public class HDF5Connector {
             if (("\\" + operator).equals(Operators.OR.op())) {
                 logger.debug("...OR....");
                 nwbResults = Restrictions.or(nwbResults, partialResult);
+                nwbResults.forEach(name-> logger.debug(name));
             }
             if (operator.equals(Operators.AND.op())) {
                 logger.debug("...AND....");
                 nwbResults = Restrictions.and(nwbResults, partialResult);
+                nwbResults.forEach(name-> logger.debug(name));
             }
             if (firstRun) {
                 nwbResults.addAll(partialResult);
@@ -117,8 +117,7 @@ public class HDF5Connector {
             }
             operator = item.getParent().getOperator();
         }
-
-
+        nwbResults.forEach(name-> logger.debug(name));
         return nwbResults;
     }
 

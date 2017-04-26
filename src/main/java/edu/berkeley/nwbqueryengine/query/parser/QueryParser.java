@@ -3,6 +3,7 @@ package edu.berkeley.nwbqueryengine.query.parser;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
+import edu.berkeley.nwbqueryengine.util.BTreePrinter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -22,6 +23,8 @@ public class QueryParser {
     public Query parse(String expression) {
         Expression root = parseInternal(new Expression(expression));
         Query q = new Query(root);
+        BTreePrinter bTreePrinter = new BTreePrinter();
+        bTreePrinter.printNode(root);
         return q;
     }
 
