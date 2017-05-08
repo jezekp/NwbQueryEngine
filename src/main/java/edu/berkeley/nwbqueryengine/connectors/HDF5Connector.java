@@ -16,6 +16,7 @@ import scala.collection.TraversableOnce;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,15 +26,10 @@ import java.util.List;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class HDF5Connector {
+public class HDF5Connector implements Connector<File>{
 
     private Log logger = LogFactory.getLog(getClass());
-    public FileFormat connect(String fileName) throws Exception {
-        FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
-        FileFormat file = fileFormat.createInstance(fileName, FileFormat.READ);
-        file.open();
-        return file;
-    }
+
 
     public List<NwbResult> executeQuery(Query q, String fname) throws Exception {
         List<NwbResult> nwbResults = new LinkedList<>();
@@ -160,47 +156,10 @@ public class HDF5Connector {
     }
 
 
-    public static void x() {
-
-        try {
-            Class fileclass = Class.forName("ncsa.hdf.object.h5.H5File");
-            FileFormat fileformat = (FileFormat) fileclass.newInstance();
-            if (fileformat != null)
-                FileFormat.addFileFormat("HDF5", fileformat);
-        } catch (Throwable err) {
-            err.printStackTrace();
-        }
-
-        //todo filename
-        H5File h5file = new H5File("");
-        try {
-            h5file.open();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        FileFormat fileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
-        if (fileFormat == null) {
-            System.err.println("Cannot find HDF5 FileFormat.");
-            return;
-        }
-        try {
-            //todo filename
-            FileFormat testFile = fileFormat.createInstance("", FileFormat.READ);
-            testFile.open();
-            //Group root = (Group) ((javax.swing.tree.DefaultMutableTreeNode) testFile.getRootNode()).getUserObject();
-            Group root = (Group) testFile.get("/");
-            printGroup(root, "");
-            // close file resource
-            testFile.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Recursively print a group and its members.
+     * TODO not used now, but maybe later
      *
      * @throws Exception
      */
@@ -245,6 +204,21 @@ public class HDF5Connector {
                 // Datatype.CLASS_STRING;
             }
         }
+    }
+
+    @Override
+    public List<NwbResult> executeQuery(Query query, File obj) throws Exception{
+        List<NwbResult> res = new LinkedList<>();
+        logger.debug("File: " + obj.getAbsolutePath());
+        if(obj.isFile()) {
+            res = executeQuery(query, obj.getName());
+        } else {
+            for(File item : obj.listFiles()) {
+                logger.debug("Individual file: " + item.getAbsolutePath());
+                res.addAll(executeQuery(query, item.getAbsolutePath()));
+            }
+        }
+        return res;
     }
 }
 

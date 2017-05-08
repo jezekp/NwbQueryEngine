@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class Main {
             //printer.printNode(expression);
             //query.leftSideOfExpressions(expression);
             HDF5Connector connector = new HDF5Connector();
-            List<NwbResult> res =  connector.executeQuery(query, fname);
+            List<NwbResult> res =  connector.executeQuery(query, new File(path));
             res.forEach(name -> {
                 logger.debug("Have res: " + name);
                 System.out.println(name);
