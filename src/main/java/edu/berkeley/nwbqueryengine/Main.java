@@ -35,15 +35,14 @@ public class Main {
             System.loadLibrary("HDFql");
             QueryParser p = new QueryParser();
             Query query;
-            if(args.length > 0) {
+            if (args.length > 0) {
                 String expression = args[0];
                 logger.debug("Expression: " + expression);
                 // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
                 //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
                 //Query query = p.parse("processing=(electrode_idx>30)");
                 query = p.parse(expression);
-            }
-            else {
+            } else {
                 logger.error("A query has not been given...");
                 query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
                 //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
@@ -51,14 +50,22 @@ public class Main {
             }
             //printer.printNode(expression);
             //query.leftSideOfExpressions(expression);
+
             HDF5Connector connector = new HDF5Connector();
-            List<NwbResult> res =  connector.executeQuery(query, new File(path));
-            res.forEach(name -> {
-                logger.debug("Have res: " + name);
-                System.out.println(name);
-            });
 
+            for (int i = 0; i < 10; i++) {
+                long start = System.currentTimeMillis();
+                List<NwbResult> res = connector.executeQuery(query, new File(path));
 
+                long diff = System.currentTimeMillis() - start;
+                res.forEach(name -> {
+                    logger.debug("Have res: " + name);
+                    System.out.println(name);
+                });
+                logger.debug("I have: " + res.size());
+                logger.debug("Done in: " + diff / 1000 + " seconds");
+
+            }
 //            br = new BufferedReader(new InputStreamReader(System.in));
 //
 //            while (true) {

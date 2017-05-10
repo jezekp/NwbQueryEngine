@@ -2,6 +2,7 @@ package edu.berkeley.nwbqueryengine.connectors;
 
 import com.hdfql.HDFql;
 import com.hdfql.HDFqlConstants;
+import com.hdfql.HDFqlCursor;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
@@ -17,6 +18,7 @@ import scala.collection.TraversableOnce;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.io.File;
+import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,13 +28,16 @@ import java.util.List;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class HDF5Connector implements Connector<File>{
+public class HDF5Connector implements Connector<File> {
 
     private Log logger = LogFactory.getLog(getClass());
 
 
     public List<NwbResult> executeQuery(Query q, String fname) throws Exception {
         List<NwbResult> nwbResults = new LinkedList<>();
+        HDFqlCursor cursor = new HDFqlCursor();
+        HDFql.cursorInitialize(cursor);
+        HDFql.cursorUse(cursor);
         boolean firstRun = true;
         String operator = "";
         String useFileQuery = "USE FILE " + fname;
@@ -41,21 +46,29 @@ public class HDF5Connector implements Connector<File>{
         // populate HDFql default cursor with name of the HDF file in use and display it
         logger.debug("File name: " + fname);
         HDFql.execute("SHOW USE FILE");
-        HDFql.cursorFirst();
-        logger.debug("File in use: " + HDFql.cursorGetChar());
+        HDFql.cursorFirst(cursor);
+        logger.debug("File in use: " + HDFql.cursorGetChar(cursor));
+        HDFql.cursorClear(cursor);
         for (Expression item : q.leftSideOfExpressions()) {
             logger.debug("Processing  expression: " + item.getExpressionValue() + " " + item.getOperator());
             String query = "SHOW LIKE **/" + q.getQueryLeftSide() + "/**/" + StringUtils.strip(item.getExpressionValue().trim(), "''\"\"");
             logger.debug(query);
-
-            HDFql.execute(query);
-
-            List<String> showResults = new LinkedList<>();
-            while (HDFql.cursorNext() == HDFql.SUCCESS) {
-                String cursorGetChar = HDFql.cursorGetChar();
-                showResults.add(cursorGetChar);
-                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype());
+            int executeLikeRes;
+            int maxCount = 10;
+            while ((executeLikeRes = HDFql.execute(query)) != HDFql.SUCCESS && maxCount-- > 0) {
+                logger.error("Error: " + HDFql.errorGetMessage() + ", code: " + HDFql.errorGetPosition() + ", possition: " + HDFql.errorGetPosition());
             }
+            logger.debug("ExecuteLikeRes: " + executeLikeRes);
+            List<String> showResults = new LinkedList<>();
+            int cursorRes;
+            while ((cursorRes = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
+                String cursorGetChar = HDFql.cursorGetChar(cursor);
+                showResults.add(cursorGetChar);
+                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
+            }
+            HDFql.cursorInitialize(cursor);
+            HDFql.cursorUse(cursor);
+            logger.debug("cursorRes:" + cursorRes);
             List<NwbResult> partialResult = new LinkedList<>();
             for (String showResult : showResults) {
                 List<Object> values = new LinkedList<>();
@@ -69,10 +82,10 @@ public class HDF5Connector implements Connector<File>{
                 logger.debug("Select: " + selectQuery);
                 int selectStatus = HDFql.execute(selectQuery);
                 logger.debug("selectStatus: " + selectStatus);
-                while (HDFql.cursorNext() == HDFql.SUCCESS) {
-                    Object value = getValue(HDFql.cursorGetDatatype());
+                while (HDFql.cursorNext(cursor) == HDFql.SUCCESS) {
+                    Object value = getValue(HDFql.cursorGetDatatype(cursor), cursor);
                     values.add(value);
-                    logger.debug("select dataset: " + HDFql.cursorGetDatatype() + " " + value + ", " + value.getClass().getName());
+                    logger.debug("select dataset: " + HDFql.cursorGetDatatype(cursor) + " " + value + ", " + value.getClass().getName());
                 }
                 logger.debug("VariableDataType:" + HDFql.variableGetDatatype(values));
                 logger.debug("objectValue: " + values);
@@ -100,12 +113,12 @@ public class HDF5Connector implements Connector<File>{
             if (("\\" + operator).equals(Operators.OR.op())) {
                 logger.debug("...OR....");
                 nwbResults = Restrictions.or(nwbResults, partialResult);
-                nwbResults.forEach(name-> logger.debug(name));
+                nwbResults.forEach(name -> logger.debug(name));
             }
             if (operator.equals(Operators.AND.op())) {
                 logger.debug("...AND....");
                 nwbResults = Restrictions.and(nwbResults, partialResult);
-                nwbResults.forEach(name-> logger.debug(name));
+                nwbResults.forEach(name -> logger.debug(name));
             }
             if (firstRun) {
                 nwbResults.addAll(partialResult);
@@ -113,48 +126,51 @@ public class HDF5Connector implements Connector<File>{
             }
             operator = item.getParent().getOperator();
         }
-        nwbResults.forEach(name-> logger.debug(name));
+        nwbResults.forEach(name -> logger.debug(name));
+        HDFql.cursorClear(cursor);
+        cursor.delete();
+        int closeResult = HDFql.execute("CLOSE FILE " + fname);
+        logger.debug("Closing file: " + fname + ", resultCode: " + closeResult);
         return nwbResults;
     }
 
-    private Object getValue(int datatype) {
+    private Object getValue(int datatype, HDFqlCursor cursor) {
         Object res = null;
         if (datatype == HDFql.TINYINT) {
-            res = HDFql.cursorGetTinyInt();
+            res = HDFql.cursorGetTinyInt(cursor);
         }
         if (datatype == HDFql.UNSIGNED_TINYINT) {
-            res = HDFql.cursorGetUnsignedTinyInt();
+            res = HDFql.cursorGetUnsignedTinyInt(cursor);
         }
         if (datatype == HDFql.SMALLINT) {
-            res = HDFql.cursorGetSmallInt();
+            res = HDFql.cursorGetSmallInt(cursor);
         }
         if (datatype == HDFql.UNSIGNED_SMALLINT) {
-            res = HDFql.cursorGetUnsignedSmallInt();
+            res = HDFql.cursorGetUnsignedSmallInt(cursor);
         }
         if (datatype == HDFql.INT) {
-            res = HDFql.cursorGetInt();
+            res = HDFql.cursorGetInt(cursor);
         }
         if (datatype == HDFql.UNSIGNED_INT) {
-            res = HDFql.cursorGetUnsignedInt();
+            res = HDFql.cursorGetUnsignedInt(cursor);
         }
         if (datatype == HDFql.BIGINT) {
-            res = HDFql.cursorGetBigInt();
+            res = HDFql.cursorGetBigInt(cursor);
         }
         if (datatype == HDFql.UNSIGNED_BIGINT) {
-            res = HDFql.cursorGetUnsignedBigInt();
+            res = HDFql.cursorGetUnsignedBigInt(cursor);
         }
         if (datatype == HDFql.DOUBLE) {
-            res = HDFql.cursorGetDouble();
+            res = HDFql.cursorGetDouble(cursor);
         }
         if (datatype == HDFql.FLOAT) {
-            res = HDFql.cursorGetFloat();
+            res = HDFql.cursorGetFloat(cursor);
         }
         if (datatype == HDFql.CHAR) {
-            res = HDFql.cursorGetChar();
+            res = HDFql.cursorGetChar(cursor);
         }
         return res;
     }
-
 
 
     /**
@@ -207,15 +223,22 @@ public class HDF5Connector implements Connector<File>{
     }
 
     @Override
-    public List<NwbResult> executeQuery(Query query, File obj) throws Exception{
+    public List<NwbResult> executeQuery(Query query, File obj) throws Exception {
         List<NwbResult> res = new LinkedList<>();
         logger.debug("File: " + obj.getAbsolutePath());
-        if(obj.isFile()) {
-            res = executeQuery(query, obj.getName());
+        if (obj.isFile()) {
+            res = executeQuery(query, obj.getAbsolutePath());
         } else {
-            for(File item : obj.listFiles()) {
+            for (File item : obj.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    return pathname.getName().toLowerCase().endsWith(".nwb");
+                }
+            })) {
                 logger.debug("Individual file: " + item.getAbsolutePath());
-                res.addAll(executeQuery(query, item.getAbsolutePath()));
+                List<NwbResult> partialRes = executeQuery(query, item.getAbsolutePath());
+                logger.debug("I have partial res: " + partialRes.size() + ", file: " + item.getName());
+                res.addAll(partialRes);
             }
         }
         return res;

@@ -23,8 +23,10 @@ public class QueryParser {
     public Query parse(String expression) {
         Expression root = parseInternal(new Expression(expression));
         Query q = new Query(root);
-        BTreePrinter bTreePrinter = new BTreePrinter();
-        bTreePrinter.printNode(root);
+        if (logger.isDebugEnabled()) {
+            BTreePrinter bTreePrinter = new BTreePrinter();
+            bTreePrinter.printNode(root);
+        }
         return q;
     }
 
@@ -50,10 +52,10 @@ public class QueryParser {
     private void parseSubString(String input, Expression node, String delimiter) {
         String[] st = input.split(delimiter, 3);
         logger.debug("Input: " + input + ", delimiter: " + delimiter + ": " + ((st.length > 0) ? st[0] : "") + ", " + ((st.length > 1) ? st[1] : "") + " " + ((st.length > 2) ? st[2] : ""));
-        if(!st[0].equals(node.getExpressionValue()) && node.getLeftSide() == null) {
+        if (!st[0].equals(node.getExpressionValue()) && node.getLeftSide() == null) {
             node.setLeftSide(parseInternal(new Expression(st[0], st[1], node)));
         }
-        if(st.length > 2  && node.getRightSide() == null) {
+        if (st.length > 2 && node.getRightSide() == null) {
             node.setRightSide(parseInternal(new Expression(st[2], st[1], node)));
         }
     }

@@ -23,6 +23,7 @@ public class BTreePrinter {
             int maxLevel = BTreePrinter.maxLevel(root);
 
             printNodeInternal(Collections.singletonList(root), 1, maxLevel);
+            logger.debug("Parsed tree:");
             logger.debug(tree);
         }
 
