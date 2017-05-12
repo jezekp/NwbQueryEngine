@@ -52,8 +52,11 @@ public class Main {
             //query.leftSideOfExpressions(expression);
 
             HDF5Connector connector = new HDF5Connector();
+//for(int i = 0; i < 1000; i++) {
+//    connector.test(fname);
+//}
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100; i++) {
                 long start = System.currentTimeMillis();
                 List<NwbResult> res = connector.executeQuery(query, new File(path));
 
@@ -62,7 +65,7 @@ public class Main {
                     logger.debug("Have res: " + name);
                     System.out.println(name);
                 });
-                logger.debug("I have: " + res.size());
+                logger.debug(i + " I have: " + res.size());
                 logger.debug("Done in: " + diff / 1000 + " seconds");
 
             }
@@ -86,7 +89,7 @@ public class Main {
 //                System.out.println("Done.... ");
 //
 //            }
-
+//
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

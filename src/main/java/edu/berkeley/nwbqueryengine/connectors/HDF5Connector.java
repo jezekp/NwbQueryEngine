@@ -45,29 +45,32 @@ public class HDF5Connector implements Connector<File> {
         HDFql.execute(useFileQuery);
         // populate HDFql default cursor with name of the HDF file in use and display it
         logger.debug("File name: " + fname);
-        HDFql.execute("SHOW USE FILE");
-        HDFql.cursorFirst(cursor);
-        logger.debug("File in use: " + HDFql.cursorGetChar(cursor));
+        //HDFql.execute("SHOW USE FILE");
+        //HDFql.cursorFirst(cursor);
+        //logger.debug("File in use: " + HDFql.cursorGetChar(cursor));
         HDFql.cursorClear(cursor);
+        cursor.delete();
         for (Expression item : q.leftSideOfExpressions()) {
+            //HDFql.cursorClear(cursor);
             logger.debug("Processing  expression: " + item.getExpressionValue() + " " + item.getOperator());
             String query = "SHOW LIKE **/" + q.getQueryLeftSide() + "/**/" + StringUtils.strip(item.getExpressionValue().trim(), "''\"\"");
             logger.debug(query);
             int executeLikeRes;
-            int maxCount = 10;
-            while ((executeLikeRes = HDFql.execute(query)) != HDFql.SUCCESS && maxCount-- > 0) {
-                logger.error("Error: " + HDFql.errorGetMessage() + ", code: " + HDFql.errorGetPosition() + ", possition: " + HDFql.errorGetPosition());
-            }
+            HDFqlCursor cursor2 = new HDFqlCursor();
+            HDFql.cursorInitialize(cursor2);
+            HDFql.cursorUse(cursor2);
+            executeLikeRes = HDFql.execute(query);
             logger.debug("ExecuteLikeRes: " + executeLikeRes);
             List<String> showResults = new LinkedList<>();
             int cursorRes;
-            while ((cursorRes = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
-                String cursorGetChar = HDFql.cursorGetChar(cursor);
+
+            while ((cursorRes = HDFql.cursorNext(cursor2)) == HDFql.SUCCESS) {
+                String cursorGetChar = HDFql.cursorGetChar(cursor2);
                 showResults.add(cursorGetChar);
-                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
+                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor2));
             }
-            HDFql.cursorInitialize(cursor);
-            HDFql.cursorUse(cursor);
+            HDFql.cursorClear(cursor2);
+            cursor2.delete();
             logger.debug("cursorRes:" + cursorRes);
             List<NwbResult> partialResult = new LinkedList<>();
             for (String showResult : showResults) {
@@ -75,25 +78,32 @@ public class HDF5Connector implements Connector<File> {
                 logger.debug("valuesType: " + values.getClass().getName());
 //                int registeringStatus = HDFql.variableRegister(values);
 //                logger.debug("Registering variable: " + registeringStatus);
-                int size = HDFql.variableGetSize(values);
-                logger.debug("Size: " + size);
+                //int size = HDFql.variableGetSize(values);
+                //logger.debug("Size: " + size);
                 //String selectQuery = "SELECT FROM " + showResult + " INTO MEMORY " + HDFql.variableGetNumber(values);
                 String selectQuery = "SELECT FROM " + showResult;
+                HDFqlCursor cursor3 = new HDFqlCursor();
+                HDFql.cursorInitialize(cursor3);
+                HDFql.cursorUse(cursor3);
                 logger.debug("Select: " + selectQuery);
                 int selectStatus = HDFql.execute(selectQuery);
                 logger.debug("selectStatus: " + selectStatus);
-                while (HDFql.cursorNext(cursor) == HDFql.SUCCESS) {
-                    Object value = getValue(HDFql.cursorGetDatatype(cursor), cursor);
+                int selectCursorResult;
+                while ((selectCursorResult = HDFql.cursorNext(cursor3)) == HDFql.SUCCESS) {
+                    int datatype = HDFql.cursorGetDatatype(cursor3);
+                    Object value = getValue(datatype, cursor3);
                     values.add(value);
-                    logger.debug("select dataset: " + HDFql.cursorGetDatatype(cursor) + " " + value + ", " + value.getClass().getName());
+                    logger.debug("select dataset: " + datatype + " " + value + ", " + value.getClass().getName());
                 }
-                logger.debug("VariableDataType:" + HDFql.variableGetDatatype(values));
+                logger.debug("SelectCursorResult: " + selectCursorResult);
+                HDFql.cursorClear(cursor3);
+                cursor3.delete();
+                //logger.debug("VariableDataType:" + HDFql.variableGetDatatype(values));
                 logger.debug("objectValue: " + values);
                 for (Object tmp : values) {
                     logger.debug("Value: " + tmp);
                     Expression rightSide = q.getRightSide(item);
                     logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
-
                     ScriptEngineManager mgr = new ScriptEngineManager();
                     ScriptEngine engine = mgr.getEngineByName("JavaScript");
                     String exp = StringUtils.strip(tmp + "" + item.getOperator() + "" + rightSide.getExpressionValue());
@@ -106,6 +116,7 @@ public class HDF5Connector implements Connector<File> {
 
                 }
 //                HDFql.variableUnregister(values);
+
             }
 
             logger.debug(item + ", AND-OR-Operator: " + operator);
@@ -127,7 +138,7 @@ public class HDF5Connector implements Connector<File> {
             operator = item.getParent().getOperator();
         }
         nwbResults.forEach(name -> logger.debug(name));
-        HDFql.cursorClear(cursor);
+        //HDFql.cursorClear(cursor);
         cursor.delete();
         int closeResult = HDFql.execute("CLOSE FILE " + fname);
         logger.debug("Closing file: " + fname + ", resultCode: " + closeResult);
@@ -168,6 +179,9 @@ public class HDF5Connector implements Connector<File> {
         }
         if (datatype == HDFql.CHAR) {
             res = HDFql.cursorGetChar(cursor);
+        }
+        if (res == null) {
+            logger.error("IsNull");
         }
         return res;
     }
@@ -220,6 +234,37 @@ public class HDF5Connector implements Connector<File> {
                 // Datatype.CLASS_STRING;
             }
         }
+    }
+
+    public void test(String fname) {
+
+        String useFileQuery = "USE FILE " + fname;
+        logger.debug("Use file query: " + useFileQuery);
+        HDFql.execute(useFileQuery);
+        // populate HDFql default cursor with name of the HDF file in use and display it
+        logger.debug("File name: " + fname);
+
+        String query = "SHOW LIKE **/epochs/**/start_time";
+        logger.debug(query);
+        int executeLikeRes;
+        for (int i = 0; i < 1000; i++) {
+            int maxCount = 10;
+            while ((executeLikeRes = HDFql.execute(query)) != HDFql.SUCCESS && maxCount-- > 0) {
+                logger.error("Error: " + HDFql.errorGetMessage() + ", code: " + HDFql.errorGetPosition() + ", possition: " + HDFql.errorGetPosition());
+            }
+            logger.debug("ExecuteLikeRes: " + executeLikeRes);
+            if (executeLikeRes < 0) {
+                logger.error("EEE " + executeLikeRes);
+            }
+
+            int ii;
+            while ((ii = HDFql.cursorNext()) == HDFql.SUCCESS) {
+                String cursorGetChar = HDFql.cursorGetChar();
+                logger.debug("IIII " + ii);
+                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype());
+            }
+        }
+
     }
 
     @Override
