@@ -28,7 +28,7 @@
 
 	<root>
 		<level value="all" />
-		<appender-ref ref="detailedConsoleAppender"/>
+		<!--<appender-ref ref="detailedConsoleAppender"/>-->
 		<appender-ref ref="detailedLogFileAppender"/>
 	</root>
 </log4j:configuration>

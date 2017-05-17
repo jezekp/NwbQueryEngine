@@ -52,8 +52,7 @@ public class Query {
         if(expressionsLeftSide == null) {
             expressionsLeftSide = new LinkedList<>();
             leftListsViewInternal(expressionsLeftSide, root, 1, 0, true);
-            leftSide = expressionsLeftSide.get(0);
-            expressionsLeftSide.remove(0);
+            leftSide = expressionsLeftSide.remove(0);
         }
         return expressionsLeftSide;
     }

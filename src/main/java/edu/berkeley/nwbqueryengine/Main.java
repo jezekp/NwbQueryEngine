@@ -23,7 +23,7 @@ import java.util.List;
 public class Main {
 
     private static String path = "/home/petr-jezek/Data/nwb_datasets/nwbMatlab_DG";
-    private static String file = "ANM184389_20130207.nwb";
+    private static String file = "ANM186997_20130321.nwb";
     private static String fname = path + "/" + file;
 
     private static Log logger = LogFactory.getLog(Main.class);
@@ -44,26 +44,34 @@ public class Main {
                 query = p.parse(expression);
             } else {
                 logger.error("A query has not been given...");
-                query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
-                //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
+                query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
+                //query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
                 //Query query = p.parse("processing=(electrode_idx>30)");
             }
             //printer.printNode(expression);
             //query.leftSideOfExpressions(expression);
 
             HDF5Connector connector = new HDF5Connector();
-//for(int i = 0; i < 1000; i++) {
+//for(int i = 0; i < 100; i++) {
 //    connector.test(fname);
 //}
 
-            for (int i = 0; i < 100; i++) {
+//            String[] array = new String[] {"ANM184389_20130207.nwb",  "ANM184389_20130213.nwb",  "ANM199549_20130530.nwb",  "ANM199551_20130626.nwb",  "ANM199552_20130603.nwb",  "ANM199552_20130608.nwb",  "ANM184389_20130211.nwb",  "ANM186997_20130317.nwb",  "ANM199549_20130604.nwb",  "ANM199552_20130601.nwb",  "ANM199552_20130604.nwb",  "ANM203464_20130702.nwb",
+//                    "ANM184389_20130212.nwb",  "ANM186997_20130321.nwb", "ANM199549_20130605.nwb",  "ANM199552_20130602.nwb",  "ANM199552_20130606.nwb",  "ANM203464_20130705.nwb"};
+//
+//            for(String item : array) {
+//                List<NwbResult> res = connector.executeQuery(query, path + "/" + item);
+//                logger.debug(item + " resSize: "+ res.size());
+//            }
+
+            for (int i = 0; i < 1; i++) {
                 long start = System.currentTimeMillis();
                 List<NwbResult> res = connector.executeQuery(query, new File(path));
 
                 long diff = System.currentTimeMillis() - start;
                 res.forEach(name -> {
                     logger.debug("Have res: " + name);
-                    System.out.println(name);
+        //            System.out.println(name);
                 });
                 logger.debug(i + " I have: " + res.size());
                 logger.debug("Done in: " + diff / 1000 + " seconds");
@@ -89,7 +97,7 @@ public class Main {
 //                System.out.println("Done.... ");
 //
 //            }
-//
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
