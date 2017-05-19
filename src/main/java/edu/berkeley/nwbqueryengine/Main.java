@@ -5,7 +5,13 @@ import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.query.parser.QueryParser;
 import edu.berkeley.nwbqueryengine.query.result.NwbResult;
 import edu.berkeley.nwbqueryengine.util.BTreePrinter;
+import edu.berkeley.nwbqueryengine.util.MathEval;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.JxltEngine;
+import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.internal.Engine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,6 +29,7 @@ import java.util.List;
 public class Main {
 
     private static String path = "/home/petr-jezek/Data/nwb_datasets/nwbMatlab_DG";
+    //private static String path = "/tmp/datasets";
     private static String file = "ANM186997_20130321.nwb";
     private static String fname = path + "/" + file;
 
@@ -30,6 +37,9 @@ public class Main {
 
 
     public static void main(String[] args) {
+
+
+
         BufferedReader br = null;
         try {
             System.loadLibrary("HDFql");

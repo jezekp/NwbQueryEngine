@@ -5,7 +5,7 @@ package edu.berkeley.nwbqueryengine.query;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class Expression {
+public class Expression implements Cloneable{
 
     private Expression parent;
     private Expression leftSide;
@@ -24,6 +24,11 @@ public class Expression {
     public Expression(String val, String operator, Expression parent) {
         this(val, parent);
         this.operator = operator;
+    }
+    private Expression(String val, String operator, Expression parent, Expression leftSide, Expression rightSide) {
+        this(val, operator, parent);
+        this.leftSide = leftSide;
+        this.rightSide = rightSide;
     }
 
     public Expression getLeftSide() {
@@ -69,5 +74,22 @@ public class Expression {
 
     public void setParent(Expression parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Expression left = null;
+        Expression right = null;
+        Expression parent = null;
+        if (this.leftSide != null) {
+            left = this.leftSide;
+        }
+        if (this.rightSide != null) {
+            right = this.rightSide;
+        }
+        if(this.parent != null) {
+            parent = this.parent;
+        }
+        return new Expression(expressionValue, operator, parent, left, right);
     }
 }
