@@ -8,16 +8,13 @@ import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.query.result.NwbResult;
 import edu.berkeley.nwbqueryengine.query.result.Restrictions;
-import ncsa.hdf.object.*;
-import ncsa.hdf.object.h5.H5File;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.internal.Engine;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import scala.collection.TraversableOnce;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -48,7 +45,7 @@ public class HDF5Connector implements Connector<File> {
 //        HDFqlCursor cursor = new HDFqlCursor();
 //        HDFql.cursorInitialize(cursor);
 //        int cursorUse1 = HDFql.cursorUse(cursor);
-        HDFql.execute("ENABLE DEBUG");
+//        HDFql.execute("ENABLE DEBUG");
 //               HDFql.execute("ENABLE FLUSH LOCAL");
 //        HDFql.execute("SET FILE CACHE SLOTS 1024 SIZE 2024 PREEMPTION 0.1");
 //        HDFql.execute("SET DATASET CACHE SLOTS 1024 PREEMPTION 0.1");
@@ -80,7 +77,7 @@ public class HDF5Connector implements Connector<File> {
 //                int cursorUse2 = HDFql.cursorUse(cursor2);
 //                logger.debug("cursor2Use: " + cursorUse2);
                 int executeLikeRes;
-                int attempts = 100;
+                int attempts = 1;
                 HDFql.cursorClear();
                 HDFql.cursorInitialize();
                 while ((executeLikeRes = HDFql.execute(query)) != HDFql.SUCCESS && attempts-- > 0) {
@@ -89,6 +86,7 @@ public class HDF5Connector implements Connector<File> {
 //                    HDFql.execute(useFileQuery);
                     HDFql.cursorClear();
                     HDFql.cursorInitialize();
+                    //wait(300);
                     logger.error("Error: " + HDFql.errorGetMessage());
                 }
                 logger.debug("ExecuteLikeRes: " + executeLikeRes);
@@ -145,6 +143,8 @@ public class HDF5Connector implements Connector<File> {
                 Expression rightSide = q.getRightSide(clone);
                 Expression t =  (Expression) rightSide.clone();
                 logger.debug("Operator: " + clone.getOperator() + ", RightSide: " + t);
+
+                //TODO -- try to select first all expressions and then call jexl
 
                 JexlExpression func = jexl.createExpression("x1" + arithmeticalOperator + "x2");
                 mc.set("x2", t.getExpressionValue());
@@ -241,48 +241,48 @@ public class HDF5Connector implements Connector<File> {
      *
      * @throws Exception
      */
-    private static void printGroup(Group g, String indent) throws Exception {
-        if (g == null) return;
-
-        List<HObject> members = g.getMemberList();
-
-        int n = members.size();
-        indent += "    ";
-        HObject obj = null;
-        for (int i = 0; i < n; i++) {
-
-            obj = (HObject) members.get(i);
-            System.out.println(indent + obj);
-            List<Attribute> metadata = obj.getMetadata();
-            for (Attribute m : metadata) {
-                //System.out.println("metadta> " + m.toString(","));
-
-            }
-
-            if (obj instanceof Group) {
-                printGroup((Group) obj, indent);
-            }
-            if (obj instanceof Dataset) {
-                Dataset dataset = (Dataset) obj;
-
-                long[] start = dataset.getStartDims();
-                long[] stride = dataset.getStride();
-                long[] sizes = dataset.getSelectedDims();
-
-                System.out.println("start: " + Arrays.toString(start));
-                System.out.println("stride: " + Arrays.toString(stride));
-                System.out.println("sizes: " + Arrays.toString(sizes));
-
-
-                int size = dataset.getSize(dataset.getDatatype().getDatatypeClass());
-                if (size > 0) {
-                    Object o = ((Dataset) obj).read();
-                }
-                //System.out.println("datatype: " + ((Dataset) obj).getDatatype().getDatatypeClass());
-                // Datatype.CLASS_STRING;
-            }
-        }
-    }
+//    private static void printGroup(Group g, String indent) throws Exception {
+//        if (g == null) return;
+//
+//        List<HObject> members = g.getMemberList();
+//
+//        int n = members.size();
+//        indent += "    ";
+//        HObject obj = null;
+//        for (int i = 0; i < n; i++) {
+//
+//            obj = (HObject) members.get(i);
+//            System.out.println(indent + obj);
+//            List<Attribute> metadata = obj.getMetadata();
+//            for (Attribute m : metadata) {
+//                //System.out.println("metadta> " + m.toString(","));
+//
+//            }
+//
+//            if (obj instanceof Group) {
+//                printGroup((Group) obj, indent);
+//            }
+//            if (obj instanceof Dataset) {
+//                Dataset dataset = (Dataset) obj;
+//
+//                long[] start = dataset.getStartDims();
+//                long[] stride = dataset.getStride();
+//                long[] sizes = dataset.getSelectedDims();
+//
+//                System.out.println("start: " + Arrays.toString(start));
+//                System.out.println("stride: " + Arrays.toString(stride));
+//                System.out.println("sizes: " + Arrays.toString(sizes));
+//
+//
+//                int size = dataset.getSize(dataset.getDatatype().getDatatypeClass());
+//                if (size > 0) {
+//                    Object o = ((Dataset) obj).read();
+//                }
+//                //System.out.println("datatype: " + ((Dataset) obj).getDatatype().getDatatypeClass());
+//                // Datatype.CLASS_STRING;
+//            }
+//        }
+//    }
 
     public void test(String fname) {
 

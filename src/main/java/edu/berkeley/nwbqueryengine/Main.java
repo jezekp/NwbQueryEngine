@@ -37,31 +37,48 @@ public class Main {
 
 
     public static void main(String[] args) {
-
-
-
         BufferedReader br = null;
         try {
             System.loadLibrary("HDFql");
             QueryParser p = new QueryParser();
             Query query;
             if (args.length > 0) {
-                String expression = args[0];
-                logger.debug("Expression: " + expression);
-                // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
-                //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
-                //Query query = p.parse("processing=(electrode_idx>30)");
-                query = p.parse(expression);
+                String file = args[0];
+                if (args.length > 1) {
+                    String expression = args[1];
+                    logger.debug("Expression: " + expression);
+                    query = p.parse(expression);
+                } else {
+                    // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
+                    //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
+                    //Query query = p.parse("processing=(electrode_idx>30)");
+                    query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
+                }
+                HDF5Connector connector = new HDF5Connector();
+                for (int i = 0; i < 1; i++) {
+                    long start = System.currentTimeMillis();
+                    List<NwbResult> res = connector.executeQuery(query, new File(file));
+                    long diff = System.currentTimeMillis() - start;
+                    res.forEach(name -> {
+                        logger.debug("Have res: " + name);
+                        //            System.out.println(name);
+                    });
+                    logger.debug(i + " I have: " + res.size());
+                    logger.debug("Done in: " + diff / 1000 + " seconds");
+                    System.out.println(i + " I have: " + res.size());
+
+                }
             } else {
-                logger.error("A query has not been given...");
-                query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
+                String message = "A file/dir has not been given...";
+                logger.error(message);
+                System.out.println(message);
+
                 //query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
-                //Query query = p.parse("processing=(electrode_idx>30)");
             }
             //printer.printNode(expression);
             //query.leftSideOfExpressions(expression);
 
-            HDF5Connector connector = new HDF5Connector();
+
 //for(int i = 0; i < 100; i++) {
 //    connector.test(fname);
 //}
@@ -74,19 +91,7 @@ public class Main {
 //                logger.debug(item + " resSize: "+ res.size());
 //            }
 
-            for (int i = 0; i < 1; i++) {
-                long start = System.currentTimeMillis();
-                List<NwbResult> res = connector.executeQuery(query, new File(path));
 
-                long diff = System.currentTimeMillis() - start;
-                res.forEach(name -> {
-                    logger.debug("Have res: " + name);
-        //            System.out.println(name);
-                });
-                logger.debug(i + " I have: " + res.size());
-                logger.debug("Done in: " + diff / 1000 + " seconds");
-
-            }
 //            br = new BufferedReader(new InputStreamReader(System.in));
 //
 //            while (true) {

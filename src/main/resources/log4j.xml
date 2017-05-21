@@ -9,26 +9,26 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd" >
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
 
-	<!-- javatypes tests logging configuration -->
+    <!-- javatypes tests logging configuration -->
 
-	<appender name="detailedConsoleAppender" class="org.apache.log4j.ConsoleAppender">
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-6p [%c:%M:%L] - %m%n"/>
-		</layout>
-	</appender>
+    <appender name="detailedConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-6p [%c:%M:%L] - %m%n"/>
+        </layout>
+    </appender>
 
-	<appender name="detailedLogFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="/tmp/nwb-query-engine.log" />
-        <param name="Append" value="true" />
-		<param name="DatePattern" value="'.'yyyy-MM-dd"/>
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-6p [%c:%M:%L] - %m%n"/>
-		</layout>
-	</appender>
+    <appender name="detailedLogFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="/tmp/nwb-query-engine.log"/>
+        <param name="Append" value="true"/>
+        <param name="DatePattern" value="'.'yyyy-MM-dd"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-6p [%c:%M:%L] - %m%n"/>
+        </layout>
+    </appender>
 
-	<root>
-		<level value="all" />
-		<!--<appender-ref ref="detailedConsoleAppender"/>-->
-		<appender-ref ref="detailedLogFileAppender"/>
-	</root>
+    <root>
+        <level value="error"/>
+<!--        <appender-ref ref="detailedConsoleAppender"/>-->
+        <appender-ref ref="detailedLogFileAppender"/>
+    </root>
 </log4j:configuration>
