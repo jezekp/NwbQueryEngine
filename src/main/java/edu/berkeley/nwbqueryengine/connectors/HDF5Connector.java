@@ -1,8 +1,8 @@
 package edu.berkeley.nwbqueryengine.connectors;
 
-import com.hdfql.HDFql;
-import com.hdfql.HDFqlConstants;
-import com.hdfql.HDFqlCursor;
+import as.hdfql.HDFql;
+import as.hdfql.HDFqlCursor;
+import edu.berkeley.nwbqueryengine.PartialExpression;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
@@ -16,8 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.*;
@@ -33,36 +31,19 @@ public class HDF5Connector implements Connector<File> {
     private JexlEngine jexl = new Engine();
     private MapContext mc = new MapContext();
 
-    public List<NwbResult> executeQuery(Query q, String fname) throws Exception {
+    public List<PartialExpression> executeLikeQuery(Query q, String fileName) {
         HDFql.cursorClear();
         HDFql.cursorInitialize();
-        List<NwbResult> nwbResults = new LinkedList<>();
-        Map<String, List<String>> showExpressions = new HashMap<>();
-        Map<String, List<Object>> dataSets = new HashMap<>();
-
-        boolean firstRun = true;
-        String operator = "";
-//        HDFqlCursor cursor = new HDFqlCursor();
-//        HDFql.cursorInitialize(cursor);
-//        int cursorUse1 = HDFql.cursorUse(cursor);
-//        HDFql.execute("ENABLE DEBUG");
-//               HDFql.execute("ENABLE FLUSH LOCAL");
-//        HDFql.execute("SET FILE CACHE SLOTS 1024 SIZE 2024 PREEMPTION 0.1");
-//        HDFql.execute("SET DATASET CACHE SLOTS 1024 PREEMPTION 0.1");
-//        logger.debug("cursor1Use: " + cursorUse1);
-        String useFileQuery = "USE READONLY FILE " + fname;
+        HDFql.execute("ENABLE DEBUG");
+        String useFileQuery = "USE READONLY FILE " + fileName;
         logger.debug("Use file query: " + useFileQuery);
         HDFql.execute(useFileQuery);
-        // populate HDFql default cursor with name of the HDF file in use and display it
-        logger.debug("File name: " + fname);
         HDFql.execute("SHOW USE FILE");
         HDFql.cursorFirst();
-        logger.debug("File in use: " + HDFql.cursorGetChar());
-
-
+        List<PartialExpression> partialExpressions = new LinkedList<>();
+        Map<String, List<String>> showExpressions = new HashMap<>();
         //cursor.delete();
-        for (Expression item : q.leftSideOfExpressions()) {
-            String arithmeticalOperator = item.getOperator();
+        for (Expression item : new LinkedList<>(q.leftSideOfExpressions())) {
             List<String> showResults;
             String expressionValue = item.getExpressionValue();
             logger.debug("Processing  expression: " + expressionValue + " " + item.getOperator());
@@ -97,13 +78,50 @@ public class HDF5Connector implements Connector<File> {
                     showResults.add(cursorGetChar);
                     logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype());
                 }
-                showExpressions.put(expressionValue, showResults);
+                showExpressions.put(expressionValue, new LinkedList<>(showResults));
                 //HDFql.cursorClear();
                 //cursor2.delete();
                 logger.debug("cursorRes:" + cursorRes);
+
             }
+            partialExpressions.add(new PartialExpression(showResults, item, fileName));
+        }
+        int closeResult = HDFql.execute("CLOSE FILE " + fileName);
+        logger.debug("Closing file: " + fileName + ", resultCode: " + closeResult);
+        //HDFql.cursorClear();
+        return partialExpressions;
+    }
+
+    public List<NwbResult> executeQuery(Query q, String fname, List<PartialExpression> partialExpressions) throws Exception {
+        HDFql.cursorClear();
+        HDFql.cursorInitialize();
+        List<NwbResult> nwbResults = new LinkedList<>();
+        Map<String, List<Object>> dataSets = new HashMap<>();
+        boolean firstRun = true;
+        String operator = "";
+//        HDFqlCursor cursor = new HDFqlCursor();
+//        HDFql.cursorInitialize(cursor);
+//        int cursorUse1 = HDFql.cursorUse(cursor);
+        HDFql.execute("ENABLE DEBUG");
+//               HDFql.execute("ENABLE FLUSH LOCAL");
+//        HDFql.execute("SET FILE CACHE SLOTS 1024 SIZE 2024 PREEMPTION 0.1");
+//        HDFql.execute("SET DATASET CACHE SLOTS 1024 PREEMPTION 0.1");
+//        logger.debug("cursor1Use: " + cursorUse1);
+        String useFileQuery = "USE READONLY FILE " + fname;
+        logger.debug("Use file query: " + useFileQuery);
+        HDFql.execute(useFileQuery);
+        // populate HDFql default cursor with name of the HDF file in use and display it
+        logger.debug("File name: " + fname);
+        HDFql.execute("SHOW USE FILE");
+        HDFql.cursorFirst();
+        logger.debug("File in use: " + HDFql.cursorGetChar());
+
+        for(PartialExpression partialExpression : partialExpressions) {
             List<NwbResult> partialResult = new LinkedList<>();
             List<Object> values;
+            Expression item = partialExpression.getExpression();
+            String arithmeticalOperator = item.getOperator();
+            List<String> showResults = partialExpression.getShowResults();
             for (String datasetsForSelect : showResults) {
                 if (dataSets.containsKey(datasetsForSelect)) {
                     values = dataSets.get(datasetsForSelect);
@@ -141,13 +159,10 @@ public class HDF5Connector implements Connector<File> {
                 //HDFql.cursorClear();
                 Expression clone = (Expression) item.clone();
                 Expression rightSide = q.getRightSide(clone);
-                Expression t =  (Expression) rightSide.clone();
-                logger.debug("Operator: " + clone.getOperator() + ", RightSide: " + t);
-
-                //TODO -- try to select first all expressions and then call jexl
+                logger.debug("Operator: " + clone.getOperator() + ", RightSide: " + rightSide);
 
                 JexlExpression func = jexl.createExpression("x1" + arithmeticalOperator + "x2");
-                mc.set("x2", t.getExpressionValue());
+                mc.set("x2", rightSide.getExpressionValue());
                 for (Object tmp : new ArrayList<>(values)) {
                     logger.debug("Value: " + tmp);
                     mc.set("x1", tmp);
@@ -341,9 +356,11 @@ public class HDF5Connector implements Connector<File> {
     @Override
     public List<NwbResult> executeQuery(Query query, File obj) throws Exception {
         List<NwbResult> res = new LinkedList<>();
+        Map<String, List<PartialExpression>> files = new HashMap<>();
         logger.debug("File: " + obj.getAbsolutePath());
         if (obj.isFile()) {
-            res = executeQuery(query, obj.getAbsolutePath());
+            List<PartialExpression> pe = executeLikeQuery(query, obj.getAbsolutePath());
+            files.put(obj.getAbsolutePath(), pe);
         } else {
             for (File item : obj.listFiles(new FileFilter() {
                 @Override
@@ -352,10 +369,16 @@ public class HDF5Connector implements Connector<File> {
                 }
             })) {
                 logger.debug("Individual file: " + item.getAbsolutePath());
-                List<NwbResult> partialRes = executeQuery(query, item.getAbsolutePath());
-                logger.debug("I have partial res: " + partialRes.size() + ", file: " + item.getName());
-                res.addAll(partialRes);
+                List<PartialExpression> peTmp = executeLikeQuery(query, item.getAbsolutePath());
+                //List<NwbResult> partialRes = executeQuery(query, item.getAbsolutePath());
+
+                files.put(item.getAbsolutePath(), peTmp);
             }
+        }
+        for (Map.Entry<String, List<PartialExpression>> cursor : files.entrySet()) {
+            List<NwbResult> tmpRes = executeQuery(query, cursor.getKey(), cursor.getValue());
+            logger.debug("I have partial res: " + tmpRes.size() + ", file: " + cursor.getKey());
+            res.addAll(tmpRes);
         }
 
         return res;

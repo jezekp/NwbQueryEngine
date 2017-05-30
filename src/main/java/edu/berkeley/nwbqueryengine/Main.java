@@ -55,7 +55,7 @@ public class Main {
                     query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
                 }
                 HDF5Connector connector = new HDF5Connector();
-                for (int i = 0; i < 1; i++) {
+                for (int i = 0; i < 10; i++) {
                     long start = System.currentTimeMillis();
                     List<NwbResult> res = connector.executeQuery(query, new File(file));
                     long diff = System.currentTimeMillis() - start;

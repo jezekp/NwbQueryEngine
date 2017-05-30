@@ -1,5 +1,6 @@
 package edu.berkeley.nwbqueryengine.query.parser;
 
+import edu.berkeley.nwbqueryengine.PartialExpression;
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Query;
@@ -43,7 +44,8 @@ class ExpressionParserTest {
         Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
         HDF5Connector connector = new HDF5Connector();
         try {
-            List<NwbResult> res = connector.executeQuery(query, fname);
+            List<PartialExpression> pe = connector.executeLikeQuery(query, fname);
+            List<NwbResult> res = connector.executeQuery(query, fname, pe);
             assertTrue(res.size() > 0);
             res.forEach(name -> {
                 double value = (double) name.getValue();

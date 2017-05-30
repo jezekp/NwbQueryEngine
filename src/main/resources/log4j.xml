@@ -27,8 +27,8 @@
     </appender>
 
     <root>
-        <level value="error"/>
-<!--        <appender-ref ref="detailedConsoleAppender"/>-->
+        <level value="debug"/>
+        <appender-ref ref="detailedConsoleAppender"/>
         <appender-ref ref="detailedLogFileAppender"/>
     </root>
 </log4j:configuration>
