@@ -41,7 +41,7 @@ class ExpressionParserTest {
             assertEquals(item.getExpressionValue(), expressions[i++]);
         }
 
-        Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
+        Query query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
         HDF5Connector connector = new HDF5Connector();
         try {
             List<PartialExpression> pe = connector.executeLikeQuery(query, fname);
