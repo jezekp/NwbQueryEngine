@@ -100,7 +100,7 @@ public class HDF5Connector implements Connector<File> {
         List<NwbResult> nwbResults = new LinkedList<>();
         Map<String, List<Object>> dataSets = new HashMap<>();
         boolean firstRun = true;
-        String operator = "";
+        String andOrOperator = "";
 //        HDFqlCursor cursor = new HDFqlCursor();
 //        HDFql.cursorInitialize(cursor);
 //        int cursorUse1 = HDFql.cursorUse(cursor);
@@ -167,12 +167,15 @@ public class HDF5Connector implements Connector<File> {
                 logger.debug("Operator: " + clone.getOperator() + ", RightSide: " + rightSide);
 
                 JexlExpression func = jexl.createExpression("x1" + arithmeticalOperator + "x2");
-                mc.set("x2", rightSide.getExpressionValue());
+                String expressionValue = rightSide.getExpressionValue();
+                mc.set("x2", expressionValue);
                 for (Object tmp : new ArrayList<>(values)) {
                     logger.debug("Value: " + tmp);
                     mc.set("x1", tmp);
                     Object eval = func.evaluate(mc);
-                    if (((Boolean) eval).booleanValue()) {
+                    boolean res = ((Boolean) eval).booleanValue();
+                    logger.debug("Evaluation: " + tmp + "" + arithmeticalOperator + "" + expressionValue + ", result:" + res);
+                    if (res) {
                         partialResult.add(new NwbResult(datasetsForSelect, tmp));
                     }
                 }
@@ -180,14 +183,14 @@ public class HDF5Connector implements Connector<File> {
             }
 
 
-            logger.debug(item + ", AND-OR-Operator: " + operator);
+            logger.debug(item + ", AND-OR-Operator: " + andOrOperator);
 
-            if (("\\" + operator).equals(Operators.OR.op())) {
+            if (("\\" + andOrOperator).equals(Operators.OR.op())) {
                 logger.debug("...OR....");
                 nwbResults = Restrictions.or(nwbResults, partialResult);
                 nwbResults.forEach(name -> logger.debug(name));
             }
-            if (operator.equals(Operators.AND.op())) {
+            if (andOrOperator.equals(Operators.AND.op())) {
                 logger.debug("...AND....");
                 nwbResults = Restrictions.and(nwbResults, partialResult);
                 nwbResults.forEach(name -> logger.debug(name));
@@ -196,7 +199,7 @@ public class HDF5Connector implements Connector<File> {
                 nwbResults.addAll(partialResult);
                 firstRun = false;
             }
-            operator = item.getParent().getOperator();
+            andOrOperator = item.getParent().getOperator();
         }
         nwbResults.forEach(name -> logger.debug(name));
 //        HDFqlCursor cursor4 = new HDFqlCursor();

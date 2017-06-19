@@ -47,7 +47,7 @@ public class Main {
                     query = p.parse(expression);
                 } else {
                     // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
-                    query = p.parse("epochs=(stop_time==1600)");
+                    query = p.parse("epochs=(tags=~Hi)");
                     //Query query = p.parse("processing=(electrode_idx>30)");
                     //query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
                 }

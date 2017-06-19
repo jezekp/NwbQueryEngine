@@ -26,7 +26,7 @@ class ExpressionParserTest {
     void parse() {
         System.loadLibrary("HDFql");
         QueryParser p = new QueryParser();
-        Query root = p.parse("CellInfo=('area'='c1'|'area'='c2'&'h'='c3'|h3=c8)");
+        Query root = p.parse("CellInfo=('area'=='c1'|'area'=='c2'&'h'=='c3'|h3==c8)");
 
         Expression leftSide = root.getQueryLeftSide();
         assertNotNull(leftSide);

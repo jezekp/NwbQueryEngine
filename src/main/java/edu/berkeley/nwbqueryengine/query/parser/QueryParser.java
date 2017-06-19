@@ -46,7 +46,8 @@ public class QueryParser {
         parseSubString(input, node, "((?<=" + delimiter + ")|(?=" + delimiter + "))");
         String[] delimiters = {
                 Operators.GE.op() + "|" + Operators.LT.op(),
-                Operators.GT.op() +  "|" + Operators.LE.op() + "|" + Operators.NE.op() + "|" + Operators.EQ.op()
+                Operators.GT.op() +  "|" + Operators.LE.op() + "|" + Operators.NE.op() + "|" + Operators.EQ.op(),
+                Operators.MATCH.op()
         };
         for(String item : delimiters) {
             parseSubString(input, node, "((?<=" + item + ")|(?=" + item + "))");
