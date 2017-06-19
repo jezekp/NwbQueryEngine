@@ -8,6 +8,7 @@ import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.query.result.NwbResult;
 import edu.berkeley.nwbqueryengine.query.result.Restrictions;
+import edu.berkeley.nwbqueryengine.util.HDFqlUtil;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
@@ -34,7 +35,9 @@ public class HDF5Connector implements Connector<File> {
     public List<PartialExpression> executeLikeQuery(Query q, String fileName) {
         HDFql.cursorClear();
         HDFql.cursorInitialize();
-        HDFql.execute("ENABLE DEBUG");
+        if(logger.isDebugEnabled()) {
+            HDFql.execute("ENABLE DEBUG");
+        }
         String useFileQuery = "USE READONLY FILE " + fileName;
         logger.debug("Use file query: " + useFileQuery);
         HDFql.execute(useFileQuery);
@@ -67,7 +70,6 @@ public class HDF5Connector implements Connector<File> {
 //                    HDFql.execute(useFileQuery);
                     HDFql.cursorClear();
                     HDFql.cursorInitialize();
-                    //wait(300);
                     logger.error("Error: " + HDFql.errorGetMessage());
                 }
                 logger.debug("ExecuteLikeRes: " + executeLikeRes);
@@ -102,7 +104,9 @@ public class HDF5Connector implements Connector<File> {
 //        HDFqlCursor cursor = new HDFqlCursor();
 //        HDFql.cursorInitialize(cursor);
 //        int cursorUse1 = HDFql.cursorUse(cursor);
-        HDFql.execute("ENABLE DEBUG");
+        if(logger.isDebugEnabled()) {
+            HDFql.execute("ENABLE DEBUG");
+        }
 //               HDFql.execute("ENABLE FLUSH LOCAL");
 //        HDFql.execute("SET FILE CACHE SLOTS 1024 SIZE 2024 PREEMPTION 0.1");
 //        HDFql.execute("SET DATASET CACHE SLOTS 1024 PREEMPTION 0.1");
@@ -145,7 +149,8 @@ public class HDF5Connector implements Connector<File> {
                     int selectCursorResult;
                     //Somewhere here is a bug
                     while ((selectCursorResult = HDFql.cursorNext()) == HDFql.SUCCESS) {
-                        Object value = getValue();
+                        HDFqlUtil util = new HDFqlUtil();
+                        Object value = util.getValue();
                         values.add(value);
                         logger.debug("selected value: " + value + ", " + value.getClass().getName());
                     }
@@ -204,49 +209,6 @@ public class HDF5Connector implements Connector<File> {
         //      cursor4.delete();
         HDFql.cursorClear();
         return nwbResults;
-    }
-
-    private synchronized Object getValue() {
-        Object res = null;
-        int datatype = HDFql.cursorGetDatatype();
-        logger.debug("DataType: " + datatype);
-        if (datatype == HDFql.TINYINT) {
-            res = HDFql.cursorGetTinyInt();
-        }
-        if (datatype == HDFql.UNSIGNED_TINYINT) {
-            res = HDFql.cursorGetUnsignedTinyInt();
-        }
-        if (datatype == HDFql.SMALLINT) {
-            res = HDFql.cursorGetSmallInt();
-        }
-        if (datatype == HDFql.UNSIGNED_SMALLINT) {
-            res = HDFql.cursorGetUnsignedSmallInt();
-        }
-        if (datatype == HDFql.INT) {
-            res = HDFql.cursorGetInt();
-        }
-        if (datatype == HDFql.UNSIGNED_INT) {
-            res = HDFql.cursorGetUnsignedInt();
-        }
-        if (datatype == HDFql.BIGINT) {
-            res = HDFql.cursorGetBigInt();
-        }
-        if (datatype == HDFql.UNSIGNED_BIGINT) {
-            res = HDFql.cursorGetUnsignedBigInt();
-        }
-        if (datatype == HDFql.DOUBLE) {
-            res = HDFql.cursorGetDouble();
-        }
-        if (datatype == HDFql.FLOAT) {
-            res = HDFql.cursorGetFloat();
-        }
-        if (datatype == HDFql.CHAR) {
-            res = HDFql.cursorGetChar();
-        }
-        if (res == null) {
-            logger.error("IsNull");
-        }
-        return res;
     }
 
 
@@ -342,7 +304,8 @@ public class HDF5Connector implements Connector<File> {
             int selectCursorResult;
             while ((selectCursorResult = HDFql.cursorNext(c)) == HDFql.SUCCESS) {
                 int datatype = HDFql.cursorGetDatatype(c);
-                Object value = getValue();
+                HDFqlUtil util = new HDFqlUtil();
+                Object value = util.getValue();
                 logger.debug("select dataset: " + datatype + " " + value + ", " + value.getClass().getName());
             }
             logger.debug("selectCurorRes: " + selectCursorResult);

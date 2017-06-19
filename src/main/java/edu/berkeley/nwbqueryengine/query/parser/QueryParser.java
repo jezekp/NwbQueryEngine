@@ -33,25 +33,31 @@ public class QueryParser {
     private Expression parseInternal(Expression e) {
         Expression node = new Expression(e.getExpressionValue(), e.getOperator(), e.getParent());
         String input = node.getExpressionValue();
+        //Find expression inside brackets [] or ()
         Matcher brackets = Pattern.compile("\\(([^)]+)\\)").matcher(input);
         while (brackets.find()) {
             String value = brackets.group(1);
             node.setRightSide(parseInternal(new Expression(value, node)));
-            node.setLeftSide(parseInternal(new Expression(input.split(Operators.EQ.op())[0], node)));
+            node.setLeftSide(parseInternal(new Expression(input.split(Operators.ASSIGN.op())[0], node)));
         }
 
+        //(?=foo) lookahead and (?<=foo) lookbehind are used to a delimiter was included as well.
         String delimiter = Operators.AND.op() + "|" + Operators.OR.op();
         parseSubString(input, node, "((?<=" + delimiter + ")|(?=" + delimiter + "))");
-        String delimiter2 = Operators.EQ.op() + "|" +
-                Operators.GT.op() + "|" + Operators.GE.op() + "|" + Operators.LT.op() + "|" + Operators.LE.op() + "|" + Operators.NE.op();
-        parseSubString(input, node, "((?<=" + delimiter2 + ")|(?=" + delimiter2 + "))");
-
+        String[] delimiters = {
+                Operators.GE.op() + "|" + Operators.LT.op(),
+                Operators.GT.op() +  "|" + Operators.LE.op() + "|" + Operators.NE.op() + "|" + Operators.EQ.op()
+        };
+        for(String item : delimiters) {
+            parseSubString(input, node, "((?<=" + item + ")|(?=" + item + "))");
+        }
         return node;
     }
 
     private void parseSubString(String input, Expression node, String delimiter) {
+        //st contains [0] - left side, [1] - operator, [2] - right side
         String[] st = input.split(delimiter, 3);
-        logger.debug("Input: " + input + ", delimiter: " + delimiter + ": " + ((st.length > 0) ? st[0] : "") + ", " + ((st.length > 1) ? st[1] : "") + " " + ((st.length > 2) ? st[2] : ""));
+        logger.debug("Input: " + input + ", delimiter: " + delimiter + ", left: "  + ((st.length > 0) ? st[0] : "") + ", operator: " + ((st.length > 1) ? st[1] : "") + ", right: " + ((st.length > 2) ? st[2] : ""));
         if (!st[0].equals(node.getExpressionValue()) && node.getLeftSide() == null) {
             node.setLeftSide(parseInternal(new Expression(st[0], st[1], node)));
         }

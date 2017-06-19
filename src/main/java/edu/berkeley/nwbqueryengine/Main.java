@@ -4,12 +4,9 @@ import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.query.parser.QueryParser;
 import edu.berkeley.nwbqueryengine.query.result.NwbResult;
-import edu.berkeley.nwbqueryengine.util.BTreePrinter;
-import edu.berkeley.nwbqueryengine.util.MathEval;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.jexl3.JxltEngine;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.internal.Engine;
 import org.apache.commons.logging.Log;
@@ -17,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -50,24 +47,22 @@ public class Main {
                     query = p.parse(expression);
                 } else {
                     // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
-                    //Query query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
+                    query = p.parse("epochs=(stop_time==1600)");
                     //Query query = p.parse("processing=(electrode_idx>30)");
-                    query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
+                    //query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
                 }
                 HDF5Connector connector = new HDF5Connector();
-                for (int i = 0; i < 10; i++) {
-                    long start = System.currentTimeMillis();
-                    List<NwbResult> res = connector.executeQuery(query, new File(file));
-                    long diff = System.currentTimeMillis() - start;
-                    res.forEach(name -> {
-                        logger.debug("Have res: " + name);
-                        //            System.out.println(name);
-                    });
-                    logger.debug(i + " I have: " + res.size());
-                    logger.debug("Done in: " + diff / 1000 + " seconds");
-                    System.out.println(i + " I have: " + res.size());
+                long start = System.currentTimeMillis();
+                List<NwbResult> res = connector.executeQuery(query, new File(file));
+                long diff = System.currentTimeMillis() - start;
+                res.forEach(name -> {
+                    logger.debug("Have res: " + name);
+                    //            System.out.println(name);
+                });
+                logger.debug("I have: " + res.size());
+                logger.debug("Done in: " + diff / 1000 + " seconds");
+                System.out.println("I have: " + res.size());
 
-                }
             } else {
                 String message = "A file/dir has not been given...";
                 logger.error(message);
