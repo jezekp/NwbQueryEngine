@@ -7,7 +7,7 @@ package edu.berkeley.nwbqueryengine.query;
  */
 public enum Operators {
 
-    EQ("=="), GT(">"), LT("<"), GE(">="), LE("<="), AND("&"), OR("\\|"), NE("!="), ASSIGN("="), MATCH("=~");
+    EQ("=="), GT(">"), LT("<"), GE(">="), LE("<="), AND("&"), OR("\\|"), NE("!="), ASSIGN("="), MATCH("=~"), CONTAINS("contains");
 
     private String value;
 

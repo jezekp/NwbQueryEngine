@@ -27,7 +27,7 @@ public class Main {
 
     private static String path = "/home/petr-jezek/Data/nwb_datasets/nwbMatlab_DG";
     //private static String path = "/tmp/datasets";
-    private static String file = "ANM186997_20130321.nwb";
+    private static String file = "ANM186997_20130317.nwb";
     private static String fname = path + "/" + file;
 
     private static Log logger = LogFactory.getLog(Main.class);
@@ -47,20 +47,20 @@ public class Main {
                     query = p.parse(expression);
                 } else {
                     // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
-                    query = p.parse("epochs=(tags=~Hi)");
+                    query = p.parse("analysis=(description.contains(whisker))");
                     //Query query = p.parse("processing=(electrode_idx>30)");
                     //query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
                 }
                 HDF5Connector connector = new HDF5Connector();
                 long start = System.currentTimeMillis();
-                List<NwbResult> res = connector.executeQuery(query, new File(file));
+                List<NwbResult> res = connector.executeQuery(query, new File(fname));
                 long diff = System.currentTimeMillis() - start;
                 res.forEach(name -> {
                     logger.debug("Have res: " + name);
                     //            System.out.println(name);
                 });
-                logger.debug("I have: " + res.size());
-                logger.debug("Done in: " + diff / 1000 + " seconds");
+                logger.info("I have: " + res.size());
+                logger.info("Done in: " + diff / 1000 + " seconds");
                 System.out.println("I have: " + res.size());
 
             } else {
@@ -107,6 +107,18 @@ public class Main {
 //                System.out.println("Done.... ");
 //
 //            }
+
+//            JexlEngine jexl = new Engine();
+//            MapContext mc = new MapContext();
+//            JexlExpression func = jexl.createExpression("x1.contains(x2)");
+//
+//            mc.set("x2", "Each");
+//
+//                mc.set("x1", "Each unit has a particular principal whisker. A vector of size  1 x num_units specifies what is the principal whisker of each uni");
+//                Object eval = func.evaluate(mc);
+//                boolean res = ((Boolean) eval).booleanValue();
+//System.out.println(res);
+
 
         } catch (Exception e) {
             e.printStackTrace();

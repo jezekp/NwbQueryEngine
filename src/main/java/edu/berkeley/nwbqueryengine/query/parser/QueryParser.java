@@ -37,6 +37,7 @@ public class QueryParser {
         Matcher brackets = Pattern.compile("\\(([^)]+)\\)").matcher(input);
         while (brackets.find()) {
             String value = brackets.group(1);
+            value = value.replaceAll("\\(", "").replaceAll("\\)", "").replaceAll("\\.", "");
             node.setRightSide(parseInternal(new Expression(value, node)));
             node.setLeftSide(parseInternal(new Expression(input.split(Operators.ASSIGN.op())[0], node)));
         }
@@ -47,7 +48,7 @@ public class QueryParser {
         String[] delimiters = {
                 Operators.GE.op() + "|" + Operators.LT.op(),
                 Operators.GT.op() +  "|" + Operators.LE.op() + "|" + Operators.NE.op() + "|" + Operators.EQ.op(),
-                Operators.MATCH.op()
+                Operators.MATCH.op() + "|" + Operators.CONTAINS.op()
         };
         for(String item : delimiters) {
             parseSubString(input, node, "((?<=" + item + ")|(?=" + item + "))");

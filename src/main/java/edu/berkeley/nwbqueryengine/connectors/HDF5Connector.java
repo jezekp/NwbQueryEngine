@@ -35,7 +35,7 @@ public class HDF5Connector implements Connector<File> {
     public List<PartialExpression> executeLikeQuery(Query q, String fileName) {
         HDFql.cursorClear();
         HDFql.cursorInitialize();
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             HDFql.execute("ENABLE DEBUG");
         }
         String useFileQuery = "USE READONLY FILE " + fileName;
@@ -104,7 +104,7 @@ public class HDF5Connector implements Connector<File> {
 //        HDFqlCursor cursor = new HDFqlCursor();
 //        HDFql.cursorInitialize(cursor);
 //        int cursorUse1 = HDFql.cursorUse(cursor);
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             HDFql.execute("ENABLE DEBUG");
         }
 //               HDFql.execute("ENABLE FLUSH LOCAL");
@@ -120,7 +120,7 @@ public class HDF5Connector implements Connector<File> {
         HDFql.cursorFirst();
         logger.debug("File in use: " + HDFql.cursorGetChar());
 
-        for(PartialExpression partialExpression : partialExpressions) {
+        for (PartialExpression partialExpression : partialExpressions) {
             List<NwbResult> partialResult = new LinkedList<>();
             List<Object> values;
             Expression item = partialExpression.getExpression();
@@ -166,10 +166,16 @@ public class HDF5Connector implements Connector<File> {
                 Expression rightSide = q.getRightSide(clone);
                 logger.debug("Operator: " + clone.getOperator() + ", RightSide: " + rightSide);
 
-                JexlExpression func = jexl.createExpression("x1" + arithmeticalOperator + "x2");
+                String jexlExpression;
+                if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
+                    jexlExpression = "x1.contains(x2)";
+                } else {
+                    jexlExpression = "x1" + arithmeticalOperator + "x2";
+                }
+                JexlExpression func = jexl.createExpression(jexlExpression);
                 String expressionValue = rightSide.getExpressionValue();
                 mc.set("x2", expressionValue);
-                for (Object tmp : new ArrayList<>(values)) {
+                for (Object tmp : new LinkedList<>(values)) {
                     logger.debug("Value: " + tmp);
                     mc.set("x1", tmp);
                     Object eval = func.evaluate(mc);
@@ -263,7 +269,6 @@ public class HDF5Connector implements Connector<File> {
 //            }
 //        }
 //    }
-
     public void test(String fname) {
 
         String useFileQuery = "USE FILE " + fname;
