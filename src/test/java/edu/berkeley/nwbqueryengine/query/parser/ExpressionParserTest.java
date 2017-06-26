@@ -3,10 +3,12 @@ package edu.berkeley.nwbqueryengine.query.parser;
 import edu.berkeley.nwbqueryengine.PartialExpression;
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
 import edu.berkeley.nwbqueryengine.query.Expression;
+import edu.berkeley.nwbqueryengine.query.ExpressionProcessor;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.query.result.NwbResult;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,12 +42,13 @@ class ExpressionParserTest {
         for (Expression item : leftSideExpressions) {
             assertEquals(item.getExpressionValue(), expressions[i++]);
         }
-
-        Query query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
-        HDF5Connector connector = new HDF5Connector();
         try {
-            List<PartialExpression> pe = connector.executeLikeQuery(query, fname);
-            List<NwbResult> res = connector.executeQuery(query, fname, pe);
+            Query query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
+            HDF5Connector connector = new HDF5Connector(new File(fname));
+            ExpressionProcessor processor = new ExpressionProcessor(connector);
+            List<NwbResult> res = processor.evaluate(query);
+
+
             assertTrue(res.size() > 0);
             res.forEach(name -> {
                 double value = (double) name.getValue();

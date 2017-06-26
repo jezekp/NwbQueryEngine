@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class QueryParser {
+public class QueryParser implements Parser{
 
 
     private Log logger = LogFactory.getLog(getClass());
