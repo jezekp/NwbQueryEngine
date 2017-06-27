@@ -1,21 +1,17 @@
 package edu.berkeley.nwbqueryengine;
 
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
-import edu.berkeley.nwbqueryengine.query.ExpressionProcessor;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.query.parser.QueryParser;
-import edu.berkeley.nwbqueryengine.query.result.NwbResult;
+import edu.berkeley.nwbqueryengine.data.NwbResult;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.jexl3.MapContext;
-import org.apache.commons.jexl3.internal.Engine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.util.ArrayList;
+import java.io.FileFilter;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -52,74 +48,30 @@ public class Main {
                     //Query query = p.parse("processing=(electrode_idx>30)");
                     query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
                 }
-                HDF5Connector connector = new HDF5Connector( new File(path));
-                ExpressionProcessor processor = new ExpressionProcessor(connector);
-                long start = System.currentTimeMillis();
-                List<NwbResult> res = processor.evaluate(query);
-                long diff = System.currentTimeMillis() - start;
-                res.forEach(name -> {
-                    logger.debug("Have res: " + name);
-                    //            System.out.println(name);
-                });
-                logger.info("I have: " + res.size());
-                logger.info("Done in: " + diff / 1000 + " seconds");
-                System.out.println("I have: " + res.size());
+
+                List<NwbResult> completeRes = new LinkedList<>();
+                File obj = new File(path);
+                if (obj.isDirectory()) {
+                    for (File item : obj.listFiles(new FileFilter() {
+                        @Override
+                        public boolean accept(File pathname) {
+                            return pathname.getName().toLowerCase().endsWith(".nwb");
+                        }
+                    })) {
+                        completeRes.addAll(processFile(item, query));
+                    }
+
+                } else {
+                    completeRes = processFile(obj, query);
+                }
+                logger.info("I have complete: " + completeRes.size());
 
             } else {
                 String message = "A file/dir has not been given...";
                 logger.error(message);
                 System.out.println(message);
 
-                //query = p.parse("epochs=('start_time'<'200' | 'stop_time'>'1600')");
             }
-            //printer.printNode(expression);
-            //query.leftSideOfExpressions(expression);
-
-
-//for(int i = 0; i < 100; i++) {
-//    connector.test(fname);
-//}
-
-//            String[] array = new String[] {"ANM184389_20130207.nwb",  "ANM184389_20130213.nwb",  "ANM199549_20130530.nwb",  "ANM199551_20130626.nwb",  "ANM199552_20130603.nwb",  "ANM199552_20130608.nwb",  "ANM184389_20130211.nwb",  "ANM186997_20130317.nwb",  "ANM199549_20130604.nwb",  "ANM199552_20130601.nwb",  "ANM199552_20130604.nwb",  "ANM203464_20130702.nwb",
-//                    "ANM184389_20130212.nwb",  "ANM186997_20130321.nwb", "ANM199549_20130605.nwb",  "ANM199552_20130602.nwb",  "ANM199552_20130606.nwb",  "ANM203464_20130705.nwb"};
-//
-//            for(String item : array) {
-//                List<NwbResult> res = connector.executeQuery(query, path + "/" + item);
-//                logger.debug(item + " resSize: "+ res.size());
-//            }
-
-
-//            br = new BufferedReader(new InputStreamReader(System.in));
-//
-//            while (true) {
-//
-//                System.out.print(">");
-//                String input = br.readLine();
-//
-//                if ("q".equals(input)) {
-//                    System.out.println("Exit!");
-//                    System.exit(0);
-//                }
-//
-//                QueryParser p = new QueryParser();
-//                Query query = p.parse(input);
-//                HDF5Connector connector = new HDF5Connector();
-//                List<NwbResult> res = connector.executeQuery(query, fname);
-//                res.forEach(name -> System.out.println(name));
-//                System.out.println("Done.... ");
-//
-//            }
-
-//            JexlEngine jexl = new Engine();
-//            MapContext mc = new MapContext();
-//            JexlExpression func = jexl.createExpression("x1.contains(x2)");
-//
-//            mc.set("x2", "Each");
-//
-//                mc.set("x1", "Each unit has a particular principal whisker. A vector of size  1 x num_units specifies what is the principal whisker of each uni");
-//                Object eval = func.evaluate(mc);
-//                boolean res = ((Boolean) eval).booleanValue();
-//System.out.println(res);
 
 
         } catch (Exception e) {
@@ -128,13 +80,21 @@ public class Main {
             IOUtils.closeQuietly(br);
         }
 
-        //HDFqlExample.test();
-/*        try {
-            HDF5Connector.x();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
 
+    }
+
+    public static List<NwbResult> processFile(File obj, Query query) throws Exception {
+        HDF5Connector connector = new HDF5Connector(obj);
+        ExpressionProcessor processor = new ExpressionProcessor(connector);
+
+        List<NwbResult> res = processor.evaluate(query);
+
+        res.forEach(name -> {
+            logger.debug("Have res: " + name);
+            //            System.out.println(name);
+        });
+        logger.info("I have: " + res.size());
+        return res;
     }
 
 

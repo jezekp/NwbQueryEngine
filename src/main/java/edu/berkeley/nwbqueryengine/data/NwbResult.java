@@ -1,4 +1,4 @@
-package edu.berkeley.nwbqueryengine.query.result;
+package edu.berkeley.nwbqueryengine.data;
 
 /**
  * Created by petr-jezek on 24.4.17*

@@ -1,24 +1,15 @@
 package edu.berkeley.nwbqueryengine.connectors;
 
 import as.hdfql.HDFql;
-import as.hdfql.HDFqlCursor;
-import edu.berkeley.nwbqueryengine.PartialExpression;
+import edu.berkeley.nwbqueryengine.data.PartialExpression;
 import edu.berkeley.nwbqueryengine.query.Expression;
-import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
-import edu.berkeley.nwbqueryengine.query.result.NwbResult;
-import edu.berkeley.nwbqueryengine.query.result.Restrictions;
 import edu.berkeley.nwbqueryengine.util.HDFqlUtil;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.jexl3.MapContext;
-import org.apache.commons.jexl3.internal.Engine;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.*;
 
 /**
@@ -34,6 +25,8 @@ public class HDF5Connector implements Connector<String> {
     public HDF5Connector(File obj) {
         this.obj = obj;
     }
+
+
 
 
     private List<PartialExpression> executeLikeQuery(Query q, String fileName) {
@@ -100,32 +93,14 @@ public class HDF5Connector implements Connector<String> {
 
     public List<PartialExpression> processSearch(Query query) throws ConnectorException {
         List<PartialExpression> res = new LinkedList<>();
-        Map<String, List<PartialExpression>> files = new HashMap<>();
         logger.debug("File: " + obj.getAbsolutePath());
         if (obj.isFile()) {
             connect(obj);
-            List<PartialExpression> pe = executeLikeQuery(query, obj.getAbsolutePath());
-            files.put(obj.getAbsolutePath(), pe);
+            res = executeLikeQuery(query, obj.getAbsolutePath());
             disconect(obj);
         } else {
-            for (File item : obj.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File pathname) {
-                    return pathname.getName().toLowerCase().endsWith(".nwb");
-                }
-            })) {
-                logger.debug("Individual file: " + item.getAbsolutePath());
-                connect(item);
-                List<PartialExpression> peTmp = executeLikeQuery(query, item.getAbsolutePath());
-                disconect(item);
-                files.put(item.getAbsolutePath(), peTmp);
-            }
+            throw new ConnectorException("obj must be a file not a directory");
         }
-
-        for (Map.Entry<String, List<PartialExpression>> entry : files.entrySet()) {
-            res.addAll(entry.getValue());
-        }
-
         return res;
     }
 

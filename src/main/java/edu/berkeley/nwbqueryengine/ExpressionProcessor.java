@@ -1,10 +1,12 @@
-package edu.berkeley.nwbqueryengine.query;
+package edu.berkeley.nwbqueryengine;
 
-import edu.berkeley.nwbqueryengine.PartialExpression;
-import edu.berkeley.nwbqueryengine.ProcessorException;
 import edu.berkeley.nwbqueryengine.connectors.Connector;
-import edu.berkeley.nwbqueryengine.query.result.NwbResult;
-import edu.berkeley.nwbqueryengine.query.result.Restrictions;
+import edu.berkeley.nwbqueryengine.query.Expression;
+import edu.berkeley.nwbqueryengine.query.Operators;
+import edu.berkeley.nwbqueryengine.query.Query;
+import edu.berkeley.nwbqueryengine.data.NwbResult;
+import edu.berkeley.nwbqueryengine.data.PartialExpression;
+import edu.berkeley.nwbqueryengine.data.Restrictions;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
@@ -47,7 +49,7 @@ public class ExpressionProcessor {
             List<Object> values;
             Expression item = partialExpression.getExpression();
             String arithmeticalOperator = item.getOperator();
-            List<String> showResults = partialExpression.getShowResults();
+            List<String> showResults = partialExpression.getEntity();
             for (String datasetsForSelect : showResults) {
                 if (dataSets.containsKey(datasetsForSelect)) {
                     values = dataSets.get(datasetsForSelect);
@@ -77,7 +79,7 @@ public class ExpressionProcessor {
                     mc.set("x1", tmp);
                     Object eval = func.evaluate(mc);
                     boolean res = ((Boolean) eval).booleanValue();
-                    logger.debug("Evaluation: " + tmp + "" + arithmeticalOperator + "" + expressionValue + ", result:" + res);
+                    logger.debug("Evaluation: " + tmp + "" + arithmeticalOperator + "" + expressionValue + ", data:" + res);
                     if (res) {
                         partialResult.add(new NwbResult(datasetsForSelect, tmp));
                     }

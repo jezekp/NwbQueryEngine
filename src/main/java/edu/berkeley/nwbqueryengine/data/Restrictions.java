@@ -1,7 +1,4 @@
-package edu.berkeley.nwbqueryengine.query.result;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+package edu.berkeley.nwbqueryengine.data;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -1,8 +1,7 @@
 package edu.berkeley.nwbqueryengine.connectors;
 
-import edu.berkeley.nwbqueryengine.PartialExpression;
+import edu.berkeley.nwbqueryengine.data.PartialExpression;
 import edu.berkeley.nwbqueryengine.query.Query;
-import edu.berkeley.nwbqueryengine.query.result.NwbResult;
 
 import java.util.List;
 
@@ -11,9 +10,9 @@ import java.util.List;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public interface Connector<T> {
+public interface Connector<Entity> {
 
-    List<Object> getValues(T entity) throws ConnectorException;
+    List<Object> getValues(Entity entity) throws ConnectorException;
 
     List<PartialExpression> processSearch(Query query) throws ConnectorException;
 }

@@ -1,11 +1,10 @@
 package edu.berkeley.nwbqueryengine.query.parser;
 
-import edu.berkeley.nwbqueryengine.PartialExpression;
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
 import edu.berkeley.nwbqueryengine.query.Expression;
-import edu.berkeley.nwbqueryengine.query.ExpressionProcessor;
+import edu.berkeley.nwbqueryengine.ExpressionProcessor;
 import edu.berkeley.nwbqueryengine.query.Query;
-import edu.berkeley.nwbqueryengine.query.result.NwbResult;
+import edu.berkeley.nwbqueryengine.data.NwbResult;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

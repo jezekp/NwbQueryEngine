@@ -11,5 +11,8 @@ public class ConnectorException extends Exception{
     public ConnectorException(Exception e) {
         super(e);
     }
+    public ConnectorException(String message) {
+        super(message);
+    }
 
 }
