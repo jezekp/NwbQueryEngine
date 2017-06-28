@@ -1,7 +1,7 @@
 package edu.berkeley.nwbqueryengine.connectors;
 
 import as.hdfql.HDFql;
-import edu.berkeley.nwbqueryengine.data.PartialExpression;
+import edu.berkeley.nwbqueryengine.data.EntityWrapper;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.util.HDFqlUtil;
@@ -29,8 +29,8 @@ public class HDF5Connector implements Connector<String> {
 
 
 
-    private List<PartialExpression> executeLikeQuery(Query q, String fileName) {
-        List<PartialExpression> partialExpressions = new LinkedList<>();
+    private List<EntityWrapper> executeLikeQuery(Query q, String fileName) {
+        List<EntityWrapper> partialExpressions = new LinkedList<>();
         Map<String, List<String>> showExpressions = new HashMap<>();
         //cursor.delete();
         for (Expression item : new LinkedList<>(q.leftSideOfExpressions())) {
@@ -64,7 +64,7 @@ public class HDF5Connector implements Connector<String> {
                 logger.debug("cursorRes:" + cursorRes);
 
             }
-            partialExpressions.add(new PartialExpression(showResults, item, fileName));
+            partialExpressions.add(new EntityWrapper(showResults, item, fileName));
         }
         return partialExpressions;
     }
@@ -91,8 +91,8 @@ public class HDF5Connector implements Connector<String> {
         HDFql.cursorClear();
     }
 
-    public List<PartialExpression> processSearch(Query query) throws ConnectorException {
-        List<PartialExpression> res = new LinkedList<>();
+    public List<EntityWrapper> processSearch(Query query) throws ConnectorException {
+        List<EntityWrapper> res = new LinkedList<>();
         logger.debug("File: " + obj.getAbsolutePath());
         if (obj.isFile()) {
             connect(obj);

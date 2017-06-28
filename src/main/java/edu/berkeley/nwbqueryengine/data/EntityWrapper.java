@@ -9,13 +9,13 @@ import java.util.List;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class PartialExpression<Entity, DB> {
+public class EntityWrapper<T, DB> {
 
-    private List<Entity> entity;
+    private List<T> entity;
     private Expression expression;
     private DB storage;
 
-    public PartialExpression(List<Entity> showResults, Expression expression, DB storage) {
+    public EntityWrapper(List<T> showResults, Expression expression, DB storage) {
         this.entity = showResults;
         this.expression = expression;
         this.setStorage(storage);
@@ -29,11 +29,11 @@ public class PartialExpression<Entity, DB> {
         this.expression = expression;
     }
 
-    public List<Entity> getEntity() {
+    public List<T> getEntity() {
         return entity;
     }
 
-    public void setEntity(List<Entity> entity) {
+    public void setEntity(List<T> entity) {
         this.entity = entity;
     }
 

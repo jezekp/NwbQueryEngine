@@ -5,7 +5,7 @@ import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
-import edu.berkeley.nwbqueryengine.data.PartialExpression;
+import edu.berkeley.nwbqueryengine.data.EntityWrapper;
 import edu.berkeley.nwbqueryengine.data.Restrictions;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
@@ -38,13 +38,14 @@ public class ExpressionProcessor {
         Map<String, List<Object>> dataSets = new HashMap<>();
         boolean firstRun = true;
         String andOrOperator = "";
-        List<PartialExpression> partialExpressions;
+        List<EntityWrapper> entities;
         try {
-            partialExpressions = storageConnector.processSearch(query);
+            entities = storageConnector.processSearch(query);
         } catch (Exception e) {
+            logger.error(e);
             throw new ProcessorException(e);
         }
-        for (PartialExpression partialExpression : partialExpressions) {
+        for (EntityWrapper partialExpression : entities) {
             List<NwbResult> partialResult = new LinkedList<>();
             List<Object> values;
             Expression item = partialExpression.getExpression();
@@ -58,6 +59,7 @@ public class ExpressionProcessor {
                         values = storageConnector.getValues(datasetsForSelect);
                         dataSets.put(datasetsForSelect, values);
                     } catch (Exception e) {
+                        logger.error(e);
                         throw new ProcessorException(e);
                     }
                 }
