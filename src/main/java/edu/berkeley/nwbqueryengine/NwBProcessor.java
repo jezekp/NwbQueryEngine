@@ -21,7 +21,7 @@ import java.util.*;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class ExpressionProcessor {
+public class NwBProcessor implements Processor<NwbResult>{
 
     private Log logger = LogFactory.getLog(getClass());
     private JexlEngine jexl = new Engine();
@@ -29,7 +29,7 @@ public class ExpressionProcessor {
 
     public Connector storageConnector;
 
-    public ExpressionProcessor(Connector storageConnector) {
+    public NwBProcessor(Connector storageConnector) {
         this.storageConnector = storageConnector;
     }
 
@@ -49,7 +49,6 @@ public class ExpressionProcessor {
             List<NwbResult> partialResult = new LinkedList<>();
             List<Object> values;
             Expression item = partialExpression.getExpression();
-            String arithmeticalOperator = item.getOperator();
             List<String> showResults = partialExpression.getEntity();
             for (String datasetsForSelect : showResults) {
                 if (dataSets.containsKey(datasetsForSelect)) {
@@ -64,6 +63,8 @@ public class ExpressionProcessor {
                     }
                 }
 
+
+                String arithmeticalOperator = item.getOperator();
                 Expression rightSide = query.getRightSide(item);
                 logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
 

@@ -85,7 +85,7 @@ public class Main {
 
     public static List<NwbResult> processFile(File obj, Query query) throws Exception {
         HDF5Connector connector = new HDF5Connector(obj);
-        ExpressionProcessor processor = new ExpressionProcessor(connector);
+        NwBProcessor processor = new NwBProcessor(connector);
 
         List<NwbResult> res = processor.evaluate(query);
 

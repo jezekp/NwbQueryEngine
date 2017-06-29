@@ -26,9 +26,6 @@ public class HDF5Connector implements Connector<String> {
         this.obj = obj;
     }
 
-
-
-
     private List<EntityWrapper> executeLikeQuery(Query q, String fileName) {
         List<EntityWrapper> partialExpressions = new LinkedList<>();
         Map<String, List<String>> showExpressions = new HashMap<>();
@@ -85,7 +82,7 @@ public class HDF5Connector implements Connector<String> {
     }
 
 
-    public void disconect(File obj) throws ConnectorException {
+    public void disconnect(File obj) throws ConnectorException {
         int closeResult = HDFql.execute("CLOSE FILE " + obj.getAbsolutePath());
         logger.debug("Closing file: " + obj.getAbsolutePath() + ", resultCode: " + closeResult);
         HDFql.cursorClear();
@@ -97,7 +94,7 @@ public class HDF5Connector implements Connector<String> {
         if (obj.isFile()) {
             connect(obj);
             res = executeLikeQuery(query, obj.getAbsolutePath());
-            disconect(obj);
+            disconnect(obj);
         } else {
             throw new ConnectorException("obj must be a file not a directory");
         }
@@ -106,7 +103,7 @@ public class HDF5Connector implements Connector<String> {
 
     @Override
     public List<Object> getValues(String entity) throws ConnectorException {
-        connect(obj); //TODO this doesn't work when a directory is used
+        connect(obj);
         List<Object> values = new ArrayList<>();
         logger.debug("valuesType: " + values.getClass().getName());
         String selectQuery = "SELECT FROM " + entity;
@@ -122,7 +119,7 @@ public class HDF5Connector implements Connector<String> {
         }
         logger.debug("SelectCursorResult: " + selectCursorResult);
         logger.debug("objectValue: " + values);
-        disconect(obj);
+        disconnect(obj);
         return values;
     }
 }
