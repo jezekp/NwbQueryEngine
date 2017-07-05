@@ -7,7 +7,7 @@ package edu.berkeley.nwbqueryengine.query;
  */
 public enum Operators {
 
-    EQ("=="), GT(">"), LT("<"), GE(">="), LE("<="), AND("&"), OR("\\|"), NE("!="), ASSIGN("="), MATCH("=~"), CONTAINS("contains");
+    EQ("=="), GT(">"), LT("<"), GE(">="), LE("<="), AND("&"), OR("\\|"), NE("!="), ASSIGN("="), MATCH("=~"), CONTAINS("LIKE");
 
     private String value;
 
@@ -16,6 +16,6 @@ public enum Operators {
     }
 
     public String op() {
-        return value;
+        return value.toUpperCase();
     }
 }

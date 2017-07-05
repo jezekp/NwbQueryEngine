@@ -2,7 +2,7 @@ package edu.berkeley.nwbqueryengine.query.parser;
 
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
 import edu.berkeley.nwbqueryengine.query.Expression;
-import edu.berkeley.nwbqueryengine.NwBProcessor;
+import edu.berkeley.nwbqueryengine.NwbProcessor;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class ExpressionParserTest {
         try {
             Query query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
             HDF5Connector connector = new HDF5Connector(new File(fname));
-            NwBProcessor processor = new NwBProcessor(connector);
+            NwbProcessor processor = new NwbProcessor(connector);
             List<NwbResult> res = processor.evaluate(query);
 
 

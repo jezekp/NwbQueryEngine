@@ -21,7 +21,7 @@ import java.util.*;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class NwBProcessor implements Processor<NwbResult>{
+public class NwbProcessor implements Processor<NwbResult>{
 
     private Log logger = LogFactory.getLog(getClass());
     private JexlEngine jexl = new Engine();
@@ -29,7 +29,7 @@ public class NwBProcessor implements Processor<NwbResult>{
 
     public Connector storageConnector;
 
-    public NwBProcessor(Connector storageConnector) {
+    public NwbProcessor(Connector storageConnector) {
         this.storageConnector = storageConnector;
     }
 

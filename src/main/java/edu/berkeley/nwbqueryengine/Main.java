@@ -44,13 +44,13 @@ public class Main {
                     query = p.parse(expression);
                 } else {
                     // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
-                    //query = p.parse("analysis=(description.contains(whisker))");
+                    query = p.parse("analysis=(description LIKE whisker)");
                     //Query query = p.parse("processing=(electrode_idx>30)");
-                    query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
+                    //query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
                 }
 
                 List<NwbResult> completeRes = new LinkedList<>();
-                File obj = new File(path);
+                File obj = new File(fname);
                 if (obj.isDirectory()) {
                     for (File item : obj.listFiles(new FileFilter() {
                         @Override
@@ -85,7 +85,7 @@ public class Main {
 
     public static List<NwbResult> processFile(File obj, Query query) throws Exception {
         HDF5Connector connector = new HDF5Connector(obj);
-        NwBProcessor processor = new NwBProcessor(connector);
+        NwbProcessor processor = new NwbProcessor(connector);
 
         List<NwbResult> res = processor.evaluate(query);
 
