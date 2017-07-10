@@ -51,7 +51,7 @@ class ExpressionParserTest {
             assertTrue(res.size() > 0);
             res.forEach(name -> {
                 double value = (double) name.getValue();
-                assertFalse(value < 200 || value > 400 && value < 1600);
+                assertFalse(value <= 200 || value >= 400 && value <= 1600);
             });
         } catch (Exception e) {
             fail(e.getMessage());

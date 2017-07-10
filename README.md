@@ -2,7 +2,21 @@
 This is a prototype of a query engine used for NeurodataWithoutBorders dataSet format
 
 Getting started:
+-
 
--needs hdf-java-2.9 (https://support.hdfgroup.org/ftp/HDF5/releases/HDF-JAVA/hdf-java-2.9/bin/linux64/)
+- run java -Djava.library.path=PATH_TO_RESOURCES_DIR -jar NwbQueryEngine.jar
 
--setup -Djava.library.path=DOWNLOADED_DIR/hdf-java/lib/linux/
+Python support:
+- 
+
+- install py4j by
+- run server java -Djava.library.path=PATH_TO_RESOURCES_DIR -jar NwbQueryEngine.jar pyserver
+
+- run python code such as:
+```python
+ >>> from py4j.java_gateway import JavaGateway
+ >>> gateway = JavaGateway()
+ >>> random = gateway.jvm.java.util.Random()
+ >>> addition_app = gateway.entry_point 
+ >>> gateway.executeQuery("file or dir with nwb files", "query")
+```
