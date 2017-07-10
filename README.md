@@ -16,7 +16,6 @@ Python support:
 ```python
  >>> from py4j.java_gateway import JavaGateway
  >>> gateway = JavaGateway()
- >>> random = gateway.jvm.java.util.Random()
  >>> addition_app = gateway.entry_point 
  >>> gateway.executeQuery("file or dir with nwb files", "query")
 ```

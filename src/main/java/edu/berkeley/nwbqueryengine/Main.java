@@ -37,40 +37,42 @@ public class Main {
         try {
             System.loadLibrary("HDFql");
             QueryParser p = new QueryParser();
-            Query query;
+            Query query = null;
             if (args.length > 0) {
                 String arg1 = args[0];
                 if(arg1.equals("pyserver")) {
                     PyServer server = new PyServer();
                     server.start();
-                }
-                if (args.length > 1) {
-                    String expression = args[1];
-                    logger.debug("Expression: " + expression);
-                    query = p.parse(expression);
                 } else {
-                    // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
-                    //query = p.parse("analysis=(description LIKE whisker)");
-                    //Query query = p.parse("processing=(electrode_idx>30)");
-                    query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
-                }
+                    if (args.length > 1) {
+                        String expression = args[1];
+                        logger.debug("Expression: " + expression);
+                        query = p.parse(expression);
+                    } else {
+                        // Query query = p.parse("epochs=('start_time'>'200' & stop_time<400 | 'stop_time'>'1600')");
+                        //query = p.parse("analysis=(description LIKE whisker)");
+                        //Query query = p.parse("processing=(electrode_idx>30)");
+                        query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
+                        List<NwbResult> completeRes = new LinkedList<>();
+                        File obj = new File(path);
+                        if (obj.isDirectory()) {
+                            for (File item : obj.listFiles(new FileFilter() {
+                                @Override
+                                public boolean accept(File pathname) {
+                                    return pathname.getName().toLowerCase().endsWith(".nwb");
+                                }
+                            })) {
+                                completeRes.addAll(processFile(item, query));
+                            }
 
-                List<NwbResult> completeRes = new LinkedList<>();
-                File obj = new File(path);
-                if (obj.isDirectory()) {
-                    for (File item : obj.listFiles(new FileFilter() {
-                        @Override
-                        public boolean accept(File pathname) {
-                            return pathname.getName().toLowerCase().endsWith(".nwb");
+                        } else {
+                            completeRes = processFile(obj, query);
                         }
-                    })) {
-                        completeRes.addAll(processFile(item, query));
-                    }
+                        logger.info("I have complete: " + completeRes.size());
 
-                } else {
-                    completeRes = processFile(obj, query);
+                    }
                 }
-                logger.info("I have complete: " + completeRes.size());
+
 
             } else {
                 String message = "A file/dir has not been given...";
