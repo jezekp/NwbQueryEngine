@@ -25,11 +25,11 @@ import java.util.List;
  * queries examples:
  * </p>
  * <p>
- *
-    "analysis=(description LIKE whisker)"<br><br/>
- "processing=(electrode_idx>30)"<br><br/>
- "epochs=(start_time>200 & stop_time<400 | stop_time>1600)"<br><br/>
- </p>
+ * <p>
+ * "analysis=(description LIKE whisker)"<br><br/>
+ * "processing=(electrode_idx>30)"<br><br/>
+ * "epochs=(start_time>200 & stop_time<400 | stop_time>1600)"<br><br/>
+ * </p>
  * <p>
  * jezekp@kiv.zcu.cz
  * <p/>
@@ -44,12 +44,11 @@ public class Main {
 
 
     public static void main(String[] args) {
-        BufferedReader br = null;
         try {
             System.loadLibrary("HDFql");
             if (args.length > 0) {
                 String arg1 = args[0];
-                if(arg1.equals("pyserver")) {
+                if (arg1.equals("pyserver")) {
                     PyServer server = new PyServer();
                     server.start();
                 } else {
@@ -69,9 +68,7 @@ public class Main {
 
             }
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            IOUtils.closeQuietly(br);
+            logger.error(e);
         }
 
 
