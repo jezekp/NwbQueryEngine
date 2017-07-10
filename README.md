@@ -9,7 +9,7 @@ Getting started:
 Python support:
 - 
 
-- install py4j by
+- install py4j by pip install py4j (https://www.py4j.org/install.html)
 - run server java -Djava.library.path=PATH_TO_RESOURCES_DIR -jar NwbQueryEngine.jar pyserver
 
 - run python code such as:
