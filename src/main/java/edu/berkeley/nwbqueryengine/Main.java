@@ -53,11 +53,10 @@ public class Main {
                     server.start();
                 } else {
                     if (args.length > 1) {
-                        String file = args[0];
                         String expression = args[1];
                         logger.debug("Expression: " + expression);
                         Facade f = new FileFacade();
-                        f.executeQuery(file, expression);
+                        f.executeQuery(arg1, expression);
                     }
                 }
 
