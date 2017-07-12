@@ -1,5 +1,9 @@
 package edu.berkeley.nwbqueryengine.io;
 
+import edu.berkeley.nwbqueryengine.data.NwbResult;
+
+import java.util.List;
+
 /**
  * Created by petr-jezek on 10.7.17*
  * <p>
@@ -7,5 +11,5 @@ package edu.berkeley.nwbqueryengine.io;
  */
 public interface Facade<DB, Q> {
 
-    void executeQuery(DB storage, Q query);
+    List<NwbResult> executeQuery(DB storage, Q query);
 }

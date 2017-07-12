@@ -15,7 +15,7 @@ public class NwbResult {
         this.value = value;
     }
 
-    public Object getDataSet() {
+    public String getDataSet() {
         return dataSet;
     }
 

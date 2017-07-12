@@ -50,7 +50,7 @@ public class Main {
                 String arg1 = args[0];
                 if (arg1.equals("pyserver")) {
                     PyServer server = new PyServer();
-                    server.start();
+                    server.start(new FileFacade());
                 } else {
                     if (args.length > 1) {
                         String expression = args[1];

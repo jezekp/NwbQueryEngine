@@ -22,7 +22,8 @@ public class FileFacade implements Facade<String, String>{
 
     private Log logger = LogFactory.getLog(getClass());
 
-    public void executeQuery(String file, String expression) {
+    public List<NwbResult> executeQuery(String file, String expression) {
+        List<NwbResult> completeRes = new LinkedList<>();
         try {
             QueryParser p = new QueryParser();
 
@@ -30,7 +31,7 @@ public class FileFacade implements Facade<String, String>{
             Query query = p.parse(expression);
 
 
-            List<NwbResult> completeRes = new LinkedList<>();
+
             File obj = new File(file);
             if (obj.isDirectory()) {
                 for (File item : obj.listFiles(new FileFilter() {
@@ -49,6 +50,7 @@ public class FileFacade implements Facade<String, String>{
         } catch (Exception e) {
             logger.error(e);
         }
+        return completeRes;
 
     }
 

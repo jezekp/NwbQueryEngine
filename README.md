@@ -16,5 +16,7 @@ Python support:
 ```python
  >>> from py4j.java_gateway import JavaGateway
  >>> gateway = JavaGateway()
- >>> gateway.executeQuery("file or dir with nwb files", "query")
+ >>> res = gateway.executeQuery("file or dir with nwb files", "query")
+ >>> res[0].getDataset()
+ >>> res[0].getValue()
 ```
