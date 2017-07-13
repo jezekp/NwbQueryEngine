@@ -54,7 +54,7 @@ public class FileFacade implements Facade<String, String>{
 
     }
 
-    public List<NwbResult> processFile(File obj, Query query) throws Exception {
+    public synchronized List<NwbResult> processFile(File obj, Query query) throws Exception {
         HDF5Connector connector = new HDF5Connector(obj);
         NwbProcessor processor = new NwbProcessor(connector);
 

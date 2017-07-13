@@ -1,6 +1,7 @@
 package edu.berkeley.nwbqueryengine.util;
 
 import as.hdfql.HDFql;
+import as.hdfql.HDFqlCursor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,42 +14,42 @@ public class HDFqlUtil {
 
     private Log logger = LogFactory.getLog(getClass());
 
-    public Object getValue() {
+    public Object getValue(HDFqlCursor cursor) {
         Object res = null;
-        int datatype = HDFql.cursorGetDatatype();
+        int datatype = HDFql.cursorGetDatatype(cursor);
         logger.debug("DataType: " + datatype);
         if (datatype == HDFql.TINYINT) {
-            res = HDFql.cursorGetTinyInt();
+            res = HDFql.cursorGetTinyInt(cursor);
         }
         if (datatype == HDFql.UNSIGNED_TINYINT) {
-            res = HDFql.cursorGetUnsignedTinyInt();
+            res = HDFql.cursorGetUnsignedTinyInt(cursor);
         }
         if (datatype == HDFql.SMALLINT) {
-            res = HDFql.cursorGetSmallInt();
+            res = HDFql.cursorGetSmallInt(cursor);
         }
         if (datatype == HDFql.UNSIGNED_SMALLINT) {
-            res = HDFql.cursorGetUnsignedSmallInt();
+            res = HDFql.cursorGetUnsignedSmallInt(cursor);
         }
         if (datatype == HDFql.INT) {
-            res = HDFql.cursorGetInt();
+            res = HDFql.cursorGetInt(cursor);
         }
         if (datatype == HDFql.UNSIGNED_INT) {
-            res = HDFql.cursorGetUnsignedInt();
+            res = HDFql.cursorGetUnsignedInt(cursor);
         }
         if (datatype == HDFql.BIGINT) {
-            res = HDFql.cursorGetBigInt();
+            res = HDFql.cursorGetBigInt(cursor);
         }
         if (datatype == HDFql.UNSIGNED_BIGINT) {
-            res = HDFql.cursorGetUnsignedBigInt();
+            res = HDFql.cursorGetUnsignedBigInt(cursor);
         }
         if (datatype == HDFql.DOUBLE) {
-            res = HDFql.cursorGetDouble();
+            res = HDFql.cursorGetDouble(cursor);
         }
         if (datatype == HDFql.FLOAT) {
-            res = HDFql.cursorGetFloat();
+            res = HDFql.cursorGetFloat(cursor);
         }
         if (datatype == HDFql.CHAR) {
-            res = HDFql.cursorGetChar();
+            res = HDFql.cursorGetChar(cursor);
         }
         if (res == null) {
             logger.error("IsNull");
