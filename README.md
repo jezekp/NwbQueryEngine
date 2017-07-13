@@ -1,5 +1,5 @@
 # NwbQueryEngine
-This is a prototype of a query engine used for NeurodataWithoutBorders dataSet format
+This is a prototype of a query engine used for NeurodataWithoutBorders format
 
 Getting started:
 -
