@@ -25,7 +25,7 @@ e.g: java -Djava.library.path=src/main/resources/ -jar target/nwbqueryengine-1.0
 Python support:
 ==
 
-- install [py4j] by pip install py4j(https://www.py4j.org/install.html)
+- install [py4j](https://www.py4j.org/install.html) by pip install py4j
 - run server java -Djava.library.path=PATH_TO_RESOURCES_DIR -jar target/nwbqueryengine-1.0-SNAPSHOT-jar-with-dependencies.jar pyserver
 
 
