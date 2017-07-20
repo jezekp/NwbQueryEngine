@@ -101,7 +101,7 @@ public class HDF5Connector implements Connector<String> {
     }
 
     public  List<EntityWrapper> processSearch(Query query) throws ConnectorException {
-        List<EntityWrapper> res = new LinkedList<>();
+        List<EntityWrapper> res;
         logger.debug("File: " + obj.getAbsolutePath());
         if (obj.isFile()) {
             connect(obj);

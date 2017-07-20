@@ -16,7 +16,7 @@ Syntax:
 
 - group_name=(expression)
 - expression=(expression | expression & expression)
-- expression=(expression<expression) | (expression>expression) | (expression>=expression) | | (expression<=expression)
+- expression=(expression<expression) | (expression>expression) | (expression>=expression) | | (expression<=expression) | | (expression LiKE expression)
 
 Examples:
 -

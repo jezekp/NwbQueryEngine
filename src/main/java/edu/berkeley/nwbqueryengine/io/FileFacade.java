@@ -26,24 +26,23 @@ public class FileFacade implements Facade<String, String>{
         List<NwbResult> completeRes = new LinkedList<>();
         try {
             QueryParser p = new QueryParser();
-
             logger.debug("Expression: " + expression);
             Query query = p.parse(expression);
 
-
-
             File obj = new File(file);
             if (obj.isDirectory()) {
+                logger.debug("Goes through directory: " + obj);
                 for (File item : obj.listFiles(new FileFilter() {
                     @Override
                     public boolean accept(File pathname) {
                         return pathname.getName().toLowerCase().endsWith(".nwb");
                     }
                 })) {
+                    logger.info("Processing file: " + item + " in directory: " + obj);
                     completeRes.addAll(processFile(item, query));
                 }
-
             } else {
+                logger.info("Processing file: " + obj);
                 completeRes = processFile(obj, query);
             }
             logger.info("I have complete: " + completeRes.size());
