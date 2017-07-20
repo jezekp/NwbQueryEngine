@@ -27,12 +27,15 @@ Python support:
 
 - install [py4j](https://www.py4j.org/install.html) by pip install py4j
 - run server java -Djava.library.path=PATH_TO_RESOURCES_DIR -jar target/nwbqueryengine-1.0-SNAPSHOT-jar-with-dependencies.jar pyserver
+- For running on a remote host parameter -Dhost.ip=remote-host-ip must be used
 
 
 - run python code such as:
 ```python
  >>> from py4j.java_gateway import JavaGateway
- >>> gateway = JavaGateway()
+ >>> from py4j.java_gateway import GatewayParameters
+ >>> gateway = JavaGateway() # for localhost
+ >>> gateway = JavaGateway(gateway_parameters=GatewayParameters(address='remote host ip')) # or for remote host
  >>> res = gateway.executeQuery("file or dir with nwb files", "query")
  >>> res[0].getDataset()
  >>> res[0].getValue()
