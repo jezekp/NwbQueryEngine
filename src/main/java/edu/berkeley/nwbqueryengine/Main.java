@@ -1,6 +1,7 @@
 package edu.berkeley.nwbqueryengine;
 
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
+import edu.berkeley.nwbqueryengine.io.ArrayFacade;
 import edu.berkeley.nwbqueryengine.io.Facade;
 import edu.berkeley.nwbqueryengine.io.FileFacade;
 import edu.berkeley.nwbqueryengine.python.PyServer;
@@ -50,7 +51,8 @@ public class Main {
                 String arg1 = args[0];
                 if (arg1.equals("pyserver")) {
                     PyServer server = new PyServer();
-                    server.start(new FileFacade());
+                    //server.start(new FileFacade());
+                    server.start(new ArrayFacade());
                 } else {
                     if (args.length > 1) {
                         String expression = args[1];
