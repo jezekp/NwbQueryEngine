@@ -12,6 +12,10 @@ public class Properties {
 
     private static Log logger = LogFactory.getLog(Properties.class);
 
+    private Properties() {
+
+    }
+
     private static Properties properties = null;
     private static String hostIp;
 
