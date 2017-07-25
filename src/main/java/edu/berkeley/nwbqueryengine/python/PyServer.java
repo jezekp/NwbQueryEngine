@@ -20,10 +20,8 @@ public class PyServer {
     private Log logger = LogFactory.getLog(getClass());
 
     public void start(Facade facade) {
-
-        InetAddress address;
         try {
-            address = InetAddress.getByName(Properties.get().getHostIp());
+            InetAddress address = InetAddress.getByName(Properties.get().getHostIp());
             GatewayServer gatewayServer = new GatewayServer(
                     facade,
                     GatewayServer.DEFAULT_PORT,
@@ -32,7 +30,7 @@ public class PyServer {
                     address,
                     GatewayServer.DEFAULT_CONNECT_TIMEOUT,
                     GatewayServer.DEFAULT_READ_TIMEOUT,
-                    null //TODO add command that allows transfer data to the server and results back
+                    null
             );
             gatewayServer.start();
             int port = gatewayServer.getListeningPort();
