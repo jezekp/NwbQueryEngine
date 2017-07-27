@@ -25,7 +25,8 @@ public class Properties {
             properties = new Properties();
             java.util.Properties p = System.getProperties();
             hostIp = p.getProperty("host.ip");
-            logger.debug("Host IP: " + hostIp);
+            logger.info("Reading properties:");
+            logger.info("Host IP: " + hostIp);
         }
         return properties;
     }

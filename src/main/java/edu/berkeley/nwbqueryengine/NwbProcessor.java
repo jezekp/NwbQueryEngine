@@ -38,32 +38,19 @@ public class NwbProcessor implements Processor<NwbResult>{
         Map<String, List<Object>> dataSets = new HashMap<>();
         boolean firstRun = true;
         String andOrOperator = "";
-        List<EntityWrapper> entities;
+        List<EntityWrapper> entityWrappers;
         try {
-            entities = storageConnector.processSearch(query);
+            entityWrappers = storageConnector.processSearch(query);
         } catch (Exception e) {
             logger.error(e);
             throw new ProcessorException(e);
         }
-        for (EntityWrapper partialExpression : entities) {
+        for (EntityWrapper partialExpression : entityWrappers) {
             List<NwbResult> partialResult = new LinkedList<>();
-            List<Object> values;
             Expression item = partialExpression.getExpression();
-            List<String> showResults = partialExpression.getEntity();
-            for (String datasetsForSelect : showResults) {
-                if (dataSets.containsKey(datasetsForSelect)) {
-                    values = dataSets.get(datasetsForSelect);
-                } else {
-                    try {
-                        values = storageConnector.getValues(datasetsForSelect);
-                        dataSets.put(datasetsForSelect, values);
-                    } catch (Exception e) {
-                        logger.error(e);
-                        throw new ProcessorException(e);
-                    }
-                }
-
-
+            List<String> entities = partialExpression.getEntity();
+            for (String entity : entities) {
+                List<Object> values = getValues(entity, dataSets);
                 String arithmeticalOperator = item.getOperator();
                 Expression rightSide = query.getRightSide(item);
                 logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
@@ -84,7 +71,7 @@ public class NwbProcessor implements Processor<NwbResult>{
                     boolean res = ((Boolean) eval).booleanValue();
                     logger.debug("Evaluation: " + tmp + "" + arithmeticalOperator + "" + expressionValue + ", data:" + res);
                     if (res) {
-                        partialResult.add(new NwbResult(datasetsForSelect, tmp));
+                        partialResult.add(new NwbResult(entity, tmp));
                     }
                 }
 
@@ -112,5 +99,21 @@ public class NwbProcessor implements Processor<NwbResult>{
         nwbResults.forEach(name -> logger.debug(name));
 
         return nwbResults;
+    }
+
+    private List<Object> getValues(String entity, Map<String, List<Object>> dataSets) throws ProcessorException{
+        List<Object> values;
+        if (dataSets.containsKey(entity)) {
+            values = dataSets.get(entity);
+        } else {
+            try {
+                values = storageConnector.getValues(entity);
+                dataSets.put(entity, values);
+            } catch (Exception e) {
+                logger.error(e);
+                throw new ProcessorException(e);
+            }
+        }
+        return values;
     }
 }

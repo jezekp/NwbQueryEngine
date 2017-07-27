@@ -15,8 +15,8 @@ public class EntityWrapper<T, DB> {
     private Expression expression;
     private DB storage;
 
-    public EntityWrapper(List<T> showResults, Expression expression, DB storage) {
-        this.entity = showResults;
+    public EntityWrapper(List<T> entity, Expression expression, DB storage) {
+        this.entity = entity;
         this.expression = expression;
         this.setStorage(storage);
     }

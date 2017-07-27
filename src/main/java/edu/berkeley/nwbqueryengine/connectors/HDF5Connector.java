@@ -34,9 +34,10 @@ public class HDF5Connector implements Connector<String> {
         Map<String, List<String>> showExpressions = new HashMap<>();
         //cursor.delete();
         for (Expression item : new LinkedList<>(q.leftSideOfExpressions())) {
+            //dataset name and complete path (e. g. "epochs/Trial_001/start_time");
             List<String> showResults;
             String expressionValue = item.getExpressionValue();
-            logger.debug("Processing  expression: " + expressionValue + " " + item.getOperator());
+            logger.debug("Processing  expression: " + expressionValue + " ,operator: " + item.getOperator());
             if (showExpressions.containsKey(expressionValue)) {
                 showResults = showExpressions.get(expressionValue);
             } else {
