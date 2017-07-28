@@ -37,6 +37,6 @@ Python support:
  >>> gateway = JavaGateway() # for localhost
  >>> gateway = JavaGateway(gateway_parameters=GatewayParameters(address='remote host ip')) # or for remote host
  >>> res = gateway.executeQuery("file or dir with nwb files", "query")
- >>> res[0].getDataset()
+ >>> res[0].getDataSet()
  >>> res[0].getValue()
 ```
