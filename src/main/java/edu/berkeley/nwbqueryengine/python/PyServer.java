@@ -1,8 +1,7 @@
 package edu.berkeley.nwbqueryengine.python;
 
 import edu.berkeley.nwbqueryengine.Properties;
-import edu.berkeley.nwbqueryengine.io.Facade;
-import edu.berkeley.nwbqueryengine.io.FileFacade;
+import edu.berkeley.nwbqueryengine.api.Input;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import py4j.GatewayServer;
@@ -19,11 +18,11 @@ public class PyServer {
 
     private Log logger = LogFactory.getLog(getClass());
 
-    public void start(Facade facade) {
+    public void start(Input input) {
         try {
             InetAddress address = InetAddress.getByName(Properties.get().getHostIp());
             GatewayServer gatewayServer = new GatewayServer(
-                    facade,
+                    input,
                     GatewayServer.DEFAULT_PORT,
                     GatewayServer.DEFAULT_PYTHON_PORT,
                     address,

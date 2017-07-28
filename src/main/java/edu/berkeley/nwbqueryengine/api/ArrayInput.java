@@ -1,4 +1,4 @@
-package edu.berkeley.nwbqueryengine.io;
+package edu.berkeley.nwbqueryengine.api;
 
 import edu.berkeley.nwbqueryengine.data.NwbResult;
 import org.apache.commons.io.FileUtils;
@@ -12,7 +12,7 @@ import java.util.List;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class ArrayFacade implements Facade<byte[], String> {
+public class ArrayInput implements Input<byte[], String> {
 
 //    The way to read nbw file from python, convert it to byteArray and send it to the server
 

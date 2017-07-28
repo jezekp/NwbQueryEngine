@@ -1,23 +1,11 @@
 package edu.berkeley.nwbqueryengine;
 
-import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
-import edu.berkeley.nwbqueryengine.io.ArrayFacade;
-import edu.berkeley.nwbqueryengine.io.Facade;
-import edu.berkeley.nwbqueryengine.io.FileFacade;
+import edu.berkeley.nwbqueryengine.api.ArrayInput;
+import edu.berkeley.nwbqueryengine.api.FileInput;
+import edu.berkeley.nwbqueryengine.api.Input;
 import edu.berkeley.nwbqueryengine.python.PyServer;
-import edu.berkeley.nwbqueryengine.query.Query;
-import edu.berkeley.nwbqueryengine.query.parser.QueryParser;
-import edu.berkeley.nwbqueryengine.data.NwbResult;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import py4j.GatewayServer;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
-import java.util.LinkedList;
-import java.util.List;
 
 
 /**
@@ -51,13 +39,13 @@ public class Main {
                 String arg1 = args[0];
                 if (arg1.equals("pyserver")) {
                     PyServer server = new PyServer();
-                    //server.start(new FileFacade());
-                    server.start(new ArrayFacade());
+                    //server.start(new FileInput());
+                    server.start(new ArrayInput());
                 } else {
                     if (args.length > 1) {
                         String expression = args[1];
                         logger.debug("Expression: " + expression);
-                        Facade f = new FileFacade();
+                        Input f = new FileInput();
                         f.executeQuery(arg1, expression);
                     }
                 }

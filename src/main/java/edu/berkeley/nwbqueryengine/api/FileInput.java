@@ -1,4 +1,4 @@
-package edu.berkeley.nwbqueryengine.io;
+package edu.berkeley.nwbqueryengine.api;
 
 import edu.berkeley.nwbqueryengine.NwbProcessor;
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
@@ -18,7 +18,7 @@ import java.util.List;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class FileFacade implements Facade<String, String>{
+public class FileInput implements Input<String, String> {
 
     private Log logger = LogFactory.getLog(getClass());
 

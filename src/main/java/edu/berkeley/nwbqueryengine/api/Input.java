@@ -1,4 +1,4 @@
-package edu.berkeley.nwbqueryengine.io;
+package edu.berkeley.nwbqueryengine.api;
 
 import edu.berkeley.nwbqueryengine.data.NwbResult;
 
@@ -9,7 +9,7 @@ import java.util.List;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public interface Facade<DB, Q> {
+public interface Input<DB, Q> {
 
     List<NwbResult> executeQuery(DB storage, Q query);
 }
