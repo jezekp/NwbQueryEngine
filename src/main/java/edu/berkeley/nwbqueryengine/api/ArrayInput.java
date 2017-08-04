@@ -14,6 +14,8 @@ import java.util.List;
  */
 public class ArrayInput implements Input<byte[], String> {
 
+    protected Input input = new FileInput();
+
 //    The way to read nbw file from python, convert it to byteArray and send it to the server
 
 //    with open('/tmp/test.nwb', mode='rb') as file: # b is important -> binary
@@ -32,8 +34,8 @@ public class ArrayInput implements Input<byte[], String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Input i = new FileInput();
-        List<NwbResult> res = i.executeQuery(fileName, query);
+
+        List<NwbResult> res = input.executeQuery(fileName, query);
         FileUtils.deleteQuietly(file);
         return res;
     }

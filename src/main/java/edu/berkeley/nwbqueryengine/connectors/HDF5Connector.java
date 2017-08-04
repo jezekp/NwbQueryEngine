@@ -22,14 +22,16 @@ public class HDF5Connector implements Connector<String> {
 
     private Log logger = LogFactory.getLog(getClass());
     private File obj;
+    HDFqlCursor cursor = new HDFqlCursor();
 
 
     public HDF5Connector(File obj) {
+        HDFql.cursorUse(cursor);
         this.obj = obj;
 
     }
 
-    private  List<EntityWrapper> executeLikeQuery(Query q, String fileName) {
+    private  List<EntityWrapper> executeLikeQuery(Query q, String fileName) throws ConnectorException {
         List<EntityWrapper> partialExpressions = new LinkedList<>();
         Map<String, List<String>> showExpressions = new HashMap<>();
         //cursor.delete();
@@ -47,9 +49,8 @@ public class HDF5Connector implements Connector<String> {
                 int executeLikeRes;
                 int attempts = 1;
 
-                HDFqlCursor cursor1 = new HDFqlCursor();
-                synchronized (cursor1) {
-                    HDFql.cursorUse(cursor1);
+                synchronized (this) {
+                    connect(obj);
                     while ((executeLikeRes = HDFql.execute(query)) != HDFql.SUCCESS && attempts-- > 0) {
 //                    HDFql.cursorClear(cursor);
 //                    HDFql.cursorInitialize(cursor);
@@ -58,14 +59,15 @@ public class HDF5Connector implements Connector<String> {
                     logger.debug("ExecuteLikeRes: " + executeLikeRes);
 
                     int cursorRes;
-                    while ((cursorRes = HDFql.cursorNext(cursor1)) == HDFql.SUCCESS) {
-                        String cursorGetChar = HDFql.cursorGetChar(cursor1);
+                    while ((cursorRes = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
+                        String cursorGetChar = HDFql.cursorGetChar(cursor);
                         showResults.add(cursorGetChar);
-                        logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor1));
+                        logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
                     }
 
                     showExpressions.put(expressionValue, new LinkedList<>(showResults));
                     logger.debug("cursorRes:" + cursorRes);
+                    disconnect(obj);
                 }
 
 
@@ -77,11 +79,7 @@ public class HDF5Connector implements Connector<String> {
 
 
     public void connect(File obj) throws ConnectorException {
-        HDFqlCursor cursor = new HDFqlCursor();
         synchronized (cursor) {
-            HDFql.cursorUse(cursor);
-            HDFql.cursorClear(cursor);
-            HDFql.cursorInitialize(cursor);
             if (logger.isDebugEnabled()) {
                 HDFql.execute("ENABLE DEBUG");
             }
@@ -101,13 +99,13 @@ public class HDF5Connector implements Connector<String> {
 
     }
 
-    public  List<EntityWrapper> processSearch(Query query) throws ConnectorException {
+    public List<EntityWrapper> processSearch(Query query) throws ConnectorException {
         List<EntityWrapper> res;
         logger.debug("File: " + obj.getAbsolutePath());
         if (obj.isFile()) {
-            connect(obj);
+            //connect(obj);
             res = executeLikeQuery(query, obj.getAbsolutePath());
-            disconnect(obj);
+    //        disconnect(obj);
         } else {
             throw new ConnectorException("obj must be a file not a directory");
         }
@@ -118,9 +116,7 @@ public class HDF5Connector implements Connector<String> {
     public List<Object> getValues(String entity) throws ConnectorException {
         connect(obj);
         List<Object> values = new ArrayList<>();
-        HDFqlCursor cursor = new HDFqlCursor();
-        synchronized (cursor) {
-            HDFql.cursorUse(cursor);
+        synchronized (this) {
 
             logger.debug("valuesType: " + values.getClass().getName());
             String selectQuery = "SELECT FROM " + entity;
