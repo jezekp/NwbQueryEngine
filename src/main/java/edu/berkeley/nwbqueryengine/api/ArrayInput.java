@@ -25,16 +25,16 @@ public class ArrayInput implements Input<byte[], String> {
 //
     @Override
     public List<NwbResult> executeQuery(byte[] storage, String query) {
-        String fileName = "/tmp/test.nwb";
+        String fileName = "/tmp/test_" + System.currentTimeMillis() + ".nwb";
+        File file = new File(fileName);
         try {
-
-            FileUtils.writeByteArrayToFile(new File(fileName), storage);
-
+            FileUtils.writeByteArrayToFile(file, storage);
         } catch (IOException e) {
             e.printStackTrace();
         }
         Input i = new FileInput();
         List<NwbResult> res = i.executeQuery(fileName, query);
+        FileUtils.deleteQuietly(file);
         return res;
     }
 }
