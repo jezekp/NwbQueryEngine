@@ -11,6 +11,7 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.internal.Engine;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -21,7 +22,7 @@ import java.util.*;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class NwbProcessor implements Processor<NwbResult>{
+public class NwbProcessor implements Processor<NwbResult> {
 
     private Log logger = LogFactory.getLog(getClass());
     private JexlEngine jexl = new Engine();
@@ -33,7 +34,7 @@ public class NwbProcessor implements Processor<NwbResult>{
         this.storageConnector = storageConnector;
     }
 
-    public List<NwbResult> evaluate(Query query) throws ProcessorException{
+    public List<NwbResult> evaluate(Query query) throws ProcessorException {
         List<NwbResult> nwbResults = new LinkedList<>();
         Map<String, List<Object>> dataSets = new HashMap<>();
         boolean firstRun = true;
@@ -52,26 +53,33 @@ public class NwbProcessor implements Processor<NwbResult>{
             for (String entity : entities) {
                 List<Object> values = getValues(entity, dataSets);
                 String arithmeticalOperator = item.getOperator();
-                Expression rightSide = query.getRightSide(item);
+                Expression rightSide = item.getRightSideSibling();
                 logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
 
-                String jexlExpression;
-                if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
-                    jexlExpression = "x1.contains(x2)";
+                if (StringUtils.isBlank(arithmeticalOperator)) {
+                    for (Object value : new LinkedList<>(values)) {
+                        logger.debug("Value: " + value);
+                        partialResult.add(new NwbResult(entity, value));
+                    }
                 } else {
-                    jexlExpression = "x1" + arithmeticalOperator + "x2";
-                }
-                JexlExpression func = jexl.createExpression(jexlExpression);
-                String expressionValue = rightSide.getExpressionValue();
-                mc.set("x2", expressionValue);
-                for (Object tmp : new LinkedList<>(values)) {
-                    logger.debug("Value: " + tmp);
-                    mc.set("x1", tmp);
-                    Object eval = func.evaluate(mc);
-                    boolean res = ((Boolean) eval).booleanValue();
-                    logger.debug("Evaluation: " + tmp + "" + arithmeticalOperator + "" + expressionValue + ", data:" + res);
-                    if (res) {
-                        partialResult.add(new NwbResult(entity, tmp));
+                    String jexlExpression;
+                    if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
+                        jexlExpression = "x1.contains(x2)";
+                    } else {
+                        jexlExpression = "x1" + arithmeticalOperator + "x2";
+                    }
+                    JexlExpression func = jexl.createExpression(jexlExpression);
+                    String expressionValue = rightSide.getExpressionValue();
+                    mc.set("x2", expressionValue);
+                    for (Object value : new LinkedList<>(values)) {
+                        logger.debug("Value: " + value);
+                        mc.set("x1", value);
+                        Object eval = func.evaluate(mc);
+                        boolean res = ((Boolean) eval).booleanValue();
+                        logger.debug("Evaluation: " + value + "" + arithmeticalOperator + "" + expressionValue + ", data:" + res);
+                        if (res) {
+                            partialResult.add(new NwbResult(entity, value));
+                        }
                     }
                 }
 
@@ -101,7 +109,7 @@ public class NwbProcessor implements Processor<NwbResult>{
         return nwbResults;
     }
 
-    private List<Object> getValues(String entity, Map<String, List<Object>> dataSets) throws ProcessorException{
+    private List<Object> getValues(String entity, Map<String, List<Object>> dataSets) throws ProcessorException {
         List<Object> values;
         if (dataSets.containsKey(entity)) {
             values = dataSets.get(entity);

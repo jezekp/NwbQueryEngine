@@ -57,22 +57,7 @@ public class Query {
         return expressionsLeftSide;
     }
 
-    public Expression getRightSide(Expression expression) {
-        return getReverseSide(expression, false);
-    }
 
-    public Expression getReverseSide(Expression expression, boolean left) {
-        Expression res = null;
-        Expression parent = expression.getParent();
-        if (parent != null) {
-            res = left ? parent.getLeftSide() : parent.getRightSide();
-        }
-        return res;
-    }
-
-    public Expression getQueryLeftSide(Expression expression) {
-        return getReverseSide(expression, true);
-    }
 
 
 }

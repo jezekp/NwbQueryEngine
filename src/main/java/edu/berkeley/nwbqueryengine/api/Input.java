@@ -11,5 +11,5 @@ import java.util.List;
  */
 public interface Input<DB, Q> {
 
-    List<NwbResult> executeQuery(DB storage, Q query);
+    List<NwbResult> executeQuery(DB storage, Q query) throws InputException;
 }

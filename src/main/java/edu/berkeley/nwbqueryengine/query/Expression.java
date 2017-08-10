@@ -1,9 +1,37 @@
 package edu.berkeley.nwbqueryengine.query;
 
 /**
+
  * Created by petr-jezek on 18.4.17*
  * <p>
  * jezekp@kiv.zcu.cz
+
+   Expression is a node of a tree parsed by a query parser.
+
+   Query such as: epochs=(start_time>200 & stop_time<400 | stop_time>1600)
+   is parsed to a following structure:
+ 
+
+               epochs=(start_time>200 & stop_time<400 | stop_time>1600) ()                               
+              / \               
+             /   \              
+            /     \             
+           /       \            
+          /         \           
+         /           \          
+        /             \         
+       /               \
+   epochs ()  start_time>200 & stop_time<400 | stop_time>1600 ()
+                      / \       
+                     /   \      
+                    /     \     
+                   /       \    
+         start_time>200  (&) stop_time<400 | stop_time>1600 (&)
+                  / \     / \   
+                 /   \   /   \  
+   start_time (>)   200  (>) stop_time<400  (|)    stop_time>1600 (|)
+                        / \ / \ 
+          stop_time (<) 400  (<) stop_time (>) 1600 (>)
  */
 public class Expression implements Cloneable{
 
@@ -91,5 +119,22 @@ public class Expression implements Cloneable{
             parent = this.parent;
         }
         return new Expression(expressionValue, operator, parent, left, right);
+    }
+
+    public Expression getRightSideSibling() {
+        return getReverseSide(false);
+    }
+
+    public Expression getReverseSide(boolean left) {
+        Expression res = null;
+
+        if (parent != null) {
+            res = left ? parent.getLeftSide() : parent.getRightSide();
+        }
+        return res;
+    }
+
+    public Expression getLeftSideSibling(Expression expression) {
+        return getReverseSide(true);
     }
 }

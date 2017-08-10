@@ -48,7 +48,7 @@ class ExpressionParserTest {
             List<NwbResult> res = processor.evaluate(query);
 
 
-            assertTrue(res.size() > 0);
+            assertTrue(res.size() == 87);
             res.forEach(name -> {
                 double value = (double) name.getValue();
                 assertFalse(value <= 200 || value >= 400 && value <= 1600);

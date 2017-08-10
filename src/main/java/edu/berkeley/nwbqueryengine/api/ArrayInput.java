@@ -35,7 +35,12 @@ public class ArrayInput implements Input<byte[], String> {
             e.printStackTrace();
         }
 
-        List<NwbResult> res = input.executeQuery(fileName, query);
+        List<NwbResult> res = null;
+        try {
+            res = input.executeQuery(fileName, query);
+        } catch (InputException e) {
+            e.printStackTrace();
+        }
         FileUtils.deleteQuietly(file);
         return res;
     }

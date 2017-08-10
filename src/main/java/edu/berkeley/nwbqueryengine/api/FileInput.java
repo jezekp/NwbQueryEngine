@@ -22,7 +22,7 @@ public class FileInput implements Input<String, String> {
 
     private Log logger = LogFactory.getLog(getClass());
 
-    public List<NwbResult> executeQuery(String file, String expression) {
+    public List<NwbResult> executeQuery(String file, String expression) throws InputException {
         List<NwbResult> completeRes = new LinkedList<>();
         try {
             QueryParser p = new QueryParser();
@@ -48,6 +48,7 @@ public class FileInput implements Input<String, String> {
             logger.info("I have complete: " + completeRes.size());
         } catch (Exception e) {
             logger.error(e);
+            throw new InputException(e);
         }
         return completeRes;
 
@@ -60,8 +61,7 @@ public class FileInput implements Input<String, String> {
         List<NwbResult> res = processor.evaluate(query);
 
         res.forEach(name -> {
-            logger.debug("Have res: " + name);
-            //            System.out.println(name);
+            logger.debug("I have item: " + name);
         });
         logger.info("I have: " + res.size());
         return res;
