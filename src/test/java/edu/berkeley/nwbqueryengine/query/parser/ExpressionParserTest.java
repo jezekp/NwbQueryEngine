@@ -5,9 +5,11 @@ import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.NwbProcessor;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,9 +25,43 @@ class ExpressionParserTest {
     private static String file = "ANM184389_20130207.nwb";
     private static String fname = path + "/" + file;
 
-    @Test
-    void parse() {
+    @BeforeAll
+    static void init() {
         System.loadLibrary("HDFql");
+    }
+
+    protected List<NwbResult> execute(String expression) {
+        List<NwbResult> res = new LinkedList<>();
+        try {
+            QueryParser p = new QueryParser();
+            Query query = p.parse(expression);
+            HDF5Connector connector = new HDF5Connector(new File(fname));
+            NwbProcessor processor = new NwbProcessor(connector);
+            res = processor.evaluate(query);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+        return res;
+    }
+
+    @Test
+    void parseQueryWithOperands() {
+        List<NwbResult> res = execute("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
+        assertTrue(res.size() == 87);
+        res.forEach(name -> {
+            double value = (double) name.getValue();
+            assertFalse(value <= 200 || value >= 400 && value <= 1600);
+        });
+    }
+    @Test
+    void parseQueryWithoutOperands() {
+        List<NwbResult> res = execute("epochs=(start_time | stop_time)");
+        assertTrue(res.size() == 736);
+    }
+
+
+    @Test
+    void parseGenericQuery() {
         QueryParser p = new QueryParser();
         Query root = p.parse("CellInfo=('area'=='c1'|'area'=='c2'&'h'=='c3'|h3==c8)");
 
@@ -41,21 +77,7 @@ class ExpressionParserTest {
         for (Expression item : leftSideExpressions) {
             assertEquals(item.getExpressionValue(), expressions[i++]);
         }
-        try {
-            Query query = p.parse("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
-            HDF5Connector connector = new HDF5Connector(new File(fname));
-            NwbProcessor processor = new NwbProcessor(connector);
-            List<NwbResult> res = processor.evaluate(query);
 
-
-            assertTrue(res.size() == 87);
-            res.forEach(name -> {
-                double value = (double) name.getValue();
-                assertFalse(value <= 200 || value >= 400 && value <= 1600);
-            });
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
     }
 
 }
