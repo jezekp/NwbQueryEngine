@@ -42,6 +42,9 @@ public class Expression implements Cloneable{
     private String expressionValue;
 
     public Expression(String val) {
+        if(val != null) {
+            val = val.trim();
+        }
         this.expressionValue = val;
     }
 

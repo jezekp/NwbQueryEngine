@@ -48,9 +48,9 @@ public class HDF5Connector implements Connector<String> {
                 logger.debug(query);
                 int executeLikeRes;
                 int attempts = 1;
-
+                connect(obj);
                 synchronized (this) {
-                    connect(obj);
+
                     while ((executeLikeRes = HDFql.execute(query)) != HDFql.SUCCESS && attempts-- > 0) {
 //                    HDFql.cursorClear(cursor);
 //                    HDFql.cursorInitialize(cursor);
@@ -67,8 +67,9 @@ public class HDF5Connector implements Connector<String> {
 
                     showExpressions.put(expressionValue, new LinkedList<>(showResults));
                     logger.debug("cursorRes:" + cursorRes);
-                    disconnect(obj);
+
                 }
+                disconnect(obj);
 
 
             }
@@ -79,7 +80,7 @@ public class HDF5Connector implements Connector<String> {
 
 
     public void connect(File obj) throws ConnectorException {
-        synchronized (cursor) {
+        synchronized (this) {
             if (logger.isDebugEnabled()) {
                 HDFql.execute("ENABLE DEBUG");
             }
@@ -114,10 +115,9 @@ public class HDF5Connector implements Connector<String> {
 
     @Override
     public List<Object> getValues(String entity) throws ConnectorException {
-        connect(obj);
         List<Object> values = new ArrayList<>();
         synchronized (this) {
-
+            connect(obj);
             logger.debug("valuesType: " + values.getClass().getName());
             String selectQuery = "SELECT FROM " + entity;
             logger.debug("Select: " + selectQuery);
@@ -132,7 +132,7 @@ public class HDF5Connector implements Connector<String> {
             }
             logger.debug("SelectCursorResult: " + selectCursorResult);
             logger.debug("objectValue: " + values);
-            disconnect(obj);
+         //   disconnect(obj);
         }
         return values;
     }

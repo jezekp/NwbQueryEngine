@@ -28,7 +28,7 @@ public class NwbProcessor implements Processor<NwbResult> {
     private JexlEngine jexl = new Engine();
     private MapContext mc = new MapContext();
 
-    public Connector storageConnector;
+    private Connector storageConnector;
 
     public NwbProcessor(Connector storageConnector) {
         this.storageConnector = storageConnector;
@@ -76,7 +76,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                         mc.set("x1", value);
                         Object eval = func.evaluate(mc);
                         boolean res = ((Boolean) eval).booleanValue();
-                        logger.debug("Evaluation: " + value + "" + arithmeticalOperator + "" + expressionValue + ", data:" + res);
+                        logger.debug("Evaluation: " + value + " " + arithmeticalOperator + " " + expressionValue + ", data: " + res);
                         if (res) {
                             partialResult.add(new NwbResult(entity, value));
                         }
