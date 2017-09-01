@@ -28,7 +28,7 @@ Examples:
  epochs=(start_time>200 & stop_time<400 &#124; stop_time>1600) | selects all epochs which start_time > 200 or stop_time < 400 or stop_time > 1600
  epochs=(start_time)                    | selects all epochs with a start_time dataset        
  data=(unit LIKE unkno) | selects all datasets data with attributes containing a substring unkno
- pole_in/data=(unit LIKE unkno) | takes into account only data within pole_in group
+ pole_in/data=(unit LIKE unkno) | takes into account only data within a pole_in group
  
  
 
