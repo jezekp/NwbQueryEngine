@@ -14,9 +14,11 @@ Operators:
 Syntax:
 -
 
-- group_name=(expression)
-- expression=(expression | expression & expression)
-- expression=(expression<expression) | (expression>expression) | (expression>=expression) | (expression<=expression | (expression LIKE expression)
+- gd = group_name|dataset_name
+- gda = gd|attribute
+- gd = (expression)
+- expression = expression | expression & expression
+- expression = gda<const | gda<const | gda<const | gda<const | gda<const | gda
 
 Examples:
 -
