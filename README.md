@@ -30,7 +30,7 @@ Python support:
 - For running on a remote host parameter -Dhost.ip=remote-host-ip must be used
 
 
-- run python code such as:
+- run [python code](doc/example.py) such as:
 ```python
  >>> from py4j.java_gateway import JavaGateway
  >>> from py4j.java_gateway import GatewayParameters
