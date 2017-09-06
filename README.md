@@ -16,9 +16,9 @@ Prerequisites
 
 Running
 ==
-- compile with mvn clean package
+- compile with mvn clean package -Djava.library.path=src/main/resources/
 
-- run java -Djava.library.path=PATH_TO_RESOURCES_DIR -jar target/nwbqueryengine-1.0-SNAPSHOT-jar-with-dependencies.jar file [query](doc/queries.md)
+- run java -Djava.library.path=src/main/resources/ -jar target/nwbqueryengine-1.0-SNAPSHOT-jar-with-dependencies.jar file [query](doc/queries.md)
 
 e.g: java -Djava.library.path=src/main/resources/ -jar target/nwbqueryengine-1.0-SNAPSHOT-jar-with-dependencies.jar /home/user/file.nwb "processing=(electrode_idx>30)"
 
