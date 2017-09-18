@@ -16,9 +16,9 @@ Prerequisites
 
 Running
 ==
-- compile with mvn clean package
+- compile with mvn clean package -Djava.library.path=src/main/resources/
 
-- run java -Djava.library.path=PATH_TO_RESOURCES_DIR -jar target/nwbqueryengine-1.0-SNAPSHOT-jar-with-dependencies.jar file [query](doc/queries.md)
+- run java -Djava.library.path=src/main/resources/ -jar target/nwbqueryengine-1.0-SNAPSHOT-jar-with-dependencies.jar file [query](doc/queries.md)
 
 e.g: java -Djava.library.path=src/main/resources/ -jar target/nwbqueryengine-1.0-SNAPSHOT-jar-with-dependencies.jar /home/user/file.nwb "processing=(electrode_idx>30)"
 
@@ -30,7 +30,7 @@ Python support:
 - For running on a remote host parameter -Dhost.ip=remote-host-ip must be used
 
 
-- run python code such as:
+- run [python code](doc/example.py) such as:
 ```python
  >>> from py4j.java_gateway import JavaGateway
  >>> from py4j.java_gateway import GatewayParameters
