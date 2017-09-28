@@ -80,11 +80,10 @@ public class QueryParser implements Parser {
             //  <, >, <=, >=  must be found or an expression without filter like: echoch=(startime) is given and
             // no additional parsing is needed
         } else {
-            Expression e = new Expression(st[0], previousOperator, node);
             if (!isOthers) {
-                node.setLeftSide(parseInternal(e, OTHERS, previousOperator));
+                node.setLeftSide(parseInternal(new Expression(st[0], previousOperator, node), OTHERS, previousOperator));
             } else {
-                node.setLeftSide(e);
+                node.setLeftSide(new Expression(st[0], "", node));
             }
         }
 
