@@ -47,6 +47,7 @@ public class FileInput implements Input<String, String> {
             }
             logger.info("I have complete: " + completeRes.size());
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e);
             throw new InputException(e);
         }
@@ -54,7 +55,7 @@ public class FileInput implements Input<String, String> {
 
     }
 
-    public synchronized List<NwbResult> processFile(File obj, Query query) throws Exception {
+    private synchronized List<NwbResult> processFile(File obj, Query query) throws Exception {
         HDF5Connector connector = new HDF5Connector(obj);
         NwbProcessor processor = new NwbProcessor(connector);
 

@@ -5,6 +5,8 @@ import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.NwbProcessor;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +27,8 @@ class ExpressionParserTest {
     private static String file = "ANM184389_20130207.nwb";
     private static String fname = path + "/" + file;
 
+    private Log logger = LogFactory.getLog(getClass());
+
     @BeforeAll
     static void init() {
         System.loadLibrary("HDFql");
@@ -39,9 +43,22 @@ class ExpressionParserTest {
             NwbProcessor processor = new NwbProcessor(connector);
             res = processor.evaluate(query);
         } catch (Exception e) {
+            logger.error(e);
             fail(e.getMessage());
         }
         return res;
+    }
+
+    @Test
+    void parseQeryWithSingleOperand() {
+        List<NwbResult> res = execute("epochs=(start_time>200)");
+        assertTrue(res.size() == 327);
+        res.forEach(name -> {
+            double value = (double) name.getValue();
+            logger.debug("Test with single Operand: " + value);
+            assertFalse(value <= 200);
+        });
+
     }
 
     @Test
@@ -50,6 +67,7 @@ class ExpressionParserTest {
         assertTrue(res.size() == 87);
         res.forEach(name -> {
             double value = (double) name.getValue();
+            logger.debug("Test with more operands: " + value);
             assertFalse(value <= 200 || value >= 400 && value <= 1600);
         });
     }

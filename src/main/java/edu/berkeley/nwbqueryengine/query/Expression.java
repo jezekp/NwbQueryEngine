@@ -10,28 +10,46 @@ package edu.berkeley.nwbqueryengine.query;
 
    Query such as: epochs=(start_time>200 & stop_time<400 | stop_time>1600)
    is parsed to a following structure:
- 
 
-               epochs=(start_time>200 & stop_time<400 | stop_time>1600) ()                               
-              / \               
-             /   \              
-            /     \             
-           /       \            
-          /         \           
-         /           \          
-        /             \         
-       /               \
-   epochs ()  start_time>200 & stop_time<400 | stop_time>1600 ()
-                      / \       
-                     /   \      
-                    /     \     
-                   /       \    
-         start_time>200  (&) stop_time<400 | stop_time>1600 (&)
-                  / \     / \   
-                 /   \   /   \  
-   start_time (>)   200  (>) stop_time<400  (|)    stop_time>1600 (|)
-                        / \ / \ 
-          stop_time (<) 400  (<) stop_time (>) 1600 (>)
+                               epochs=(start_time>200 & stop_time<400 | stop_time>1600) ()                                                               
+                              / \                               
+                             /   \                              
+                            /     \                             
+                           /       \                            
+                          /         \                           
+                         /           \                          
+                        /             \                         
+                       /               \                        
+                      /                 \                       
+                     /                   \                      
+                    /                     \                     
+                   /                       \                    
+                  /                         \                   
+                 /                           \                  
+                /                             \                 
+               /                               \                
+               epochs ()                               start_time>200 & stop_time<400 | stop_time>1600 ()                               
+                                              / \               
+                                             /   \              
+                                            /     \             
+                                           /       \            
+                                          /         \           
+                                         /           \          
+                                        /             \         
+                                       /               \        
+                                     start_time>200 (&)               stop_time<400 | stop_time>1600 (&)               
+                                      / \             / \       
+                                     /   \           /   \      
+                                    /     \         /     \     
+                                   /       \       /       \    
+                               start_time (>)       200 (>)       stop_time<400 (|)       stop_time>1600 (|)       
+                                                  / \     /     
+                                                 /   \   /      
+                                     stop_time (<)   400 (<)   stop_time>1600 (null)      
+                                                        / \     
+                            stop_time (>) 1600 (>)   
+                                                                                                             
+
  */
 public class Expression implements Cloneable{
 

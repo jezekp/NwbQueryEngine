@@ -37,8 +37,7 @@ public class NwbProcessor implements Processor<NwbResult> {
     public List<NwbResult> evaluate(Query query) throws ProcessorException {
         List<NwbResult> nwbResults = new LinkedList<>();
         Map<String, List<Object>> dataSets = new HashMap<>();
-        boolean firstRun = true;
-        String andOrOperator = "";
+        String andOrOperator;
         List<EntityWrapper> entityWrappers;
         try {
             entityWrappers = storageConnector.processSearch(query);
@@ -49,60 +48,64 @@ public class NwbProcessor implements Processor<NwbResult> {
         for (EntityWrapper partialExpression : entityWrappers) {
             List<NwbResult> partialResult = new LinkedList<>();
             Expression item = partialExpression.getExpression();
-            List<String> entities = partialExpression.getEntity();
-            for (String entity : entities) {
-                List<Object> values = getValues(entity, dataSets);
-                String arithmeticalOperator = item.getOperator();
-                Expression rightSide = item.getRightSideSibling();
-                logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
 
-                if (StringUtils.isBlank(arithmeticalOperator)) {
-                    for (Object value : new LinkedList<>(values)) {
-                        logger.debug("Value: " + value);
-                        partialResult.add(new NwbResult(entity, value));
-                    }
-                } else {
-                    String jexlExpression;
-                    if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
-                        jexlExpression = "x1.contains(x2)";
-                    } else {
-                        jexlExpression = "x1" + arithmeticalOperator + "x2";
-                    }
-                    JexlExpression func = jexl.createExpression(jexlExpression);
-                    String expressionValue = rightSide.getExpressionValue();
-                    mc.set("x2", expressionValue);
-                    for (Object value : new LinkedList<>(values)) {
-                        logger.debug("Value: " + value);
-                        mc.set("x1", value);
-                        Object eval = func.evaluate(mc);
-                        boolean res = ((Boolean) eval).booleanValue();
-                        logger.debug("Evaluation: " + value + " " + arithmeticalOperator + " " + expressionValue + ", data: " + res);
-                        if (res) {
+            andOrOperator = item.getParent().getOperator();
+
+            //if operator is and and previous result is an empty set I mustn't continue
+            if(!(StringUtils.equals(andOrOperator, Operators.AND.op()) && nwbResults.size() == 0)) {
+                List<String> entities = partialExpression.getEntity();
+                for (String entity : entities) {
+                    List<Object> values = getValues(entity, dataSets);
+                    String arithmeticalOperator = item.getOperator();
+                    Expression rightSide = item.getRightSideSibling();
+                    logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
+//todo solve case when x1|x2 without value - modify tree parser to list does not contain operator - stop_time (|)  ?
+                    if (StringUtils.isBlank(arithmeticalOperator)) {
+                        for (Object value : new LinkedList<>(values)) {
+                            logger.debug("Value: " + value);
                             partialResult.add(new NwbResult(entity, value));
                         }
+                    } else {
+                        String jexlExpression;
+                        if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
+                            jexlExpression = "x1.contains(x2)";
+                        } else {
+                            jexlExpression = "x1" + arithmeticalOperator + "x2";
+                        }
+                        JexlExpression func = jexl.createExpression(jexlExpression);
+                        String expressionValue = rightSide.getExpressionValue();
+                        mc.set("x2", expressionValue);
+                        for (Object value : new LinkedList<>(values)) {
+                            logger.debug("Value: " + value);
+                            mc.set("x1", value);
+                            Object eval = func.evaluate(mc);
+                            boolean res = ((Boolean) eval).booleanValue();
+                            logger.debug("Evaluation: " + value + " " + arithmeticalOperator + " " + expressionValue + ", data: " + res);
+                            if (res) {
+                                partialResult.add(new NwbResult(entity, value));
+                            }
+                        }
                     }
+
                 }
-
             }
-
 
             logger.debug(item + ", AND-OR-Operator: " + andOrOperator);
 
-            if (("\\" + andOrOperator).equals(Operators.OR.op())) {
+            if (StringUtils.equals("\\" + andOrOperator, Operators.OR.op())) {
                 logger.debug("...OR....");
                 nwbResults = Restrictions.or(nwbResults, partialResult);
                 nwbResults.forEach(name -> logger.debug(name));
             }
-            if (andOrOperator.equals(Operators.AND.op())) {
+            if (StringUtils.equals(andOrOperator, Operators.AND.op())) {
                 logger.debug("...AND....");
                 nwbResults = Restrictions.and(nwbResults, partialResult);
                 nwbResults.forEach(name -> logger.debug(name));
             }
-            if (firstRun) {
+            if (StringUtils.isBlank(andOrOperator)) {
                 nwbResults.addAll(partialResult);
-                firstRun = false;
             }
-            andOrOperator = item.getParent().getOperator();
+
         }
         nwbResults.forEach(name -> logger.debug(name));
 
