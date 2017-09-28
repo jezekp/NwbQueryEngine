@@ -67,6 +67,7 @@ public class QueryParser implements Parser {
         // if the operator is AND or OR parse it recursively
         //   - left side is a subexpression like a>b, a<c, a>=b, a<=b etc
         //   - right side is a subexpression like subexpression | subexpression & subexpression etc.
+        logger.debug("Parse substring: " + st.length + ", " + isOthers);
         if (st.length > 1) {
             if (isOthers) {
                 node.setLeftSide(new Expression(st[0], st[1], node));

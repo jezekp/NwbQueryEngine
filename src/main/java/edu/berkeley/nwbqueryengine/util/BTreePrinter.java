@@ -16,15 +16,19 @@ import java.util.List;
 public class BTreePrinter {
 
     private Log logger = LogFactory.getLog(getClass());
-    private String tree;
+    private StringBuilder tree = new StringBuilder();
 
         public void printNode(Expression root) {
-            tree = "\n";
+            tree.append("\n");
             int maxLevel = BTreePrinter.maxLevel(root);
-
-            printNodeInternal(Collections.singletonList(root), 1, maxLevel);
             logger.debug("Parsed tree:");
-            logger.debug(tree);
+            if(maxLevel < 10) {
+                printNodeInternal(Collections.singletonList(root), 1, maxLevel);
+                logger.debug(tree.toString());
+            } else           {
+                logger.debug("Too large tree to print");
+            }
+
         }
 
         private void printNodeInternal(List<Expression> nodes, int level, int maxLevel) {
@@ -41,7 +45,7 @@ public class BTreePrinter {
             List<Expression> newNodes = new ArrayList<Expression>();
             for (Expression node : nodes) {
                 if (node != null) {
-                    tree += (node.getExpressionValue() + " (" + node.getOperator() + ")");
+                    tree.append(node.getExpressionValue() + " (" + node.getOperator() + ")");
                     newNodes.add(node.getLeftSide());
                     newNodes.add(node.getRightSide());
                 } else {
@@ -52,7 +56,7 @@ public class BTreePrinter {
 
                 printWhitespaces(betweenSpaces);
             }
-            tree += "\n";
+            tree.append("\n");
 
             for (int i = 1; i <= endgeLines; i++) {
                 for (int j = 0; j < nodes.size(); j++) {
@@ -63,21 +67,21 @@ public class BTreePrinter {
                     }
 
                     if (nodes.get(j).getLeftSide() != null)
-                        tree += ("/");
+                        tree.append("/");
                     else
                         printWhitespaces(1);
 
                     printWhitespaces(i + i - 1);
 
                     if (nodes.get(j).getRightSide() != null)
-                        tree += ("\\");
+                        tree.append("\\");
                     else
                         printWhitespaces(1);
 
                     printWhitespaces(endgeLines + endgeLines - i);
                 }
 
-                tree += "\n";
+                tree.append("\n");
             }
 
             printNodeInternal(newNodes, level + 1, maxLevel);
@@ -85,7 +89,7 @@ public class BTreePrinter {
 
         private void printWhitespaces(int count) {
             for (int i = 0; i < count; i++)
-                tree += (" ");
+                tree.append(" ");
         }
 
         private static int maxLevel(Expression node) {
