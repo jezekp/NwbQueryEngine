@@ -59,7 +59,6 @@ public class NwbProcessor implements Processor<NwbResult> {
                     String arithmeticalOperator = item.getOperator();
                     Expression rightSide = item.getRightSideSibling();
                     logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
-//todo solve case when x1|x2 without value - modify tree parser to list does not contain operator - stop_time (|)  ?
                     if (StringUtils.isBlank(arithmeticalOperator)) {
                         for (Object value : new LinkedList<>(values)) {
                             logger.debug("Value: " + value);

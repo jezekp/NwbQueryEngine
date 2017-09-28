@@ -58,7 +58,6 @@ public class QueryParser implements Parser {
         }
         return node;
     }
-//todo - add parameter previous operator, store st[1] to expression. Call parse internal with previous operator
     private void parseSubString(String input, Expression node, String delimiter, String previousOperator) {
         //st contains [0] - left side, [1] - operator, [2] - right side
         String[] st = input.split(delimiter, 3);
