@@ -24,7 +24,7 @@ public class Query {
 
     public Expression getQueryLeftSide() {
         if(leftSide == null) {
-            expressionsLeftSide = leftSideOfExpressions();
+            expressionsLeftSide = leftSideOfTree();
         }
         return leftSide;
 
@@ -48,13 +48,18 @@ public class Query {
     }
 
     // A wrapper over leftListsViewInternal()
-    public List<Expression> leftSideOfExpressions() {
+    public List<Expression> leftSideOfTree() {
         if(expressionsLeftSide == null) {
             expressionsLeftSide = new LinkedList<>();
             leftListsViewInternal(expressionsLeftSide, root, 1, 0, true);
-            leftSide = expressionsLeftSide.remove(0);
+            leftSide = expressionsLeftSide.get(0);
         }
         return expressionsLeftSide;
+    }
+
+    public List<Expression> leftSideOfExpressions() {
+        leftSideOfTree();
+        return expressionsLeftSide.subList(1, expressionsLeftSide.size());
     }
 
 

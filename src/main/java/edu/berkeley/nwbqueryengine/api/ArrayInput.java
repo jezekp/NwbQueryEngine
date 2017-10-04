@@ -18,7 +18,7 @@ public class ArrayInput implements Input<byte[], String> {
 
 //    The way to read nbw file from python, convert it to byteArray and send it to the server
 
-//    with open('/tmp/test.nwb', mode='rb') as file: # b is important -> binary
+    //    with open('/tmp/test.nwb', mode='rb') as file: # b is important -> binary
 //            fileContent = file.read()
 //
 //    b = bytearray(fileContent)
@@ -26,22 +26,19 @@ public class ArrayInput implements Input<byte[], String> {
 //
 //
     @Override
-    public List<NwbResult> executeQuery(byte[] storage, String query) {
+    public List<NwbResult> executeQuery(byte[] storage, String query) throws InputException {
         String fileName = "/tmp/test_" + System.currentTimeMillis() + ".nwb";
+        List<NwbResult> res;
         File file = new File(fileName);
         try {
             FileUtils.writeByteArrayToFile(file, storage);
+            res = input.executeQuery(fileName, query);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new InputException(e);
+        } finally {
+            FileUtils.deleteQuietly(file);
         }
 
-        List<NwbResult> res = null;
-        try {
-            res = input.executeQuery(fileName, query);
-        } catch (InputException e) {
-            e.printStackTrace();
-        }
-        FileUtils.deleteQuietly(file);
         return res;
     }
 }
