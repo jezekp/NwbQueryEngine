@@ -18,13 +18,13 @@ public class Query {
     private Log logger = LogFactory.getLog(getClass());
     private List<Expression> expressionsLeftSide;
     private Expression leftSide;
-    private List<Expression> subQueries = new LinkedList<>();
+    private List<Query> subQueries = new LinkedList<>();
 
     public Query(Expression root) {
         this.root = root;
     }
 
-    public List<Expression> getSubQueries() {
+    public List<Query> getSubQueries() {
         if(subQueries.isEmpty()) {
             getQueryLeftSide();
         }
@@ -49,19 +49,23 @@ public class Query {
             logger.debug("Node: [" + node.getExpressionValue() + ", " + node.getOperator() + ", left: (" + node.getLeftSide() + "), right: (" + node.getRightSide() + ")], ");
             res.add(node);
             max_level = level;
-        }
 
-        if(node.getOperator().equals(QueryParser.ASSIGN) && node.getLeftSide() == null && node.getRightSide() == null) {
-            subQueries.add(node);
+            //When operator is assign and left and right sides are null the node is a left side of a subtree
+            //Its parrent is a subquery root
+            if(node.getOperator().equals(QueryParser.ASSIGN)) {
+                subQueries.add(new Query(node.getParent()));
+            }
         }
 
         // Recur for left and right subtrees
         leftListsViewInternal(res, node.getLeftSide(), level + 1, max_level, true);
         leftListsViewInternal(res, node.getRightSide(), level + 1, max_level, false);
+
+
     }
 
     // A wrapper over leftListsViewInternal()
-    public List<Expression> leftSideOfTree() {
+    private List<Expression> leftSideOfTree() {
         if(expressionsLeftSide == null) {
             expressionsLeftSide = new LinkedList<>();
             leftListsViewInternal(expressionsLeftSide, root, 1, 0, true);
@@ -72,7 +76,15 @@ public class Query {
 
     public List<Expression> leftSideOfExpressions() {
         leftSideOfTree();
-        return expressionsLeftSide.subList(1, expressionsLeftSide.size());
+        List<Expression> res = new LinkedList<>();
+        List<Expression> tmp = expressionsLeftSide.subList(1, expressionsLeftSide.size());
+        for(Expression item : tmp) {
+            if(!item.getOperator().equals(QueryParser.ASSIGN)) {
+                logger.debug("Left side item: " + item);
+                res.add(item);
+            }
+        }
+        return res;
     }
 
 

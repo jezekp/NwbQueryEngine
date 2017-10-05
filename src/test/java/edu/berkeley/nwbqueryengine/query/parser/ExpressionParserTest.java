@@ -64,15 +64,21 @@ class ExpressionParserTest {
     @Test
     void parseSubQueriesTest() {
         QueryParser parser = new QueryParser();
-        Query query = parser.parse("epochs=(start_time > 10 | stop_time < 20) & epochs2=(start_time2 > 10 | stop_time2 < 20)");
-        List<Expression> expressions =  query.getSubQueries();
+        Query query = parser.parse("epochs=(start_time > 10 | stop_time < 20) | epochs2=(start_time2 > 10 | stop_time2 < 20) | epochs3=(start_time3 > 10 | stop_time3 < 20)& epochs4=(start_time4 > 10 | stop_time4 < 20)");
+        List<Query> expressions =  query.getSubQueries();
+        expressions.forEach(name-> {
+            final StringBuilder s = new StringBuilder();
+            name.leftSideOfExpressions().forEach(expression ->  s.append(expression + " "));
+            logger.debug("name: " + name.getQueryLeftSide() + ", operator: " + name.getQueryLeftSide().getParent().getRightSideSibling().getOperator());
+            logger.debug("Expressions: " + s);
+        });
         assertTrue(expressions.size() > 0);
     }
 
     @Test
     void parseQueryWithOperands() {
         List<NwbResult> res = execute("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
-//        assertTrue(res.size() == 87);
+        assertTrue(res.size() == 87);
         res.forEach(name -> {
             double value = (double) name.getValue();
             logger.debug("Test with more operands: " + value);

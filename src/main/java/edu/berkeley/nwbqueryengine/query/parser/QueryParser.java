@@ -60,7 +60,7 @@ public class QueryParser implements Parser {
             String operator = (subValueStartingIndex < input.length()) ? "" + (input.charAt(subValueStartingIndex)) : "";
             String valueWithoutOperator = StringUtils.strip(subValue, AND_OR);
             node.setOperator(operator);
-            node.setLeftSide(parseSubString(new Expression(valueWithoutOperator), ASSIGN_DELIMITER, previousOperator));
+            node.setLeftSide(parseSubString(new Expression(valueWithoutOperator, node), ASSIGN_DELIMITER, previousOperator));
             Expression newNode = new Expression("", previousOperator, node);
             node.setRightSide(newNode);
             node = newNode;
