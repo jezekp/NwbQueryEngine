@@ -1,5 +1,6 @@
 package edu.berkeley.nwbqueryengine.query;
 
+import edu.berkeley.nwbqueryengine.query.parser.QueryParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,9 +18,17 @@ public class Query {
     private Log logger = LogFactory.getLog(getClass());
     private List<Expression> expressionsLeftSide;
     private Expression leftSide;
+    private List<Expression> subQueries = new LinkedList<>();
 
     public Query(Expression root) {
         this.root = root;
+    }
+
+    public List<Expression> getSubQueries() {
+        if(subQueries.isEmpty()) {
+            getQueryLeftSide();
+        }
+        return new LinkedList<>(subQueries);
     }
 
     public Expression getQueryLeftSide() {
@@ -40,6 +49,10 @@ public class Query {
             logger.debug("Node: [" + node.getExpressionValue() + ", " + node.getOperator() + ", left: (" + node.getLeftSide() + "), right: (" + node.getRightSide() + ")], ");
             res.add(node);
             max_level = level;
+        }
+
+        if(node.getOperator().equals(QueryParser.ASSIGN) && node.getLeftSide() == null && node.getRightSide() == null) {
+            subQueries.add(node);
         }
 
         // Recur for left and right subtrees

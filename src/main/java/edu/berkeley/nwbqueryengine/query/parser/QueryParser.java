@@ -27,6 +27,7 @@ public class QueryParser implements Parser {
             Operators.GT.op() + "|" + Operators.LE.op() + "|" + Operators.NE.op() + "|" + Operators.EQ.op() + "|" +
             Operators.MATCH.op() + "|" + Operators.CONTAINS.op();
 
+    //(?=foo) lookahead and (?<=foo) lookbehind are used to a delimiter be included as well.
     public static String AND_OR_DELIMITER = "((?<=" + AND_OR + ")|(?=" + AND_OR + "))";
     public static String OTHERS_DELIMITER = "((?<=" + OTHERS + ")|(?=" + OTHERS + "))";
     public static String ASSIGN_DELIMITER = "((?<=" + ASSIGN + ")|(?=" + ASSIGN + "))";
@@ -53,8 +54,8 @@ public class QueryParser implements Parser {
         String previousOperator = "";
         while (brackets.find()) {
             String subValue = input.substring(subValueStartingIndex, brackets.end(0));
-            //left side is group_name, right side is an expression like expression | expression or expression & expression
-            //parse it recursively
+            //left side of each subtreee is group_name, right side is an expression like expression | expression or expression & expression
+            //parse it recursively, goes over all expressions like epochs=(a|b|c)
             subValueStartingIndex += subValue.length();
             String operator = (subValueStartingIndex < input.length()) ? "" + (input.charAt(subValueStartingIndex)) : "";
             String valueWithoutOperator = StringUtils.strip(subValue, AND_OR);
@@ -77,7 +78,7 @@ public class QueryParser implements Parser {
         boolean isOthers = delimiter.equals(OTHERS_DELIMITER);
         boolean isAssign = delimiter.equals(ASSIGN_DELIMITER);
         // if st > 1 and the operator is OTHERS (<, >, <=, >= etc. ) just assign the left side of the expression and the right side
-        // if the operator is AND or OR parse it recursively
+        // if the operator is AND or OR or ASSIGN (=) parse right side recursively
         //   - left side is a subexpression like a>b, a<c, a>=b, a<=b etc
         //   - right side is a subexpression like subexpression | subexpression & subexpression etc.
         logger.debug("Parse substring: " + st.length + ", " + isOthers);
@@ -88,7 +89,7 @@ public class QueryParser implements Parser {
                 node.setRightSide(new Expression(st[2], st[1], node));
             } else if (isAssign) {
                 node.setLeftSide(new Expression(st[0], st[1], node));
-                node.setRightSide(parseSubString(new Expression(st[2].replaceAll("\\(|\\)|\\[|\\]", ""), st[1], node), AND_OR_DELIMITER, st[1]));
+                node.setRightSide(parseSubString(new Expression(st[2].replaceAll("\\(|\\)|\\[|\\]", ""), "", node), AND_OR_DELIMITER, st[1]));
             } else {
                 node.setRightSide(parseSubString(new Expression(st[2], st[1], node), AND_OR_DELIMITER, st[1]));
             }
@@ -102,8 +103,8 @@ public class QueryParser implements Parser {
             }
         }
         if (!isOthers && !isAssign) {
-            //(?=foo) lookahead and (?<=foo) lookbehind are used to a delimiter be included as well.
-            node.setLeftSide(parseSubString(new Expression(st[0], previousOperator, node), OTHERS_DELIMITER, previousOperator));
+            String tmpOperator = previousOperator.equals(ASSIGN) ? "" : previousOperator;
+            node.setLeftSide(parseSubString(new Expression(st[0], tmpOperator, node), OTHERS_DELIMITER, previousOperator));
         }
         return node;
 
