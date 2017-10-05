@@ -114,7 +114,7 @@ public class Expression implements Cloneable{
 
     @Override
     public String toString() {
-        return expressionValue;
+        return "Value: " + expressionValue + ", operator: " + operator;
     }
 
     public Expression getParent() {
