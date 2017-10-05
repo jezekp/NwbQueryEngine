@@ -93,7 +93,7 @@ class ExpressionParserTest {
         assertEquals(expressions.length, leftSideExpressions.size());
         int i = 0;
         for (Expression item : leftSideExpressions) {
-            assertEquals(item.getExpressionValue(), expressions[i++]);
+            assertEquals(expressions[i++], item.getExpressionValue());
         }
 
     }

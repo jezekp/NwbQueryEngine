@@ -38,7 +38,7 @@ public class BTreePrinter {
             int floor = maxLevel - level;
             int endgeLines = (int) Math.pow(2, (Math.max(floor - 1, 0)));
             int firstSpaces = (int) Math.pow(2, (floor)) - 1;
-            int betweenSpaces = (int) Math.pow(2, (floor + 1)) - 1;
+            int betweenSpaces = (int) ((Math.pow(2, (floor + 1)) - 1) / (double) 2);
 
             printWhitespaces(firstSpaces);
 
