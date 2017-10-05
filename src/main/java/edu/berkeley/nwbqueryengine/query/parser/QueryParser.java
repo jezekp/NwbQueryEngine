@@ -64,9 +64,6 @@ public class QueryParser implements Parser {
             node.setRightSide(newNode);
             node = newNode;
             previousOperator = operator;
-
-          //  newNode.setLeftSide(parseSubString(newNode, AND_OR, "" + (input.charAt(subValue.length()))));
-           // subValueStartingIndex++;
         }
 
         return res;

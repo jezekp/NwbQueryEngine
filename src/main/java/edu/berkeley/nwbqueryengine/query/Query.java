@@ -37,7 +37,7 @@ public class Query {
 
         // If this is the first node of its level
         if (max_level < level && isLeft && node.getLeftSide() == null && node.getRightSide() == null) {
-            logger.debug("[" + node.getExpressionValue() + ", " + node.getOperator() + ", left: (" + node.getLeftSide() + "), right: (" + node.getRightSide() + ")], ");
+            logger.debug("Node: [" + node.getExpressionValue() + ", " + node.getOperator() + ", left: (" + node.getLeftSide() + "), right: (" + node.getRightSide() + ")], ");
             res.add(node);
             max_level = level;
         }
