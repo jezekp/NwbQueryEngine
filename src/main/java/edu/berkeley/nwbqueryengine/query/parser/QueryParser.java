@@ -59,7 +59,7 @@ public class QueryParser implements Parser {
             String operator = (subValueStartingIndex < input.length()) ? "" + (input.charAt(subValueStartingIndex)) : "";
             String valueWithoutOperator = StringUtils.strip(subValue, AND_OR);
             node.setOperator(operator);
-            node.setLeftSide(parseSubString(new Expression(valueWithoutOperator), ASSIGN, previousOperator));
+            node.setLeftSide(parseSubString(new Expression(valueWithoutOperator), ASSIGN_DELIMITER, previousOperator));
             Expression newNode = new Expression("", previousOperator, node);
             node.setRightSide(newNode);
             node = newNode;
@@ -77,8 +77,8 @@ public class QueryParser implements Parser {
         String input = node.getExpressionValue();
         String[] st = input.split(delimiter, 3);
         logger.debug("Input: " + input + ", delimiter: " + delimiter + ", left: " + ((st.length > 0) ? st[0] : "") + ", operator: " + ((st.length > 1) ? st[1] : "") + ", right: " + ((st.length > 2) ? st[2] : ""));
-        boolean isOthers = delimiter.contains(OTHERS);
-        boolean isAssign = delimiter.equals(ASSIGN); //TODO solve == vs =
+        boolean isOthers = delimiter.equals(OTHERS_DELIMITER);
+        boolean isAssign = delimiter.equals(ASSIGN_DELIMITER);
         // if st > 1 and the operator is OTHERS (<, >, <=, >= etc. ) just assign the left side of the expression and the right side
         // if the operator is AND or OR parse it recursively
         //   - left side is a subexpression like a>b, a<c, a>=b, a<=b etc
@@ -90,8 +90,8 @@ public class QueryParser implements Parser {
                 node.setLeftSide(new Expression(st[0], st[1], node));
                 node.setRightSide(new Expression(st[2], st[1], node));
             } else if (isAssign) {
-                node.setLeftSide(new Expression(st[0], ASSIGN, node));
-                node.setRightSide(parseSubString(new Expression(st[1].replaceAll("\\(|\\)|\\[|\\]", ""), previousOperator, node), AND_OR_DELIMITER, previousOperator));
+                node.setLeftSide(new Expression(st[0], st[1], node));
+                node.setRightSide(parseSubString(new Expression(st[2].replaceAll("\\(|\\)|\\[|\\]", ""), st[1], node), AND_OR_DELIMITER, st[1]));
             } else {
                 node.setRightSide(parseSubString(new Expression(st[2], st[1], node), AND_OR_DELIMITER, st[1]));
             }

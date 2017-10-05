@@ -52,7 +52,7 @@ public class NwbProcessor implements Processor<NwbResult> {
             andOrOperator = item.getParent().getOperator();
 
             //if operator is and and previous result is an empty set I mustn't continue
-            if(!(StringUtils.equals(andOrOperator, Operators.AND.op()) && nwbResults.size() == 0)) {
+            if (!(StringUtils.equals(andOrOperator, Operators.AND.op()) && nwbResults.size() == 0)) {
                 List<String> entities = partialExpression.getEntity();
                 for (String entity : entities) {
                     List<Object> values = getValues(entity, dataSets);
@@ -89,19 +89,19 @@ public class NwbProcessor implements Processor<NwbResult> {
                 }
             }
 
+
+
             logger.debug(item + ", AND-OR-Operator: " + andOrOperator);
 
             if (StringUtils.equals("\\" + andOrOperator, Operators.OR.op())) {
                 logger.debug("...OR....");
                 nwbResults = Restrictions.or(nwbResults, partialResult);
                 nwbResults.forEach(name -> logger.debug(name));
-            }
-            if (StringUtils.equals(andOrOperator, Operators.AND.op())) {
+            } else if (StringUtils.equals(andOrOperator, Operators.AND.op())) {
                 logger.debug("...AND....");
                 nwbResults = Restrictions.and(nwbResults, partialResult);
                 nwbResults.forEach(name -> logger.debug(name));
-            }
-            if (StringUtils.isBlank(andOrOperator)) {
+            } else {
                 nwbResults.addAll(partialResult);
             }
 
