@@ -91,6 +91,13 @@ class ExpressionParserTest {
         assertTrue(res.size() == 736);
     }
 
+    @Test
+    void like() {
+        List<NwbResult> res = execute("analysis=(description LIKE whisker)");
+        assertTrue(res.size() > 0);
+        res.forEach(item -> assertTrue(((String) item.getValue()).contains("whisker")));
+    }
+
 
     @Test
     void parseGenericQuery() {
