@@ -31,6 +31,7 @@ Examples:
  epochs=(start_time)                    | selects all epochs with a start_time dataset        
  data=(unit LIKE unkno) | selects all datasets data with attributes containing a substring unkno
  pole_in/data=(unit LIKE unkno) | takes into account only data within a pole_in group
+ analysis=(description LIKE whisker) &#124; epochs=(start_time)  | A combination of previous queries
  
  
 

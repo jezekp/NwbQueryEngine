@@ -31,49 +31,50 @@ public class HDF5Connector implements Connector<String> {
 
     }
 
-    private  List<EntityWrapper> executeLikeQuery(Query q, String fileName) throws ConnectorException {
+    private List<EntityWrapper> executeLikeQuery(Query query, String fileName) throws ConnectorException {
         List<EntityWrapper> partialExpressions = new LinkedList<>();
-        Map<String, List<String>> showExpressions = new HashMap<>();
-        //cursor.delete();
-        for (Expression item : new LinkedList<>(q.leftSideOfExpressions())) {
-            //dataset name and complete path (e. g. "epochs/Trial_001/start_time");
-            List<String> showResults;
-            String expressionValue = item.getExpressionValue();
-            logger.debug("Processing  expression: " + expressionValue + " ,operator: " + item.getOperator());
-            if (showExpressions.containsKey(expressionValue)) {
-                showResults = showExpressions.get(expressionValue);
-            } else {
-                showResults = new LinkedList<>();
-                String query = "SHOW LIKE **/" + q.getQueryLeftSide().getExpressionValue() + "/**/" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
-                logger.debug(query);
-                int executeLikeRes;
-                int attempts = 1;
-                connect(obj);
-                synchronized (this) {
+        for (Query subQuery : query.getSubQueries()) {
+            Map<String, List<String>> showExpressions = new HashMap<>();
+            for (Expression item : new LinkedList<>(subQuery.leftSideOfExpressions())) {
+                //dataset name and complete path (e. g. "epochs/Trial_001/start_time");
+                List<String> showResults;
+                String expressionValue = item.getExpressionValue();
+                logger.debug("Processing  expression: " + expressionValue + " ,operator: " + item.getOperator());
+                if (showExpressions.containsKey(expressionValue)) {
+                    showResults = showExpressions.get(expressionValue);
+                } else {
+                    showResults = new LinkedList<>();
+                    String queryString = "SHOW LIKE **/" + subQuery.getQueryLeftSide().getExpressionValue() + "/**/" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
+                    logger.debug(queryString);
+                    int executeLikeRes;
+                    int attempts = 1;
+                    connect(obj);
+                    synchronized (this) {
 
-                    while ((executeLikeRes = HDFql.execute(query)) != HDFql.SUCCESS && attempts-- > 0) {
+                        while ((executeLikeRes = HDFql.execute(queryString)) != HDFql.SUCCESS && attempts-- > 0) {
 //                    HDFql.cursorClear(cursor);
 //                    HDFql.cursorInitialize(cursor);
-                        logger.error("Error: " + HDFql.errorGetMessage());
-                    }
-                    logger.debug("ExecuteLikeRes: " + executeLikeRes);
+                            logger.error("Error: " + HDFql.errorGetMessage());
+                        }
+                        logger.debug("ExecuteLikeRes: " + executeLikeRes);
 
-                    int cursorRes;
-                    while ((cursorRes = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
-                        String cursorGetChar = HDFql.cursorGetChar(cursor);
-                        showResults.add(cursorGetChar);
-                        logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
-                    }
+                        int cursorRes;
+                        while ((cursorRes = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
+                            String cursorGetChar = HDFql.cursorGetChar(cursor);
+                            showResults.add(cursorGetChar);
+                            logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
+                        }
 
-                    showExpressions.put(expressionValue, new LinkedList<>(showResults));
-                    logger.debug("cursorRes:" + cursorRes);
+                        showExpressions.put(expressionValue, new LinkedList<>(showResults));
+                        logger.debug("cursorRes:" + cursorRes);
+
+                    }
+                    disconnect(obj);
+
 
                 }
-                disconnect(obj);
-
-
+                partialExpressions.add(new EntityWrapper(showResults, item, fileName));
             }
-            partialExpressions.add(new EntityWrapper(showResults, item, fileName));
         }
         return partialExpressions;
     }
@@ -106,7 +107,7 @@ public class HDF5Connector implements Connector<String> {
         if (obj.isFile()) {
             //connect(obj);
             res = executeLikeQuery(query, obj.getAbsolutePath());
-    //        disconnect(obj);
+            //        disconnect(obj);
         } else {
             throw new ConnectorException("obj must be a file not a directory");
         }
@@ -132,7 +133,7 @@ public class HDF5Connector implements Connector<String> {
             }
             logger.debug("SelectCursorResult: " + selectCursorResult);
             logger.debug("objectValue: " + values);
-         //   disconnect(obj);
+            //   disconnect(obj);
         }
         return values;
     }

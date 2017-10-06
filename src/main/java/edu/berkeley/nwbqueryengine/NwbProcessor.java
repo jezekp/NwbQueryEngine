@@ -38,6 +38,7 @@ public class NwbProcessor implements Processor<NwbResult> {
         List<NwbResult> nwbResults = new LinkedList<>();
         Map<String, List<Object>> dataSets = new HashMap<>();
         String andOrOperator;
+        boolean isNext = false;
         List<EntityWrapper> entityWrappers;
         try {
             entityWrappers = storageConnector.processSearch(query);
@@ -50,6 +51,13 @@ public class NwbProcessor implements Processor<NwbResult> {
             Expression item = partialExpression.getExpression();
 
             andOrOperator = item.getParent().getOperator();
+
+            //get an operator between two subqueries
+            if(andOrOperator.equals("") && isNext) {
+                andOrOperator = item.getParent().getParent().getParent().getParent().getParent().getOperator();
+            }
+
+            isNext = true;
 
             //if operator is and and previous result is an empty set I mustn't continue
             if (!(StringUtils.equals(andOrOperator, Operators.AND.op()) && nwbResults.size() == 0)) {
