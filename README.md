@@ -41,3 +41,11 @@ Python support:
  ...     print (x)
 
 ```
+
+Maven
+==
+        <dependency>
+            <groupId>edu.berkeley</groupId>
+            <artifactId>nwbqueryengine</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
