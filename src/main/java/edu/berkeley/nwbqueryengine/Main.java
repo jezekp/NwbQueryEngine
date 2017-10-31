@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -54,7 +55,8 @@ public class Main {
                         String expression = args[1];
                         logger.debug("Expression: " + expression);
                         Input f = new FileInput();
-                        f.executeQuery(arg1, expression);
+                        List<NwbResult> resultList = f.executeQuery(arg1, expression);
+                        resultList.forEach(item -> System.out.println(item));
                     }
                 }
 
