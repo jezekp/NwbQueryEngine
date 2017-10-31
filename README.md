@@ -49,3 +49,8 @@ Maven
             <artifactId>nwbqueryengine</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        
+        <repository>
+            <id>snapshots</id>
+            <url>http://eeg.kiv.zcu.cz:8081/nexus/content/repositories/snapshots/</url>
+        </repository>
