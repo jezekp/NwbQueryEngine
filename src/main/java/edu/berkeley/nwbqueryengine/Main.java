@@ -5,15 +5,9 @@ import edu.berkeley.nwbqueryengine.api.FileInput;
 import edu.berkeley.nwbqueryengine.api.Input;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
 import edu.berkeley.nwbqueryengine.python.PyServer;
-import edu.berkeley.nwbqueryengine.query.Operators;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.jexl3.MapContext;
-import org.apache.commons.jexl3.internal.Engine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.LinkedList;
 import java.util.List;
 
 

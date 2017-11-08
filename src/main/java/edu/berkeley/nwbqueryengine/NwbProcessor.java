@@ -75,7 +75,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                     } else {
                         String jexlExpression;
                         if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
-                            jexlExpression = "x1.contains(x2)";
+                            jexlExpression = "x1.contains(x2)"; //todo - use matches instead - provide regular expressions support
                         } else {
                             jexlExpression = "x1" + arithmeticalOperator + "x2";
                         }
@@ -87,7 +87,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                             mc.set("x1", value);
                             Object eval = func.evaluate(mc);
                             boolean res = ((Boolean) eval).booleanValue();
-                            logger.debug("Evaluation: " + value + " " + arithmeticalOperator + " " + expressionValue + ", data: " + res);
+                            logger.debug("Evaluation: " + value + ", Operator: " + arithmeticalOperator + ", Expression value: " + expressionValue + ", data: " + res);
                             if (res) {
                                 partialResult.add(new NwbResult(entity, value));
                             }

@@ -32,6 +32,7 @@ public class Properties {
     }
 
     public String getHostIp() {
-        return get().getHostIp();
+        get();
+        return hostIp;
     }
 }

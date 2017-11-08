@@ -34,7 +34,7 @@ public class QueryParser implements Parser {
 
 
     public Query parse(String expression) {
-        Expression root = parseInternal(new Expression(expression.replaceAll(" ", "")));
+        Expression root = parseInternal(new Expression(expression.trim()));
         Query q = new Query(root);
         if (logger.isDebugEnabled()) {
             BTreePrinter bTreePrinter = new BTreePrinter();
@@ -45,7 +45,7 @@ public class QueryParser implements Parser {
 
     private Expression parseInternal(Expression e) {
         Expression node = new Expression(e.getExpressionValue(), e.getOperator(), e.getParent());
-        String input = node.getExpressionValue();
+        String input = node.getExpressionValue().trim();
         //Expression is group_name=(expression)
         //Find expression inside brackets [] or ()
         Matcher brackets = Pattern.compile("\\(([^)]+)\\)").matcher(input);
@@ -89,7 +89,7 @@ public class QueryParser implements Parser {
                 node.setRightSide(new Expression(st[2], st[1], node));
             } else if (isAssign) {
                 node.setLeftSide(new Expression(st[0], st[1], node));
-                node.setRightSide(parseSubString(new Expression(st[2].replaceAll("\\(|\\)|\\[|\\]", ""), "", node), AND_OR_DELIMITER, st[1]));
+                    node.setRightSide(parseSubString(new Expression(st[2].replaceAll("\\(|\\)|\\[|\\]", ""), "", node), AND_OR_DELIMITER, st[1]));
             } else {
                 node.setRightSide(parseSubString(new Expression(st[2], st[1], node), AND_OR_DELIMITER, st[1]));
             }
