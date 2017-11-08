@@ -73,14 +73,15 @@ public class NwbProcessor implements Processor<NwbResult> {
                             partialResult.add(new NwbResult(entity, value));
                         }
                     } else {
+                        String expressionValue = rightSide.getExpressionValue();
                         String jexlExpression;
                         if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
-                            jexlExpression = "x1.contains(x2)"; //todo - use matches instead - provide regular expressions support
+                            jexlExpression = "x1=~x2";
+                            expressionValue = ".*" + expressionValue + ".*"; //find all substrings - is it a good or bad solution?
                         } else {
                             jexlExpression = "x1" + arithmeticalOperator + "x2";
                         }
                         JexlExpression func = jexl.createExpression(jexlExpression);
-                        String expressionValue = rightSide.getExpressionValue();
                         mc.set("x2", expressionValue);
                         for (Object value : new LinkedList<>(values)) {
                             logger.debug("Value: " + value);
