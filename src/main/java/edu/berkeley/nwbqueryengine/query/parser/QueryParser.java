@@ -62,7 +62,7 @@ public class QueryParser implements Parser {
             //parse it recursively, goes over all expressions like epochs=(a|b|c)
             subValueStartingIndex += subValue.length();
             String operator = (subValueStartingIndex < input.length()) ? "" + (input.replaceAll("\\s+","").charAt(subValueStartingIndex)) : "";
-            String valueWithoutOperator = StringUtils.strip(subValue, AND_OR);
+            String valueWithoutOperator = StringUtils.strip(subValue.trim(), AND_OR);
             node.setOperator(operator);
             node.setLeftSide(parseSubString(new Expression(valueWithoutOperator, node), ASSIGN_DELIMITER, previousOperator));
             Expression newNode = new Expression("", previousOperator, node);
