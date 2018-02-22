@@ -59,7 +59,7 @@ public class NwbProcessor implements Processor<NwbResult> {
 
             isNext = true;
 
-            //if operator is and and previous result is an empty set I mustn't continue
+            //if operator is "&" and the previous result is an empty set I mustn't continue
             if (!(StringUtils.equals(andOrOperator, Operators.AND.op()) && nwbResults.size() == 0)) {
                 List<String> entities = partialExpression.getEntity();
                 for (String entity : entities) {

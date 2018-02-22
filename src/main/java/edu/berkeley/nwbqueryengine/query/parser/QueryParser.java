@@ -32,6 +32,10 @@ public class QueryParser implements Parser {
     public static String OTHERS_DELIMITER = "((?<=" + OTHERS + ")|(?=" + OTHERS + "))";
     public static String ASSIGN_DELIMITER = "((?<=" + ASSIGN + ")|(?=" + ASSIGN + "))";
 
+    //pattern for quotes = "\"([^\"]+)\""
+    public static String BRACKETS_PATTERN = "\\(([^)]+)\\)";
+
+
 
     public Query parse(String expression) {
         Expression root = parseInternal(new Expression(expression.trim()));
@@ -48,16 +52,16 @@ public class QueryParser implements Parser {
         String input = node.getExpressionValue().trim();
         //Expression is group_name=(expression)
         //Find expression inside brackets [] or ()
-        Matcher brackets = Pattern.compile("\\(([^)]+)\\)").matcher(input);
+        Matcher brackets = Pattern.compile(BRACKETS_PATTERN).matcher(input);
         int subValueStartingIndex = 0;
         Expression res = node;
         String previousOperator = "";
         while (brackets.find()) {
             String subValue = input.substring(subValueStartingIndex, brackets.end(0));
-            //left side of each subtreee is group_name, right side is an expression like expression | expression or expression & expression
+            //left side of each subtreee is a group_name, right side is an expression like expression | expression or expression & expression
             //parse it recursively, goes over all expressions like epochs=(a|b|c)
             subValueStartingIndex += subValue.length();
-            String operator = (subValueStartingIndex < input.length()) ? "" + (input.charAt(subValueStartingIndex)) : "";
+            String operator = (subValueStartingIndex < input.length()) ? "" + (input.replaceAll("\\s+","").charAt(subValueStartingIndex)) : "";
             String valueWithoutOperator = StringUtils.strip(subValue, AND_OR);
             node.setOperator(operator);
             node.setLeftSide(parseSubString(new Expression(valueWithoutOperator, node), ASSIGN_DELIMITER, previousOperator));
@@ -89,7 +93,8 @@ public class QueryParser implements Parser {
                 node.setRightSide(new Expression(st[2], st[1], node));
             } else if (isAssign) {
                 node.setLeftSide(new Expression(st[0], st[1], node));
-                    node.setRightSide(parseSubString(new Expression(st[2].replaceAll("\\(|\\)|\\[|\\]", ""), "", node), AND_OR_DELIMITER, st[1]));
+                String rightSide = StringUtils.strip(st[2], BRACKETS_PATTERN);
+                node.setRightSide(parseSubString(new Expression(rightSide, "", node), AND_OR_DELIMITER, st[1]));
             } else {
                 node.setRightSide(parseSubString(new Expression(st[2], st[1], node), AND_OR_DELIMITER, st[1]));
             }
