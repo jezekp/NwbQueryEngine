@@ -7,6 +7,7 @@ import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
 import edu.berkeley.nwbqueryengine.data.EntityWrapper;
 import edu.berkeley.nwbqueryengine.data.Restrictions;
+import edu.berkeley.nwbqueryengine.util.ValuesUtil;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
@@ -84,12 +85,8 @@ public class NwbProcessor implements Processor<NwbResult> {
                         JexlExpression func = jexl.createExpression(jexlExpression);
                         mc.set("x2", expressionValue);
                         for (Object value : new LinkedList<>(values)) {
-                            Object copy = value;
                             logger.debug("Value: " + value);
-                            if(value instanceof String) {
-                                copy = ((String) value).replaceAll("\n", " ");
-                            }
-                            mc.set("x1", copy);
+                            mc.set("x1", ValuesUtil.getModifiedCopy(value));
                             Object eval = func.evaluate(mc);
                             boolean res = ((Boolean) eval).booleanValue();
                             logger.debug("Evaluation: " + value + ", Operator: " + arithmeticalOperator + ", Expression value: " + expressionValue + ", data: " + res);
@@ -123,6 +120,8 @@ public class NwbProcessor implements Processor<NwbResult> {
 
         return nwbResults;
     }
+
+
 
     private List<Object> getValues(String entity, Map<String, List<Object>> dataSets) throws ProcessorException {
         List<Object> values;
