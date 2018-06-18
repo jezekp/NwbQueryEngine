@@ -3,7 +3,7 @@ from py4j.java_gateway import JavaGateway
 gateway = JavaGateway() # for localhost
 
 
-with open('/home/petr-jezek/Data/nwb_datasets/nwbMatlab_DG/ANM186997_20130317.nwb', mode='rb') as file: # b is important -> binary
+with open('/tmp/nwb_datasets/newDatasets/alm-1/datafiles/nwb_files/data_structure_ANM210861_20130701.nwb', mode='rb') as file: # b is important -> binary
             fileContent = file.read()
 
 b = bytearray(fileContent)

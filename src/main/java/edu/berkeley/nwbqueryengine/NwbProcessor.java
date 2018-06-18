@@ -133,6 +133,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                 dataSets.put(entity, values);
             } catch (Exception e) {
                 logger.error(e);
+                e.printStackTrace();
                 throw new ProcessorException(e);
             }
         }

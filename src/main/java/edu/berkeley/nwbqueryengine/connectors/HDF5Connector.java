@@ -128,8 +128,10 @@ public class HDF5Connector implements Connector<String> {
             while ((selectCursorResult = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
                 HDFqlUtil util = new HDFqlUtil();
                 Object value = util.getValue(cursor);
-                values.add(value);
-                logger.debug("selected value: " + value + ", " + value.getClass().getName());
+                if(value != null) {
+                    values.add(value);
+                }
+                logger.debug("selected value: " + value + ", " + ((value == null) ? "null" : value.getClass().getName()));
             }
             logger.debug("SelectCursorResult: " + selectCursorResult);
             logger.debug("objectValue: " + values);
