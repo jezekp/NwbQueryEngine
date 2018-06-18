@@ -127,7 +127,12 @@ public class HDF5Connector implements Connector<String> {
             int selectCursorResult;
             while ((selectCursorResult = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
                 HDFqlUtil util = new HDFqlUtil();
-                Object value = util.getValue(cursor);
+                Object value = null;
+                try {
+                    value = util.getValue(cursor);
+                } catch (Exception e) {
+                    throw new ConnectorException(e);
+                }
                 if(value != null) {
                     values.add(value);
                 }

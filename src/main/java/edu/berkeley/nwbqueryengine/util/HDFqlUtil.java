@@ -14,7 +14,7 @@ public class HDFqlUtil {
 
     private Log logger = LogFactory.getLog(getClass());
 
-    public Object getValue(HDFqlCursor cursor) {
+    public Object getValue(HDFqlCursor cursor) throws Exception {
         Object res = null;
         int datatype = HDFql.cursorGetDatatype(cursor);
         logger.debug("DataType: " + datatype);
@@ -51,8 +51,12 @@ public class HDFqlUtil {
         if (datatype == HDFql.CHAR) {
             res = HDFql.cursorGetChar(cursor);
         }
+        if (datatype == HDFql.VARCHAR) {
+            res = HDFql.cursorGetChar(cursor);
+        }
         if (res == null) {
             logger.error("IsNull");
+            throw new Exception("Not recognized data type: " + datatype);
         }
         return res;
     }
