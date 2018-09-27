@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class ExpressionParserTest {
 
-    private static String path = "/home/petr-jezek/data/nwb_datasets/nwbMatlab_DG";
+    private static String path = "/home/petr-jezek/Data/nwb_datasets/nwbMatlab_DG";
     private static String file = "ANM184389_20130207.nwb";
     private static String fname = path + "/" + file;
 

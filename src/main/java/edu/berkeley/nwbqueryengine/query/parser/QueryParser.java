@@ -36,9 +36,12 @@ public class QueryParser implements Parser {
     public static String BRACKETS_PATTERN = "\\(([^)]+)\\)";
 
 
+    protected String queryPreprocessing(String input) {
+        return input.replaceAll(" ", "").trim();
+    }
 
     public Query parse(String expression) {
-        Expression root = parseInternal(new Expression(expression.trim()));
+        Expression root = parseInternal(new Expression(queryPreprocessing(expression)));
         Query q = new Query(root);
         if (logger.isDebugEnabled()) {
             BTreePrinter bTreePrinter = new BTreePrinter();
