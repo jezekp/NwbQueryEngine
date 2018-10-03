@@ -5,7 +5,7 @@ package edu.berkeley.nwbqueryengine.data;
  * <p>
  * jezekp@kiv.zcu.cz
  */
-public class NwbResult {
+public class NwbResult implements Comparable<NwbResult> {
 
     private String dataSet;
     private Object value;
@@ -33,23 +33,49 @@ public class NwbResult {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj == this) {
+        if (obj == this) {
             return true;
         }
 
         NwbResult eq = (NwbResult) obj;
-        return eq.value.equals(value);
+        return eq.value.equals(value)
+                && eq.dataSet.equals(dataSet);
     }
 
     @Override
     public int hashCode() {
         int result = 17;
         result = 31 * result + value.hashCode();
+        result = 31 * result + dataSet.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
         return "Dataset: " + dataSet + ", Value: " + value;
+    }
+
+    @Override
+    public int compareTo(NwbResult o) {
+
+        Object valueToCompare = o.getValue();
+
+        if (valueToCompare instanceof String) {
+            String compare = (String) valueToCompare;
+            String thisValue = (String) value;
+            return thisValue.compareTo(compare);
+        }
+        if (valueToCompare instanceof Number) {
+            double compare = ((Number) valueToCompare).doubleValue();
+            double thisValue = ((Number) value).doubleValue();;
+            if (compare > thisValue) {
+                return -1;
+            }
+            if (compare < thisValue) {
+                return 1;
+            }
+            return 0;
+        }
+        return 0;
     }
 }
