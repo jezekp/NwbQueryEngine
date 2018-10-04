@@ -4,6 +4,7 @@ import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.util.BTreePrinter;
+import edu.berkeley.nwbqueryengine.util.ValuesUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,12 +37,9 @@ public class QueryParser implements Parser {
     public static String BRACKETS_PATTERN = "\\(([^)]+)\\)";
 
 
-    protected String queryPreprocessing(String input) {
-        return input.replaceAll(" ", "").trim();
-    }
 
     public Query parse(String expression) {
-        Expression root = parseInternal(new Expression(queryPreprocessing(expression)));
+        Expression root = parseInternal(new Expression(expression));
         Query q = new Query(root);
         if (logger.isDebugEnabled()) {
             BTreePrinter bTreePrinter = new BTreePrinter();
@@ -63,7 +61,7 @@ public class QueryParser implements Parser {
             String subValue = input.substring(subValueStartingIndex, brackets.end(0));
             //left side of each subtreee is a group_name, right side is an expression like expression | expression or expression & expression
             //parse it recursively, goes over all expressions like epochs=(a|b|c)
-            subValueStartingIndex += subValue.length();
+            subValueStartingIndex += subValue.trim().length();
             String operator = (subValueStartingIndex < input.length()) ? "" + (input.substring(subValueStartingIndex).trim().charAt(0)) : "";
             String valueWithoutOperator = StringUtils.strip(subValue.trim(), AND_OR);
             node.setOperator(operator);
@@ -80,7 +78,7 @@ public class QueryParser implements Parser {
     private Expression parseSubString(Expression node, String delimiter, String previousOperator) {
         //st contains [0] - left side, [1] - operator, [2] - right side
         String input = node.getExpressionValue();
-        String[] st = input.split(delimiter, 3);
+        String[] st = ValuesUtil.trimArray(input.split(delimiter, 3));
         logger.debug("Input: " + input + ", delimiter: " + delimiter + ", left: " + ((st.length > 0) ? st[0] : "") + ", operator: " + ((st.length > 1) ? st[1] : "") + ", right: " + ((st.length > 2) ? st[2] : ""));
         boolean isOthers = delimiter.equals(OTHERS_DELIMITER);
         boolean isAssign = delimiter.equals(ASSIGN_DELIMITER);

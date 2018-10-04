@@ -30,6 +30,14 @@ import java.util.*;
  **********************************************************************************************************************/
 public class ValuesUtil {
 
+    public static String[] trimArray(String[] array) {
+        String[] res = new String[array.length];
+        for (int i = 0; i < array.length; i++)
+            res[i] = array[i].trim();
+
+        return res;
+    }
+
     public static Object getModifiedCopy(Object value) {
         Object copy = value;
         if (value instanceof String) {
