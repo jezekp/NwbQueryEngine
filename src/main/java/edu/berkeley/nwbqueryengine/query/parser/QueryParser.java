@@ -78,7 +78,8 @@ public class QueryParser implements Parser {
     private Expression parseSubString(Expression node, String delimiter, String previousOperator) {
         //st contains [0] - left side, [1] - operator, [2] - right side
         String input = node.getExpressionValue();
-        String[] st = ValuesUtil.trimArray(input.split(delimiter, 3));
+        String[] st = StringUtils.stripAll(input.split(delimiter, 3));
+
         logger.debug("Input: " + input + ", delimiter: " + delimiter + ", left: " + ((st.length > 0) ? st[0] : "") + ", operator: " + ((st.length > 1) ? st[1] : "") + ", right: " + ((st.length > 2) ? st[2] : ""));
         boolean isOthers = delimiter.equals(OTHERS_DELIMITER);
         boolean isAssign = delimiter.equals(ASSIGN_DELIMITER);
