@@ -9,10 +9,12 @@ public class NwbResult implements Comparable<NwbResult> {
 
     private String dataSet;
     private Object value;
+    private Object dataStorageName;
 
-    public NwbResult(String dataSet, Object value) {
+    public NwbResult(String dataSet, Object value, Object dataStorageName) {
         this.dataSet = dataSet;
         this.value = value;
+        this.setDataStorageName(dataStorageName);
     }
 
     public String getDataSet() {
@@ -52,7 +54,7 @@ public class NwbResult implements Comparable<NwbResult> {
 
     @Override
     public String toString() {
-        return "Dataset: " + dataSet + ", Value: " + value;
+        return "Dataset: " + dataSet + ", Value: " + value + ", DataStorageName: " + getDataStorageName();
     }
 
     @Override
@@ -77,5 +79,13 @@ public class NwbResult implements Comparable<NwbResult> {
             return 0;
         }
         return 0;
+    }
+
+    public Object getDataStorageName() {
+        return dataStorageName;
+    }
+
+    public void setDataStorageName(Object dataStorageName) {
+        this.dataStorageName = dataStorageName;
     }
 }

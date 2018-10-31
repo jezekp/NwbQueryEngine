@@ -1,7 +1,5 @@
 package edu.berkeley.nwbqueryengine.data;
 
-import edu.berkeley.nwbqueryengine.util.ValuesUtil;
-
 import java.util.*;
 
 import static edu.berkeley.nwbqueryengine.util.ValuesUtil.*;
@@ -51,8 +49,8 @@ public class Restrictions {
                 double lowestMax = Collections.min(Arrays.asList(maxims));
 
                 if (highestMin <= lowestMax) {
-                    result.addAll(processBounds(first, highestMin, lowestMax));
-                    result.addAll(processBounds(second, highestMin, lowestMax));
+                    result.addAll(getResultsInBounds(first, highestMin, lowestMax));
+                    result.addAll(getResultsInBounds(second, highestMin, lowestMax));
                 }
             }
         }

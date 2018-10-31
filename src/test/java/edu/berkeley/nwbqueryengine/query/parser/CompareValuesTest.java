@@ -37,8 +37,8 @@ public class CompareValuesTest {
 
     @Test
     void compareDoubles() {
-        NwbResult lowerDouble = new NwbResult("lower", 10.0);
-        NwbResult higherDouble = new NwbResult("higher", 20.0);
+        NwbResult lowerDouble = new NwbResult("lower", 10.0, null);
+        NwbResult higherDouble = new NwbResult("higher", 20.0, null);
 
         List<NwbResult> list = new LinkedList<>();
         list.add(lowerDouble);
@@ -55,8 +55,8 @@ public class CompareValuesTest {
 
     @Test
     void compareIntegers() {
-        NwbResult lowerDouble = new NwbResult("lower", 10);
-        NwbResult higherDouble = new NwbResult("higher", 20);
+        NwbResult lowerDouble = new NwbResult("lower", 10, null);
+        NwbResult higherDouble = new NwbResult("higher", 20, null);
 
         List<NwbResult> list = new LinkedList<>();
         list.add(lowerDouble);
@@ -73,8 +73,8 @@ public class CompareValuesTest {
 
     @Test
     void compareStrings() {
-        NwbResult lowerDouble = new NwbResult("lower", "Alphabet");
-        NwbResult higherDouble = new NwbResult("higher", "ZZ-top");
+        NwbResult lowerDouble = new NwbResult("lower", "Alphabet", null);
+        NwbResult higherDouble = new NwbResult("higher", "ZZ-top", null);
 
         List<NwbResult> list = new LinkedList<>();
         list.add(lowerDouble);

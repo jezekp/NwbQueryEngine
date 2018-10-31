@@ -67,7 +67,7 @@ public class ValuesUtil {
         return results;
     }
 
-    public static List<NwbResult> processBounds(List<NwbResult> input, double low, double high) {
+    public static List<NwbResult> getResultsInBounds(List<NwbResult> input, double low, double high) {
         List<NwbResult> result = new LinkedList<>();
         for (NwbResult value : input) {
             double compare = (double) value.getValue();

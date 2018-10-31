@@ -71,7 +71,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                     if (StringUtils.isBlank(arithmeticalOperator)) {
                         for (Object value : new LinkedList<>(values)) {
                             logger.debug("Value: " + value);
-                            partialResult.add(new NwbResult(entity, value));
+                            partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
                         }
                     } else {
                         String expressionValue = rightSide.getExpressionValue();
@@ -91,7 +91,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                             boolean res = ((Boolean) eval).booleanValue();
                             logger.debug("Evaluation: " + value + ", Operator: " + arithmeticalOperator + ", Expression value: " + expressionValue + ", data: " + res);
                             if (res) {
-                                partialResult.add(new NwbResult(entity, value));
+                                partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
                             }
                         }
                     }
