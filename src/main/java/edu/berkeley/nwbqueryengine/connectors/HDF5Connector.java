@@ -73,7 +73,7 @@ public class HDF5Connector implements Connector<String> {
 
 
                 }
-                partialExpressions.add(new EntityWrapper(showResults, item, fileName, query));
+                partialExpressions.add(new EntityWrapper(showResults, item, fileName, subQuery));
             }
         }
         return partialExpressions;
