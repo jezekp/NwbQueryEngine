@@ -1,6 +1,7 @@
 package edu.berkeley.nwbqueryengine.data;
 
 import edu.berkeley.nwbqueryengine.query.Expression;
+import edu.berkeley.nwbqueryengine.query.Query;
 
 import java.util.List;
 
@@ -14,11 +15,13 @@ public class EntityWrapper<T, DB> {
     private List<T> entity;
     private Expression expression;
     private DB storage;
+    private Query query;
 
-    public EntityWrapper(List<T> entity, Expression expression, DB storage) {
+    public EntityWrapper(List<T> entity, Expression expression, DB storage, Query query) {
         this.entity = entity;
         this.expression = expression;
         this.setStorage(storage);
+        this.setQuery(query);
     }
 
     public Expression getExpression() {
@@ -43,5 +46,13 @@ public class EntityWrapper<T, DB> {
 
     public void setStorage(DB storage) {
         this.storage = storage;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
     }
 }

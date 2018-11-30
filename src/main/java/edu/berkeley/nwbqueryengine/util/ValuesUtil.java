@@ -1,6 +1,8 @@
 package edu.berkeley.nwbqueryengine.util;
 
 import edu.berkeley.nwbqueryengine.data.NwbResult;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
@@ -30,6 +32,8 @@ import java.util.*;
  **********************************************************************************************************************/
 public class ValuesUtil {
 
+    private static Log logger = LogFactory.getLog(ValuesUtil.class);
+
     public static Object getModifiedCopy(Object value) {
         Object copy = value;
         if (value instanceof String) {
@@ -45,7 +49,8 @@ public class ValuesUtil {
 
     public static String getPathWithoutDatasetName(NwbResult item) {
         int index = item.getDataSet().lastIndexOf("/");
-        return item.getDataSet().substring(0, index);
+        logger.debug("Dataset: " + item);
+        return index  < 0 ? item.getDataSet() : item.getDataSet().substring(0, index);
     }
 
     public static List<NwbResult> removeDatasetWithDuplicitPath(List<NwbResult> first, List<NwbResult> second) {

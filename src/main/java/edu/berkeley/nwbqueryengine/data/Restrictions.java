@@ -20,7 +20,7 @@ public class Restrictions {
 
 
 
-    public static List<NwbResult> and(List<NwbResult> first, List<NwbResult> second) {
+    public static List<NwbResult> and(List<NwbResult> first, List<NwbResult> second, boolean isNextQuery) {
         final List<NwbResult> result = new LinkedList<>();
 
         if (first.size() > 0 && second.size() > 0) {
@@ -30,7 +30,12 @@ public class Restrictions {
             //This is applied for searching over different datasets too
             if (first.get(0).getValue() instanceof String
         || !getDatasetName(first.get(0)).equals(getDatasetName(second.get(0)))) {
-                result.addAll(removeDatasetWithDuplicitPath(first, second));
+                if(isNextQuery) {
+                    result.addAll(first);
+                    result.addAll(second);
+                } else {
+                    result.addAll(removeDatasetWithDuplicitPath(first, second));
+                }
             } else {
                 //This code takes both intervals (first and second) finds a highest lower bound and
                 // a lowest higher bound from both.

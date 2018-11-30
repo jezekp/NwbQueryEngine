@@ -47,6 +47,7 @@ public class NwbProcessor implements Processor<NwbResult> {
             logger.error(e);
             throw new ProcessorException(e);
         }
+        Query previousQuery = null;
         for (EntityWrapper partialExpression : entityWrappers) {
             List<NwbResult> partialResult = new LinkedList<>();
             Expression item = partialExpression.getExpression();
@@ -103,17 +104,22 @@ public class NwbProcessor implements Processor<NwbResult> {
 
             logger.debug(item + ", AND-OR-Operator: " + andOrOperator);
 
+            Query currentQuery = partialExpression.getQuery();
+            boolean isNextQuery = previousQuery == null || currentQuery.equals(previousQuery) ? false : true;
+
             if (StringUtils.equals("\\" + andOrOperator, Operators.OR.op())) {
                 logger.debug("...OR....");
                 nwbResults = Restrictions.or(nwbResults, partialResult);
                 nwbResults.forEach(name -> logger.debug(name));
             } else if (StringUtils.equals(andOrOperator, Operators.AND.op())) {
                 logger.debug("...AND....");
-                nwbResults = Restrictions.and(nwbResults, partialResult);
+                nwbResults = Restrictions.and(nwbResults, partialResult, isNextQuery);
                 nwbResults.forEach(name -> logger.debug(name));
             } else {
                 nwbResults.addAll(partialResult);
             }
+
+            previousQuery = currentQuery;
 
         }
         nwbResults.forEach(name -> logger.debug(name));

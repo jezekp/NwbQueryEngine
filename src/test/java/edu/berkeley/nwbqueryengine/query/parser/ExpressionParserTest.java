@@ -163,10 +163,16 @@ class ExpressionParserTest {
     @Test
     void andLikeCondition() {
         List<NwbResult> res = execute("epochs=(tags LIKE Mis) & epochs=(tags LIKE Hi)");
-        assertTrue(res.size() > 0);
+        assertTrue(res.size() == 2);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("Mis") ||
                 ((String) item.getValue()).contains("Hi")));
 
+    }
+
+    @Test
+    void complexLikeQuery() {
+        List<NwbResult> res = execute("/general/subject=(age LIKE 3 months 16 days & species LIKE Mus musculu) & /=(file_create_date LIKE 2017-04)");
+        //todo
     }
 
     @Test
