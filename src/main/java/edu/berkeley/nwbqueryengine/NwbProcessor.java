@@ -105,7 +105,9 @@ public class NwbProcessor implements Processor<NwbResult> {
 
 
             Query currentSubQuery = partialExpression.getQuery();
-            boolean isNextSubquery = previousSubQuery == null || previousSubQuery.getQueryLeftSide().getExpressionValue().equals(currentSubQuery.getQueryLeftSide().getExpressionValue()) ? false : true;
+            boolean isNextSubquery = previousSubQuery == null ||
+                    previousSubQuery.getQueryLeftSide().getExpressionValue()
+                            .equals(currentSubQuery.getQueryLeftSide().getExpressionValue()) ? false : true;
             logger.debug("isNextQuery: " + isNextSubquery);
 
             if (StringUtils.equals("\\" + andOrOperator, Operators.OR.op())) {
