@@ -44,7 +44,12 @@ public class HDF5Connector implements Connector<String> {
                     showResults = showExpressions.get(expressionValue);
                 } else {
                     showResults = new LinkedList<>();
-                    String queryString = "SHOW LIKE **/" + subQuery.getQueryLeftSide().getExpressionValue() + "/**/" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
+                    String leftSide = subQuery.getQueryLeftSide().getExpressionValue();
+                    String queryPrefix = "**/";
+                    if(leftSide.startsWith("/")) {
+                        queryPrefix = "";
+                    }
+                    String queryString = "SHOW LIKE " + queryPrefix + "" + leftSide + "/**/" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
                     logger.debug(queryString);
                     int executeLikeRes;
                     int attempts = 1;
