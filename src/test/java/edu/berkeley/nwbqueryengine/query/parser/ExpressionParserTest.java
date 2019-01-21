@@ -194,4 +194,14 @@ class ExpressionParserTest {
 
     }
 
+    @Test
+    void bracketsTest() {
+        String find = "(PW)";
+        List<NwbResult> res = execute("/=\"session_description LIKE "+ find +"\"");
+        assertTrue(res.size() == 1);
+        res.forEach(item -> assertTrue(((String) item.getValue()).contains(find)));
+
+
+    }
+
 }

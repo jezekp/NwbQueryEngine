@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by petr-jezek on 26.6.17*
@@ -75,11 +76,11 @@ public class NwbProcessor implements Processor<NwbResult> {
                             partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
                         }
                     } else {
-                        String expressionValue = rightSide.getExpressionValue();
+                        String expressionValue =  rightSide.getExpressionValue();
                         String jexlExpression;
                         if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
                             jexlExpression = "x1=~x2";
-                            expressionValue = ".*" + expressionValue + ".*"; //find all substrings - is it a good or bad solution?
+                            expressionValue = ".*" + Pattern.quote(expressionValue) + ".*"; //find all substrings - is it a good or bad solution?
                         } else {
                             jexlExpression = "x1" + arithmeticalOperator + "x2";
                         }
