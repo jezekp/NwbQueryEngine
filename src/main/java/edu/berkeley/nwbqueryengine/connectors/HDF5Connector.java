@@ -46,16 +46,17 @@ public class HDF5Connector implements Connector<String> {
                     showResults = new LinkedList<>();
                     String leftSide = subQuery.getQueryLeftSide().getExpressionValue();
                     String queryPrefix = "**/";
-                    if(leftSide.startsWith("/")) {
+                    if (leftSide.startsWith("/")) {
                         queryPrefix = "";
+                    } else if(leftSide.equals("*")) {
+                        leftSide = "**";
                     }
-                    String queryString = "SHOW LIKE " + queryPrefix + "" + leftSide + "/**/" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
+                    String queryString = "SHOW LIKE " + queryPrefix + "" + leftSide + "/" + queryPrefix + "" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
                     logger.debug(queryString);
                     int executeLikeRes;
                     int attempts = 1;
                     connect(obj);
                     synchronized (this) {
-
                         while ((executeLikeRes = HDFql.execute(queryString)) != HDFql.SUCCESS && attempts-- > 0) {
 //                    HDFql.cursorClear(cursor);
 //                    HDFql.cursorInitialize(cursor);
@@ -138,7 +139,7 @@ public class HDF5Connector implements Connector<String> {
                 } catch (Exception e) {
                     throw new ConnectorException(e);
                 }
-                if(value != null) {
+                if (value != null) {
                     values.add(value);
                 }
                 logger.debug("selected value: " + value + ", " + ((value == null) ? "null" : value.getClass().getName()));

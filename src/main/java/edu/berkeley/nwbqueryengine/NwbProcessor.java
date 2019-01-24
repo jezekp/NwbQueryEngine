@@ -85,7 +85,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                             jexlExpression = "x1" + arithmeticalOperator + "x2";
                         }
                         JexlExpression func = jexl.createExpression(jexlExpression);
-                        mc.set("x2", expressionValue);
+                        mc.set("x2", ValuesUtil.getModifiedCopy(expressionValue));
                         for (Object value : new LinkedList<>(values)) {
                             logger.debug("Value: " + value);
                             mc.set("x1", ValuesUtil.getModifiedCopy(value));

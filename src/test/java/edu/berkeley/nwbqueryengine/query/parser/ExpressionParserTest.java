@@ -1,3 +1,4 @@
+
 package edu.berkeley.nwbqueryengine.query.parser;
 
 import edu.berkeley.nwbqueryengine.connectors.HDF5Connector;
@@ -53,8 +54,7 @@ class ExpressionParserTest {
 
     @Test
     void parseQeryWithSingleOperand() {
-        //List<NwbResult> res = execute("epochs=(start_time>200)");
-        List<NwbResult> res = execute("epochs=\"start_time>200\"");
+        List<NwbResult> res = execute("epochs=(start_time>200)");
         assertTrue(res.size() == 327);
         res.forEach(name -> {
             double value = (double) name.getValue();
@@ -66,7 +66,7 @@ class ExpressionParserTest {
 
     @Test
     void parseQeryWithTwoOperand() {
-        List<NwbResult> res = execute("epochs=\"start_time>200 & start_time<500\"");
+        List<NwbResult> res = execute("epochs=(start_time>200 & start_time<500)");
         assertTrue(res.size() > 0);
         res.forEach(name -> {
             double value = (double) name.getValue();
@@ -80,7 +80,7 @@ class ExpressionParserTest {
     @Test
     void parseSubQueriesTest() {
         QueryParser parser = new QueryParser();
-        Query query = parser.parse("epochs=\"start_time > 10 | stop_time < 20\" | epochs2=\"start_time2 > 10 | stop_time2 < 20\" | epochs3=\"start_time3 > 10 | stop_time3 < 20\"& epochs4=\"start_time4 > 10 | stop_time4 < 20\"");
+        Query query = parser.parse("epochs=(start_time > 10 | stop_time < 20) | epochs2=(start_time2 > 10 | stop_time2 < 20) | epochs3=(start_time3 > 10 | stop_time3 < 20)& epochs4=(start_time4 > 10 | stop_time4 < 20)");
         List<Query> expressions = query.getSubQueries();
         assertTrue(expressions.size() > 0);
         expressions.forEach(name -> {
@@ -94,7 +94,7 @@ class ExpressionParserTest {
 
     @Test
     void parseQueryWithOperands() {
-        List<NwbResult> res = execute("epochs=\"start_time>200 & stop_time<400 | stop_time>1600\"");
+        List<NwbResult> res = execute("epochs=(start_time>200 & stop_time<400 | stop_time>1600)");
         assertTrue(res.size() > 0);
         res.forEach(name -> {
             double value = (double) name.getValue();
@@ -116,27 +116,27 @@ class ExpressionParserTest {
 
     @Test
     void parseQueryWithoutOperands() {
-        List<NwbResult> res = execute("epochs=\"start_time | stop_time\"");
+        List<NwbResult> res = execute("epochs=(start_time | stop_time)");
         assertTrue(res.size() == 736);
     }
 
     @Test
     void like() {
-        List<NwbResult> res = execute("analysis=\"description LIKE whisker\"");
+        List<NwbResult> res = execute("analysis=(description LIKE whisker)");
         assertTrue(res.size() > 0);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("whisker")));
     }
 
     @Test
     void spacesInQuery() {
-        List<NwbResult> res = execute("analysis  =    \"       description       LIKE     whisker       \"");
+        List<NwbResult> res = execute("analysis  =    (       description       LIKE     whisker        )");
         assertTrue(res.size() > 0);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("whisker")));
     }
 
     @Test
     void noSpacesInQuery() {
-        List<NwbResult> res = execute("analysis=\"descriptionLIKEwhisker\"");
+        List<NwbResult> res = execute("analysis=(descriptionLIKEwhisker)");
         assertTrue(res.size() > 0);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("whisker")));
     }
@@ -145,7 +145,7 @@ class ExpressionParserTest {
     @Test
     void parseGenericQuery() {
         QueryParser p = new QueryParser();
-        Query root = p.parse("CellInfo=\"area==c1|area==c2&h==c3|h3==c8\"");
+        Query root = p.parse("CellInfo=(area==c1|area==c2&h==c3|h3==c8)");
 
         Expression leftSide = root.getQueryLeftSide();
         assertNotNull(leftSide);
@@ -163,8 +163,7 @@ class ExpressionParserTest {
 
     @Test
     void andLikeCondition() {
-        List<NwbResult> res = execute("epochs=\"tags LIKE Mis\" & epochs=\"tags LIKE Hi\"");
-//        List<NwbResult> res = execute("epochs=(tags LIKE Mis) & epochs=(tags LIKE Hi)");
+        List<NwbResult> res = execute("epochs=(tags LIKE Mis) & epochs=(tags LIKE Hi)");
         assertTrue(res.size() == 2);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("Mis") ||
                 ((String) item.getValue()).contains("Hi")));
@@ -173,7 +172,7 @@ class ExpressionParserTest {
 
     @Test
     void andLikeCondition2() {
-        List<NwbResult> res = execute("epochs=\"tags LIKE Mis & tags LIKE Hi\"");
+        List<NwbResult> res = execute("epochs=(tags LIKE Mis & tags LIKE Hi)");
         assertTrue(res.size() == 2);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("Mis") ||
                 ((String) item.getValue()).contains("Hi")));
@@ -182,13 +181,13 @@ class ExpressionParserTest {
 
     @Test
     void complexLikeQuery() {
-        List<NwbResult> res = execute("/general/subject=\"age LIKE 3 months 16 days & species LIKE Mus musculu\" & /=\"file_create_date LIKE 2017-04\"");
+        List<NwbResult> res = execute("/general/subject=(age LIKE 3 months 16 days & species LIKE Mus musculu) & /=(file_create_date LIKE 2017-04)");
         //todo
     }
 
     @Test
     void andOverTwoDatasets() {
-        List<NwbResult> res = execute("epochs/Trial_306=\"start_time < 1530\" & epochs/Trial_307=\"stop_time>1530\"");
+        List<NwbResult> res = execute("epochs/Trial_306=(start_time < 1530) & epochs/Trial_307=(stop_time>1530)");
         //TODO fix assertTrue(res.size() == 2);
         //res.forEach(item -> assertTrue((double)item.getValue() < 1530));
 
@@ -197,11 +196,39 @@ class ExpressionParserTest {
     @Test
     void bracketsTest() {
         String find = "(PW)";
-        List<NwbResult> res = execute("/=\"session_description LIKE "+ find +"\"");
+        List<NwbResult> res = execute("/=(session_description LIKE "+ find +")");
         assertTrue(res.size() == 1);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains(find)));
 
 
+    }
+
+    @Test
+    void timeLikeTest() {
+        String find = "2013-02-07";
+        List<NwbResult> res = execute("/=(session_start_time LIKE " + find +")");
+        assertTrue(res.size() == 1);
+        res.forEach(item -> assertTrue(((String) item.getValue()).contains(find)));
+    }
+
+    @Test
+    void dateBeforeTest() {
+        List<NwbResult> findDateBefore = execute("/=(session_start_time < 2015-02-07)");
+        assertTrue(findDateBefore.size() == 1);
+        List<NwbResult> findDateAfter = execute("/=(session_start_time > 2013-02-06)");
+        assertTrue(findDateAfter.size() == 1);
+    }
+
+    @Test
+    void dateAfterTest() {
+        List<NwbResult> findDateAfter = execute("/=(session_start_time > 2013-02-06)");
+        assertTrue(findDateAfter.size() == 1);
+    }
+    @Test
+    void attributeInHierarchy() {
+        List<NwbResult> res = execute("extracellular_units=(neurodata_type LIKE Modul)");
+        assertTrue(res.size() == 1);
+        res.forEach(item -> assertTrue(((String) item.getValue()).contains("Modul")));
     }
 
 }

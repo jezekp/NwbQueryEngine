@@ -33,10 +33,9 @@ public class QueryParser implements Parser {
     public static String ASSIGN_DELIMITER = "((?<=" + ASSIGN + ")|(?=" + ASSIGN + "))";
 
     //pattern for quotes = "\"([^\"]+)\""
-    public static String QUOTES_PATTERN = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
-    //public static String QUOTES_PATTERN = "\\(([^)]+)\\)";
-    //public static String QUOTES_PATTERN = "([^\"]|\")*";
-
+    //public static String QUOTES_PATTERN = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+    public static String QUOTES_PATTERN = "(\"|').*?\\1(\\*SKIP)(\\*FAIL)|\\((?:[^()]|(\\?R))*\\)";
+    //\(([^]+)\)
 
 
     public Query parse(String expression) {

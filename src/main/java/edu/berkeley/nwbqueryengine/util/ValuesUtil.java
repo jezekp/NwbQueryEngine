@@ -37,7 +37,9 @@ public class ValuesUtil {
     public static Object getModifiedCopy(Object value) {
         Object copy = value;
         if (value instanceof String) {
-            copy = ((String) value).replaceAll("\n", " ");
+            String stringValue = ((String) value);
+            stringValue = stringValue.replaceAll("\n", " ");
+            copy = DateUtil.tryParse(stringValue);
         }
         return copy;
     }
