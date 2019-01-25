@@ -51,7 +51,7 @@ public class Query {
             max_level = level;
 
             //When operator is assign and left and right sides are null the node is a left side of a subtree
-            //Its parrent is a subquery root
+            //Its parent is a subquery root
             if(node.getOperator().equals(QueryParser.ASSIGN)) {
                 subQueries.add(new Query(node.getParent()));
             }

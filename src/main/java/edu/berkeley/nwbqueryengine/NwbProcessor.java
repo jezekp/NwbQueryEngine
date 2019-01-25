@@ -7,6 +7,7 @@ import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
 import edu.berkeley.nwbqueryengine.data.EntityWrapper;
 import edu.berkeley.nwbqueryengine.data.Restrictions;
+import edu.berkeley.nwbqueryengine.util.DateUtil;
 import edu.berkeley.nwbqueryengine.util.ValuesUtil;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
@@ -78,17 +79,26 @@ public class NwbProcessor implements Processor<NwbResult> {
                     } else {
                         String expressionValue =  rightSide.getExpressionValue();
                         String jexlExpression;
+                        boolean isLike;
                         if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
                             jexlExpression = "x1=~x2";
                             expressionValue = ".*" + Pattern.quote(expressionValue) + ".*"; //find all substrings - is it a good or bad solution?
+                            isLike = true;
                         } else {
                             jexlExpression = "x1" + arithmeticalOperator + "x2";
+                            isLike = false;
                         }
                         JexlExpression func = jexl.createExpression(jexlExpression);
-                        mc.set("x2", ValuesUtil.getModifiedCopy(expressionValue));
+                        Object x1 = ValuesUtil.getModifiedCopy(expressionValue);
+                        x1 = ValuesUtil.getDateIfPossible(x1);
+                        mc.set("x2", x1);
                         for (Object value : new LinkedList<>(values)) {
                             logger.debug("Value: " + value);
-                            mc.set("x1", ValuesUtil.getModifiedCopy(value));
+                            Object x2 = ValuesUtil.getModifiedCopy(value);
+                            if (!isLike) {
+                                x2 = ValuesUtil.getDateIfPossible(x2);
+                            }
+                            mc.set("x1", x2);
                             Object eval = func.evaluate(mc);
                             boolean res = ((Boolean) eval).booleanValue();
                             logger.debug("Evaluation: " + value + ", Operator: " + arithmeticalOperator + ", Expression value: " + expressionValue + ", data: " + res);

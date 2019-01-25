@@ -6,6 +6,7 @@ import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.NwbProcessor;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
+import edu.berkeley.nwbqueryengine.util.DateUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import javax.print.DocFlavor;
 import java.io.File;
 import java.io.FileInputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,6 +34,7 @@ class ExpressionParserTest {
 
     private static String file = "ANM184389_20130207.nwb";
     private Log logger = LogFactory.getLog(getClass());
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     @BeforeAll
     static void init() {
@@ -181,15 +186,36 @@ class ExpressionParserTest {
 
     @Test
     void complexLikeQuery() {
-        List<NwbResult> res = execute("/general/subject=(age LIKE 3 months 16 days & species LIKE Mus musculu) & /=(file_create_date LIKE 2017-04)");
-        //todo
+        List<NwbResult> res = execute("/general/subject=(age LIKE 25 & species LIKE Mus) & /=(file_create_date LIKE 2017-02-14T16:40:38.8414)");
+        assertTrue(res.size() == 3);
+        res.forEach(item -> {
+            String value = (String) item.getValue();
+            String dataset = item.getDataSet();
+            assertTrue(value.contains("25") && dataset.equals("/general/subject/age") ||
+                    value.contains("2017-02-14T16:40:38.8414") && dataset.equals("/file_create_date") ||
+                    value.contains("Mus") && dataset.equals("/general/subject/species"));
+        });
+    }
+
+    @Test
+    void complexLikeInQuotesQuery() {
+        List<NwbResult> res = execute("/general/subject=(age LIKE 25 & species LIKE \"Mus\") & /=(file_create_date LIKE \"2017-02-14T16:40:38.8414\")");
+        assertTrue(res.size() == 3);
+        res.forEach(item -> {
+            String value = (String) item.getValue();
+            String dataset = item.getDataSet();
+            assertTrue(value.contains("25") && dataset.equals("/general/subject/age") ||
+                    value.contains("2017-02-14T16:40:38.8414") && dataset.equals("/file_create_date") ||
+                    value.contains("Mus") && dataset.equals("/general/subject/species"));
+        });
     }
 
     @Test
     void andOverTwoDatasets() {
         List<NwbResult> res = execute("epochs/Trial_306=(start_time < 1530) & epochs/Trial_307=(stop_time>1530)");
-        //TODO fix assertTrue(res.size() == 2);
-        //res.forEach(item -> assertTrue((double)item.getValue() < 1530));
+        assertTrue(res.size() == 2);
+        res.forEach(item -> assertTrue((double)item.getValue() < 1530 && item.getDataSet().equals("epochs/Trial_306/start_time")
+    || (double)item.getValue() > 1530 && item.getDataSet().equals("epochs/Trial_307/stop_time")));
 
     }
 
@@ -212,23 +238,57 @@ class ExpressionParserTest {
     }
 
     @Test
-    void dateBeforeTest() {
-        List<NwbResult> findDateBefore = execute("/=(session_start_time < 2015-02-07)");
-        assertTrue(findDateBefore.size() == 1);
-        List<NwbResult> findDateAfter = execute("/=(session_start_time > 2013-02-06)");
-        assertTrue(findDateAfter.size() == 1);
+    void dateBeforeTest() throws ParseException {
+        String find = "2015-02-07";
+        List<NwbResult> res = execute("/=(session_start_time <  " + find +")");
+        assertTrue(res.size() == 1);
+        Date d = sdf.parse(find);
+        res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).before(d)));
+
     }
 
     @Test
-    void dateAfterTest() {
-        List<NwbResult> findDateAfter = execute("/=(session_start_time > 2013-02-06)");
-        assertTrue(findDateAfter.size() == 1);
+    void dateAfterTest() throws ParseException {
+        String find = "2013-02-06";
+        List<NwbResult> res = execute("/=(session_start_time > " + find +")");
+        assertTrue(res.size() == 1);
+        Date d = sdf.parse(find);
+        res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).after(d)));
     }
     @Test
     void attributeInHierarchy() {
         List<NwbResult> res = execute("extracellular_units=(neurodata_type LIKE Modul)");
         assertTrue(res.size() == 1);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("Modul")));
+    }
+
+    @Test
+    void andOverOneGroup() {
+        List<NwbResult> res = execute("/general/subject=(species LIKE Mus musculu & age LIKE 25 w)");
+        assertTrue(res.size() == 2);
+        res.forEach(item -> {
+            String value = (String) item.getValue();
+            assertTrue(value.contains("musculu") || value.contains("25 w"));
+        });
+    }
+
+    @Test
+    void andOverOneGroupFalse() {
+        List<NwbResult> res = execute("/general/subject=(species LIKE Mus musculu & age LIKE 25 weeee");
+        assertTrue(res.size() == 0);
+
+    }
+
+
+    @Test
+    void notValidQuery() {
+        List<NwbResult> res = execute("/general/subject=(species LIKE Mus musculu) & (age LIKE 25 w)");
+        //TODO
+//        assertTrue(res.size() == 2);
+//        res.forEach(item -> {
+//            String value = (String) item.getValue();
+//            assertTrue(value.contains("musculu") || value.contains("25 w"));
+//        });
     }
 
 }

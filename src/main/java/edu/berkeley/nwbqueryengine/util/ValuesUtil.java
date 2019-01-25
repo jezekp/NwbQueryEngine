@@ -38,7 +38,15 @@ public class ValuesUtil {
         Object copy = value;
         if (value instanceof String) {
             String stringValue = ((String) value);
-            stringValue = stringValue.replaceAll("\n", " ");
+            copy = stringValue.replaceAll("\n", " ");
+        }
+        return copy;
+    }
+
+    public static Object getDateIfPossible(Object value) {
+        Object copy = value;
+        if (value instanceof String) {
+            String stringValue = ((String) value);
             copy = DateUtil.tryParse(stringValue);
         }
         return copy;

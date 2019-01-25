@@ -65,7 +65,8 @@ public class QueryParser implements Parser {
             String operator = (subValueStartingIndex < input.length()) ? "" + (input.substring(subValueStartingIndex).trim().charAt(0)) : "";
             String valueWithoutOperator = StringUtils.strip(subValue.trim(), AND_OR);
             node.setOperator(operator);
-            node.setLeftSide(parseSubString(new Expression(valueWithoutOperator, node), ASSIGN_DELIMITER, previousOperator));
+            String delimiter = valueWithoutOperator.contains(ASSIGN) ? ASSIGN_DELIMITER : OTHERS_DELIMITER;
+            node.setLeftSide(parseSubString(new Expression(valueWithoutOperator, node), delimiter, previousOperator));
             Expression newNode = new Expression("", previousOperator, node);
             node.setRightSide(newNode);
             node = newNode;
@@ -79,6 +80,7 @@ public class QueryParser implements Parser {
         //st contains [0] - left side, [1] - operator, [2] - right side
         String input = node.getExpressionValue();
         String[] st = StringUtils.stripAll(input.split(delimiter, 3));
+        st = StringUtils.stripAll(st, "\"|'|(|)");
 
         logger.debug("Input: " + input + ", delimiter: " + delimiter + ", left: " + ((st.length > 0) ? st[0] : "") + ", operator: " + ((st.length > 1) ? st[1] : "") + ", right: " + ((st.length > 2) ? st[2] : ""));
         boolean isOthers = delimiter.equals(OTHERS_DELIMITER);
