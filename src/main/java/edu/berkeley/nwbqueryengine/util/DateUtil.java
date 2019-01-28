@@ -80,6 +80,7 @@ public class DateUtil {
                 return DATE_FORMAT_REGEXPS.get(regexp);
             }
         }
+        logger.warn("Unknown data format for: " + dateString);
         return null; // Unknown format.
     }
 
