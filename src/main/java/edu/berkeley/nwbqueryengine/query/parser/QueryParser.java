@@ -57,6 +57,7 @@ public class QueryParser implements Parser {
         int subValueStartingIndex = 0;
         Expression res = node;
         String previousOperator = "";
+        String previousLeftSide = "";
         while (brackets.find()) {
             String subValue = input.substring(subValueStartingIndex, brackets.end(0));
             //left side of each subtreee is a group_name, right side is an expression like expression | expression or expression & expression
@@ -65,12 +66,17 @@ public class QueryParser implements Parser {
             String operator = (subValueStartingIndex < input.length()) ? "" + (input.substring(subValueStartingIndex).trim().charAt(0)) : "";
             String valueWithoutOperator = StringUtils.strip(subValue.trim(), AND_OR);
             node.setOperator(operator);
-            String delimiter = valueWithoutOperator.contains(ASSIGN) ? ASSIGN_DELIMITER : OTHERS_DELIMITER;
-            node.setLeftSide(parseSubString(new Expression(valueWithoutOperator, node), delimiter, previousOperator));
+            //for queries like: /general/subject=(species LIKE Mus musculu) & (age LIKE 25 w)")
+            //modify it: /general/subject=(species LIKE Mus musculu) & /general/subject=(age LIKE 25 w)")
+            if(!valueWithoutOperator.contains(ASSIGN)) {
+                valueWithoutOperator = previousLeftSide + ASSIGN + valueWithoutOperator;
+            }
+            node.setLeftSide(parseSubString(new Expression(valueWithoutOperator, node), ASSIGN_DELIMITER, previousOperator));
             Expression newNode = new Expression("", previousOperator, node);
             node.setRightSide(newNode);
             node = newNode;
             previousOperator = operator;
+            previousLeftSide = res.getLeftSide().getLeftSide().getExpressionValue();
         }
 
         return res;

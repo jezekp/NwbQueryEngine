@@ -255,6 +255,14 @@ class ExpressionParserTest {
         Date d = sdf.parse(find);
         res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).after(d)));
     }
+
+    @Test
+    void dateBeforeFalseTest() {
+        String find = "2013-02-06";
+        List<NwbResult> res = execute("/=(session_start_time < " + find +")");
+        assertTrue(res.size() == 0);
+    }
+
     @Test
     void attributeInHierarchy() {
         List<NwbResult> res = execute("extracellular_units=(neurodata_type LIKE Modul)");
@@ -281,14 +289,13 @@ class ExpressionParserTest {
 
 
     @Test
-    void notValidQuery() {
+    void notLeftSideOnSubQueries() {
         List<NwbResult> res = execute("/general/subject=(species LIKE Mus musculu) & (age LIKE 25 w)");
-        //TODO
-//        assertTrue(res.size() == 2);
-//        res.forEach(item -> {
-//            String value = (String) item.getValue();
-//            assertTrue(value.contains("musculu") || value.contains("25 w"));
-//        });
+        assertTrue(res.size() == 2);
+        res.forEach(item -> {
+            String value = (String) item.getValue();
+            assertTrue(value.contains("musculu") || value.contains("25 w"));
+        });
     }
 
 }
