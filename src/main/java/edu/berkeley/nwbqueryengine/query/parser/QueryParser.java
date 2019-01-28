@@ -26,6 +26,7 @@ public class QueryParser implements Parser {
     public static String OTHERS = Operators.GE.op() + "|" + Operators.LT.op() + "|" +
             Operators.GT.op() + "|" + Operators.LE.op() + "|" + Operators.NE.op() + "|" + Operators.EQ.op() + "|" +
             Operators.MATCH.op() + "|" + Operators.CONTAINS.op();
+    public static String BRACKETS_AND_QUOTES = "\"|'|(|)";
 
     //(?=foo) lookahead and (?<=foo) lookbehind are used to a delimiter be included as well.
     public static String AND_OR_DELIMITER = "((?<=" + AND_OR + ")|(?=" + AND_OR + "))";
@@ -86,7 +87,7 @@ public class QueryParser implements Parser {
         //st contains [0] - left side, [1] - operator, [2] - right side
         String input = node.getExpressionValue();
         String[] st = StringUtils.stripAll(input.split(delimiter, 3));
-        st = StringUtils.stripAll(st, "\"|'|(|)");
+        st = StringUtils.stripAll(st, BRACKETS_AND_QUOTES);
 
         logger.debug("Input: " + input + ", delimiter: " + delimiter + ", left: " + ((st.length > 0) ? st[0] : "") + ", operator: " + ((st.length > 1) ? st[1] : "") + ", right: " + ((st.length > 2) ? st[2] : ""));
         boolean isOthers = delimiter.equals(OTHERS_DELIMITER);
@@ -103,7 +104,7 @@ public class QueryParser implements Parser {
                 node.setRightSide(new Expression(st[2], st[1], node));
             } else if (isAssign) {
                 node.setLeftSide(new Expression(st[0], st[1], node));
-                String rightSide = StringUtils.strip(st[2], BRACKETS_PATTERN);
+                String rightSide = StringUtils.strip(st[2], BRACKETS_AND_QUOTES);
                 node.setRightSide(parseSubString(new Expression(rightSide, "", node), AND_OR_DELIMITER, st[1]));
             } else {
                 node.setRightSide(parseSubString(new Expression(st[2], st[1], node), AND_OR_DELIMITER, st[1]));

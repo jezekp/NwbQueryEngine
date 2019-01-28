@@ -89,16 +89,16 @@ public class NwbProcessor implements Processor<NwbResult> {
                             isLike = false;
                         }
                         JexlExpression func = jexl.createExpression(jexlExpression);
-                        Object x1 = ValuesUtil.getModifiedCopy(expressionValue);
-                        x1 = ValuesUtil.getDateIfPossible(x1);
-                        mc.set("x2", x1);
+                        Object x2 = ValuesUtil.getModifiedCopy(expressionValue);
+                        x2 = ValuesUtil.getDateIfPossible(x2);
+                        mc.set("x2", x2);
                         for (Object value : new LinkedList<>(values)) {
                             logger.debug("Value: " + value);
-                            Object x2 = ValuesUtil.getModifiedCopy(value);
+                            Object x1 = ValuesUtil.getModifiedCopy(value);
                             if (!isLike) {
-                                x2 = ValuesUtil.getDateIfPossible(x2);
+                                x1 = ValuesUtil.getDateIfPossible(x1);
                             }
-                            mc.set("x1", x2);
+                            mc.set("x1", x1);
                             Object eval = func.evaluate(mc);
                             boolean res = ((Boolean) eval).booleanValue();
                             logger.debug("Evaluation: " + value + ", Operator: " + arithmeticalOperator + ", Expression value: " + expressionValue + ", data: " + res);

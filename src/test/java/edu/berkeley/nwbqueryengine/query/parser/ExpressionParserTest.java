@@ -264,6 +264,20 @@ class ExpressionParserTest {
     }
 
     @Test
+    void dateAfter201801() {
+        String find = "2018-01";
+        List<NwbResult> res = execute("/=(session_start_time > " + find +")");
+        assertTrue(res.size() == 0);
+    }
+
+    @Test
+    void dateBeforaeFalseTest() {
+        String find = "2018";
+        List<NwbResult> res = execute("/=(session_start_time < " + find +")");
+        assertTrue(res.size() == 0);
+    }
+
+    @Test
     void attributeInHierarchy() {
         List<NwbResult> res = execute("extracellular_units=(neurodata_type LIKE Modul)");
         assertTrue(res.size() == 1);

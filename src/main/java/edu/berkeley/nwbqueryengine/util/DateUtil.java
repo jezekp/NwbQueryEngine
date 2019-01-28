@@ -39,8 +39,10 @@ public class DateUtil {
 
     private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {{
         put("^\\d{8}$", "yyyyMMdd");
+//        put("^\\d{4}$", "yyyy");
         put("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy");
         put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
+        put("^\\d{4}-\\d{1,2}$", "yyyy-MM");
         put("^\\d{1,2}/\\d{1,2}/\\d{4}$", "MM/dd/yyyy");
         put("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd");
         put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}$", "dd MMM yyyy");
@@ -63,6 +65,7 @@ public class DateUtil {
         put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "dd MMM yyyy HH:mm:ss");
         put("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "dd MMMM yyyy HH:mm:ss");
         put("^[a-z]{3}\\s[a-z]{3}\\s\\d{1,2}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "EEE MMM dd yyyy HH:mm:ss");
+        put("^[a-z]{3}\\s[a-z]{3}\\s\\d{1,2}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{1}$", "EEE MMM dd yyyy HH:mm:s");
         put("^\\d{8}t\\d{6}[-+]\\d{4}$", "yyyyMMdd'T'hhmmssZ");
         put("^\\d{4}-\\d{2}-\\d{2}t\\d{1,2}:\\d{2}:\\d{2}[-+]\\d{2}:\\d{2}$", "yyyy-MM-dd'T'hh:mm:ssX");
     }};
@@ -77,7 +80,9 @@ public class DateUtil {
     public static String determineDateFormat(String dateString) {
         for (String regexp : DATE_FORMAT_REGEXPS.keySet()) {
             if (dateString.toLowerCase().matches(regexp)) {
-                return DATE_FORMAT_REGEXPS.get(regexp);
+                String format = DATE_FORMAT_REGEXPS.get(regexp);
+                logger.debug("Format for string: " + dateString + ": " + format);
+                return format;
             }
         }
         logger.warn("Unknown data format for: " + dateString);
