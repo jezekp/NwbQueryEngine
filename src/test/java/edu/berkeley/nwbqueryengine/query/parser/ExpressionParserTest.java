@@ -34,7 +34,8 @@ class ExpressionParserTest {
 
     private static String file = "ANM184389_20130207.nwb";
     private Log logger = LogFactory.getLog(getClass());
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat sdfyyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat sdfyyyy = new SimpleDateFormat("yyyy");
 
     @BeforeAll
     static void init() {
@@ -242,7 +243,7 @@ class ExpressionParserTest {
         String find = "2015-02-07";
         List<NwbResult> res = execute("/=(session_start_time <  " + find +")");
         assertTrue(res.size() == 1);
-        Date d = sdf.parse(find);
+        Date d = sdfyyyyMMdd.parse(find);
         res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).before(d)));
 
     }
@@ -252,7 +253,7 @@ class ExpressionParserTest {
         String find = "2013-02-06";
         List<NwbResult> res = execute("/=(session_start_time > " + find +")");
         assertTrue(res.size() == 1);
-        Date d = sdf.parse(find);
+        Date d = sdfyyyyMMdd.parse(find);
         res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).after(d)));
     }
 
@@ -264,17 +265,20 @@ class ExpressionParserTest {
     }
 
     @Test
-    void dateAfter201801() {
+    void dateAfter201801() throws ParseException {
         String find = "2018-01";
         List<NwbResult> res = execute("/=(session_start_time > " + find +")");
         assertTrue(res.size() == 0);
     }
 
     @Test
-    void dateBeforaeFalseTest() {
+    void dateBeforeTrueTest() throws ParseException {
         String find = "2018";
         List<NwbResult> res = execute("/=(session_start_time < " + find +")");
-        assertTrue(res.size() == 0);
+        assertTrue(res.size() == 1);
+        Date d = sdfyyyy.parse(find);
+        res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).before(d)));
+
     }
 
     @Test

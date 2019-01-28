@@ -90,15 +90,15 @@ public class NwbProcessor implements Processor<NwbResult> {
                         }
                         JexlExpression func = jexl.createExpression(jexlExpression);
                         Object x2 = ValuesUtil.getModifiedCopy(expressionValue);
-                        x2 = ValuesUtil.getDateIfPossible(x2);
-                        mc.set("x2", x2);
                         for (Object value : new LinkedList<>(values)) {
                             logger.debug("Value: " + value);
                             Object x1 = ValuesUtil.getModifiedCopy(value);
-                            if (!isLike) {
+                            if (!isLike && !(x1 instanceof Number)) {
                                 x1 = ValuesUtil.getDateIfPossible(x1);
+                                x2 = ValuesUtil.getDateIfPossible(x2);
                             }
                             mc.set("x1", x1);
+                            mc.set("x2", x2);
                             Object eval = func.evaluate(mc);
                             boolean res = ((Boolean) eval).booleanValue();
                             logger.debug("Evaluation: " + value + ", Operator: " + arithmeticalOperator + ", Expression value: " + expressionValue + ", data: " + res);
