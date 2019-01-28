@@ -33,8 +33,8 @@ public class QueryParser implements Parser {
     public static String ASSIGN_DELIMITER = "((?<=" + ASSIGN + ")|(?=" + ASSIGN + "))";
 
     //pattern for quotes = "\"([^\"]+)\""
-    //public static String QUOTES_PATTERN = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
-    public static String QUOTES_PATTERN = "(\"|').*?\\1(\\*SKIP)(\\*FAIL)|\\((?:[^()]|(\\?R))*\\)";
+    //public static String BRACKETS_PATTERN = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+    public static String BRACKETS_PATTERN = "(\"|').*?\\1(\\*SKIP)(\\*FAIL)|\\((?:[^()]|(\\?R))*\\)";
     //\(([^]+)\)
 
 
@@ -53,7 +53,7 @@ public class QueryParser implements Parser {
         String input = node.getExpressionValue().trim();
         //Expression is group_name=(expression)
         //Find expression inside brackets [] or ()
-        Matcher brackets = Pattern.compile(QUOTES_PATTERN).matcher(input);
+        Matcher brackets = Pattern.compile(BRACKETS_PATTERN).matcher(input);
         int subValueStartingIndex = 0;
         Expression res = node;
         String previousOperator = "";
@@ -103,7 +103,7 @@ public class QueryParser implements Parser {
                 node.setRightSide(new Expression(st[2], st[1], node));
             } else if (isAssign) {
                 node.setLeftSide(new Expression(st[0], st[1], node));
-                String rightSide = StringUtils.strip(st[2], QUOTES_PATTERN);
+                String rightSide = StringUtils.strip(st[2], BRACKETS_PATTERN);
                 node.setRightSide(parseSubString(new Expression(rightSide, "", node), AND_OR_DELIMITER, st[1]));
             } else {
                 node.setRightSide(parseSubString(new Expression(st[2], st[1], node), AND_OR_DELIMITER, st[1]));
