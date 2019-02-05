@@ -21,40 +21,40 @@ public class HDFqlUtil {
         if (datatype == HDFql.TINYINT) {
             res = HDFql.cursorGetTinyInt(cursor);
         }
-        if (datatype == HDFql.UNSIGNED_TINYINT) {
+        else if (datatype == HDFql.UNSIGNED_TINYINT) {
             res = HDFql.cursorGetUnsignedTinyInt(cursor);
         }
-        if (datatype == HDFql.SMALLINT) {
+        else if (datatype == HDFql.SMALLINT) {
             res = HDFql.cursorGetSmallInt(cursor);
         }
-        if (datatype == HDFql.UNSIGNED_SMALLINT) {
+        else if (datatype == HDFql.UNSIGNED_SMALLINT) {
             res = HDFql.cursorGetUnsignedSmallInt(cursor);
         }
-        if (datatype == HDFql.INT) {
+        else if (datatype == HDFql.INT) {
             res = HDFql.cursorGetInt(cursor);
         }
-        if (datatype == HDFql.UNSIGNED_INT) {
+        else if (datatype == HDFql.UNSIGNED_INT) {
             res = HDFql.cursorGetUnsignedInt(cursor);
         }
-        if (datatype == HDFql.BIGINT) {
+        else if (datatype == HDFql.BIGINT) {
             res = HDFql.cursorGetBigInt(cursor);
         }
-        if (datatype == HDFql.UNSIGNED_BIGINT) {
+        else if (datatype == HDFql.UNSIGNED_BIGINT) {
             res = HDFql.cursorGetUnsignedBigInt(cursor);
         }
-        if (datatype == HDFql.DOUBLE) {
+        else if (datatype == HDFql.DOUBLE) {
             res = HDFql.cursorGetDouble(cursor);
         }
-        if (datatype == HDFql.FLOAT) {
+        else if (datatype == HDFql.FLOAT) {
             res = HDFql.cursorGetFloat(cursor);
         }
-        if (datatype == HDFql.CHAR) {
+        else if (datatype == HDFql.CHAR) {
             res = HDFql.cursorGetChar(cursor);
         }
-        if (datatype == HDFql.VARCHAR) {
+        else if (datatype == HDFql.VARCHAR) {
             res = HDFql.cursorGetChar(cursor);
         }
-        if (res == null) {
+        else if (res == null) {
             logger.error("IsNull");
             throw new Exception("Not recognized data type: " + datatype);
         }
