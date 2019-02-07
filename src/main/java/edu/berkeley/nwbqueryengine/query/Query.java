@@ -87,6 +87,10 @@ public class Query {
         return res;
     }
 
+    public Expression getRoot() {
+        return root;
+    }
+
 
 
 

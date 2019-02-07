@@ -7,6 +7,7 @@ import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.data.NwbResult;
 import edu.berkeley.nwbqueryengine.data.EntityWrapper;
 import edu.berkeley.nwbqueryengine.data.Restrictions;
+import edu.berkeley.nwbqueryengine.query.parser.QueryParser;
 import edu.berkeley.nwbqueryengine.util.DateUtil;
 import edu.berkeley.nwbqueryengine.util.ValuesUtil;
 import org.apache.commons.jexl3.JexlEngine;
@@ -39,10 +40,11 @@ public class NwbProcessor implements Processor<NwbResult> {
 
     public List<NwbResult> evaluate(Query query) throws ProcessorException {
         List<NwbResult> nwbResults = new LinkedList<>();
+        List<List<NwbResult>> queryResults = new LinkedList<>();
         Map<String, List<Object>> dataSets = new HashMap<>();
         String andOrOperator;
-        boolean isNext = false;
         List<EntityWrapper> entityWrappers;
+
         try {
             entityWrappers = storageConnector.processSearch(query);
         } catch (Exception e) {
@@ -55,13 +57,9 @@ public class NwbProcessor implements Processor<NwbResult> {
             Expression item = partialExpression.getExpression();
 
             andOrOperator = item.getParent().getOperator();
-
-            //get an operator between two subqueries
-            if (andOrOperator.equals("") && isNext) {
-                andOrOperator = item.getParent().getParent().getParent().getParent().getParent().getOperator();
-            }
-
-            isNext = true;
+            Query currentSubQuery = partialExpression.getQuery();
+            boolean isNextSubQuery = previousSubQuery != null && previousSubQuery != currentSubQuery;
+            logger.debug("Next subquery: " + isNextSubQuery);
 
             //if operator is "&" and the previous result is an empty set I mustn't continue
             if (!(StringUtils.equals(andOrOperator, Operators.AND.op()) && nwbResults.size() == 0)) {
@@ -77,7 +75,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                             partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
                         }
                     } else {
-                        String expressionValue =  rightSide.getExpressionValue();
+                        String expressionValue = rightSide.getExpressionValue();
                         String jexlExpression;
                         boolean isLike;
                         if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
@@ -115,11 +113,15 @@ public class NwbProcessor implements Processor<NwbResult> {
             logger.debug(item + ", AND-OR-Operator: " + andOrOperator);
 
 
-            Query currentSubQuery = partialExpression.getQuery();
-            boolean isNextSubquery = previousSubQuery == null ||
-                    previousSubQuery.getQueryLeftSide().getExpressionValue()
-                            .equals(currentSubQuery.getQueryLeftSide().getExpressionValue()) ? false : true;
-            logger.debug("isNextQuery: " + isNextSubquery);
+            boolean isDifferentSubqueryExpression = previousSubQuery != null &&
+                    !previousSubQuery.getQueryLeftSide().getExpressionValue()
+                            .equals(currentSubQuery.getQueryLeftSide().getExpressionValue());
+            logger.debug("isNextQuery: " + isDifferentSubqueryExpression);
+
+            if (isNextSubQuery) {
+                queryResults.add(nwbResults);
+                nwbResults = new LinkedList<>();
+            }
 
             if (StringUtils.equals("\\" + andOrOperator, Operators.OR.op())) {
                 logger.debug("...OR....");
@@ -127,17 +129,50 @@ public class NwbProcessor implements Processor<NwbResult> {
                 nwbResults.forEach(name -> logger.debug(name));
             } else if (StringUtils.equals(andOrOperator, Operators.AND.op())) {
                 logger.debug("...AND....");
-                nwbResults = Restrictions.and(nwbResults, partialResult, isNextSubquery);
+                nwbResults = Restrictions.and(nwbResults, partialResult, isDifferentSubqueryExpression);
                 nwbResults.forEach(name -> logger.debug(name));
             } else {
                 nwbResults.addAll(partialResult);
             }
 
+
             previousSubQuery = currentSubQuery;
         }
-        nwbResults.forEach(name -> logger.debug(name));
+        queryResults.add(nwbResults);
+        List<NwbResult> previousResult = queryResults.remove(0);
+        List<NwbResult> completeResult = new LinkedList<>();
+        String operator = "";
+        boolean subQueryFirstRun = true;
+        String previousExpressionValue = "";
+        for (Query q : query.getSubQueries()) {
+            String expressionValue = q.getQueryLeftSide().getExpressionValue();
+            boolean isDifferent = !expressionValue.equals(previousExpressionValue);
+            String tmpOperator = q.getRoot().getParent().getOperator();
+            if(tmpOperator.matches(QueryParser.AND_OR)) {
+                operator = tmpOperator;
+            }
+            if(!operator.equals(QueryParser.AND_OR) && subQueryFirstRun) {
+                completeResult.addAll(previousResult);
+                subQueryFirstRun = false;
+            } else {
+                previousResult = queryResults.remove(0);
+                if (StringUtils.equals("\\" + operator, Operators.OR.op())) {
+                    logger.debug("...OR....");
+                    completeResult = Restrictions.or(completeResult, previousResult);
+                    completeResult.forEach(name -> logger.debug(name));
+                } else if (StringUtils.equals(operator, Operators.AND.op())) {
+                    logger.debug("...AND....");
+                    completeResult = Restrictions.and(completeResult, previousResult, isDifferent);
+                    completeResult.forEach(name -> logger.debug(name));
+                }
+            }
+            previousExpressionValue = q.getQueryLeftSide().getExpressionValue();
 
-        return nwbResults;
+        }
+
+        completeResult.forEach(name -> logger.debug(name));
+
+        return completeResult;
     }
 
 

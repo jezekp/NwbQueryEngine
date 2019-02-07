@@ -63,7 +63,7 @@ public class QueryParser implements Parser {
             String subValue = input.substring(subValueStartingIndex, brackets.end(0));
             //left side of each subtreee is a group_name, right side is an expression like expression | expression or expression & expression
             //parse it recursively, goes over all expressions like epochs=(a|b|c)
-            subValueStartingIndex += subValue.trim().length();
+            subValueStartingIndex += subValue.length();
             String operator = (subValueStartingIndex < input.length()) ? "" + (input.substring(subValueStartingIndex).trim().charAt(0)) : "";
             String valueWithoutOperator = StringUtils.strip(subValue.trim(), AND_OR);
             node.setOperator(operator);
