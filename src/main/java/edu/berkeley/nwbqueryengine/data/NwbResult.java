@@ -41,7 +41,7 @@ public class NwbResult implements Comparable<NwbResult> {
 
         NwbResult eq = (NwbResult) obj;
         return eq.value.equals(value)
-                && eq.dataSet.equals(dataSet);
+                && eq.dataSet.equals(dataSet) && eq.dataStorageName.equals(dataStorageName);
     }
 
     @Override
@@ -49,6 +49,7 @@ public class NwbResult implements Comparable<NwbResult> {
         int result = 17;
         result = 31 * result + value.hashCode();
         result = 31 * result + dataSet.hashCode();
+        result = 31 * result + dataStorageName.hashCode();
         return result;
     }
 

@@ -15,7 +15,7 @@ public class Restrictions {
         List<NwbResult> res = new LinkedList<>();
         res.addAll(first);
         res.addAll(second);
-        return res;
+        return removeDuplicities(res);
     }
 
 

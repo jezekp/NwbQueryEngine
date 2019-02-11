@@ -94,12 +94,9 @@ public class ValuesUtil {
     }
 
     public static List<NwbResult> removeDuplicities(List<NwbResult> input) {
-        List<NwbResult> al = new ArrayList<>(input);
-        Set<NwbResult> hs = new HashSet<>();
-        hs.addAll(al);
-        al.clear();
-        al.addAll(hs);
-        return al;
+        List<NwbResult> listWithoutDuplicates = new ArrayList<>(
+                new HashSet<>(input));
+        return listWithoutDuplicates;
     }
 
     static class Wrapper {
