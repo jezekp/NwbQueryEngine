@@ -67,8 +67,10 @@ public class HDF5Connector implements Connector<String> {
                         int cursorRes;
                         while ((cursorRes = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
                             String cursorGetChar = HDFql.cursorGetChar(cursor);
-                            showResults.add(cursorGetChar);
-                            logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
+                            if(cursorGetChar.endsWith(expressionValue)) {
+                                showResults.add(cursorGetChar);
+                                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
+                            }
                         }
 
                         showExpressions.put(expressionValue, new LinkedList<>(showResults));
