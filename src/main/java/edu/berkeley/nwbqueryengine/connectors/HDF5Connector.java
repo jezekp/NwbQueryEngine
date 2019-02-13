@@ -48,7 +48,7 @@ public class HDF5Connector implements Connector<String> {
                     String queryPrefix = "**/";
                     if (leftSide.startsWith("/")) {
                         queryPrefix = "";
-                    } else if(leftSide.equals("*")) {
+                    } else if (leftSide.equals("*")) {
                         leftSide = "**";
                     }
                     String queryString = "SHOW LIKE " + queryPrefix + "" + leftSide + "/" + queryPrefix + "" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
@@ -67,7 +67,7 @@ public class HDF5Connector implements Connector<String> {
                         int cursorRes;
                         while ((cursorRes = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
                             String cursorGetChar = HDFql.cursorGetChar(cursor);
-                            if(cursorGetChar.endsWith(expressionValue)) {
+                            if (cursorGetChar.endsWith(expressionValue)) {
                                 showResults.add(cursorGetChar);
                                 logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
                             }
@@ -148,7 +148,7 @@ public class HDF5Connector implements Connector<String> {
             }
             logger.debug("SelectCursorResult: " + selectCursorResult);
             logger.debug("objectValue: " + values);
-            //   disconnect(obj);
+            disconnect(obj);
         }
         return values;
     }
