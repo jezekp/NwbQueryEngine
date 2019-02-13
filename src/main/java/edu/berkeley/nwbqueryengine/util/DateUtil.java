@@ -68,6 +68,7 @@ public class DateUtil {
         put("^[a-z]{3}\\s[a-z]{3}\\s\\d{1,2}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{1}$", "EEE MMM dd yyyy HH:mm:s");
         put("^\\d{8}t\\d{6}[-+]\\d{4}$", "yyyyMMdd'T'hhmmssZ");
         put("^\\d{4}-\\d{2}-\\d{2}t\\d{1,2}:\\d{2}:\\d{2}[-+]\\d{2}:\\d{2}$", "yyyy-MM-dd'T'hh:mm:ssX");
+        put("^\\d{4}-\\d{2}-\\d{2}t\\d{1,2}:\\d{2}:\\d{2}.\\d{6}[-+]\\d{2}:\\d{2}$", "yyyy-MM-dd'T'hh:mm:ss.SSSSSSX");
     }};
 
     /**
