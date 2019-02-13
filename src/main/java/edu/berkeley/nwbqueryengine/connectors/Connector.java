@@ -12,7 +12,9 @@ import java.util.List;
  */
 public interface Connector<Entity> {
 
-    List<Object> getValues(Entity entity) throws ConnectorException;
+    void getValues(Entity entity) throws ConnectorException;
 
     List<EntityWrapper> processSearch(Query query) throws ConnectorException;
+
+    Object next() throws ConnectorException;
 }

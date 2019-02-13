@@ -1,6 +1,7 @@
 package edu.berkeley.nwbqueryengine;
 
 import edu.berkeley.nwbqueryengine.connectors.Connector;
+import edu.berkeley.nwbqueryengine.connectors.ConnectorException;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
@@ -41,7 +42,6 @@ public class NwbProcessor implements Processor<NwbResult> {
     public List<NwbResult> evaluate(Query query) throws ProcessorException {
         List<NwbResult> nwbResults = new LinkedList<>();
         List<List<NwbResult>> queryResults = new LinkedList<>();
-        Map<String, List<Object>> dataSets = new HashMap<>();
         String andOrOperator;
         List<EntityWrapper> entityWrappers;
 
@@ -65,47 +65,52 @@ public class NwbProcessor implements Processor<NwbResult> {
             if (!(StringUtils.equals(andOrOperator, Operators.AND.op()) && nwbResults.size() == 0)) {
                 List<String> entities = partialExpression.getEntity();
                 for (String entity : entities) {
-                    List<Object> values = getValues(entity, dataSets);
-                    String arithmeticalOperator = item.getOperator();
-                    Expression rightSide = item.getRightSideSibling();
-                    logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
-                    if (StringUtils.isBlank(arithmeticalOperator)) {
-                        for (Object value : values) {
-                            logger.debug("Value: " + value);
-                            partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
-                        }
-                    } else {
-                        String expressionValue = rightSide.getExpressionValue();
-                        String jexlExpression;
-                        boolean isLike;
-                        if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
-                            jexlExpression = "x1=~x2";
-                            expressionValue = ".*" + Pattern.quote(expressionValue) + ".*"; //find all substrings - is it a good or bad solution?
-                            isLike = true;
-                        } else {
-                            jexlExpression = "x1" + arithmeticalOperator + "x2";
-                            isLike = false;
-                        }
-                        JexlExpression func = jexl.createExpression(jexlExpression);
-                        Object x2 = ValuesUtil.getModifiedCopy(expressionValue);
-                        for (Object value : values) {
-                            logger.debug("Value: " + value);
-                            Object x1 = ValuesUtil.getModifiedCopy(value);
-                            if (!isLike && !(x1 instanceof Number)) {
-                                x1 = ValuesUtil.getDateIfPossible(x1);
-                                x2 = ValuesUtil.getDateIfPossible(x2);
-                            }
-                            mc.set("x1", x1);
-                            mc.set("x2", x2);
-                            Object eval = func.evaluate(mc);
-                            boolean res = ((Boolean) eval).booleanValue();
-                            logger.debug("Evaluation: " + value + ", Operator: " + arithmeticalOperator + ", Expression value: " + expressionValue + ", data: " + res);
-                            if (res) {
+                    try {
+                        storageConnector.getValues(entity);
+
+                        String arithmeticalOperator = item.getOperator();
+                        Expression rightSide = item.getRightSideSibling();
+                        logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
+                        Object value = null;
+                        if (StringUtils.isBlank(arithmeticalOperator)) {
+                            while ((value = storageConnector.next()) != null) {
+                                logger.debug("Value: " + value);
                                 partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
                             }
+                        } else {
+                            String expressionValue = rightSide.getExpressionValue();
+                            String jexlExpression;
+                            boolean isLike;
+                            if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
+                                jexlExpression = "x1=~x2";
+                                expressionValue = ".*" + Pattern.quote(expressionValue) + ".*"; //find all substrings - is it a good or bad solution?
+                                isLike = true;
+                            } else {
+                                jexlExpression = "x1" + arithmeticalOperator + "x2";
+                                isLike = false;
+                            }
+                            JexlExpression func = jexl.createExpression(jexlExpression);
+                            Object x2 = ValuesUtil.getModifiedCopy(expressionValue);
+                            while ((value = storageConnector.next()) != null) {
+                                logger.debug("Value: " + value);
+                                Object x1 = ValuesUtil.getModifiedCopy(value);
+                                if (!isLike && !(x1 instanceof Number)) {
+                                    x1 = ValuesUtil.getDateIfPossible(x1);
+                                    x2 = ValuesUtil.getDateIfPossible(x2);
+                                }
+                                mc.set("x1", x1);
+                                mc.set("x2", x2);
+                                Object eval = func.evaluate(mc);
+                                boolean res = ((Boolean) eval).booleanValue();
+                                logger.debug("Evaluation: " + value + ", Operator: " + arithmeticalOperator + ", Expression value: " + expressionValue + ", data: " + res);
+                                if (res) {
+                                    partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
+                                }
+                            }
                         }
+                    } catch (ConnectorException e) {
+                        throw new ProcessorException(e);
                     }
-
                 }
             }
 
@@ -148,10 +153,10 @@ public class NwbProcessor implements Processor<NwbResult> {
             String expressionValue = q.getQueryLeftSide().getExpressionValue();
             boolean isDifferent = !expressionValue.equals(previousExpressionValue);
             String tmpOperator = q.getRoot().getParent().getOperator();
-            if(tmpOperator.matches(QueryParser.AND_OR)) {
+            if (tmpOperator.matches(QueryParser.AND_OR)) {
                 operator = tmpOperator;
             }
-            if(!operator.equals(QueryParser.AND_OR) && subQueryFirstRun) {
+            if (!operator.equals(QueryParser.AND_OR) && subQueryFirstRun) {
                 completeResult.addAll(previousResult);
                 subQueryFirstRun = false;
             } else {
@@ -175,21 +180,4 @@ public class NwbProcessor implements Processor<NwbResult> {
         return completeResult;
     }
 
-
-    private List<Object> getValues(String entity, Map<String, List<Object>> dataSets) throws ProcessorException {
-        List<Object> values;
-        if (dataSets.containsKey(entity)) {
-            values = dataSets.get(entity);
-        } else {
-            try {
-                values = storageConnector.getValues(entity);
-                dataSets.put(entity, values);
-            } catch (Exception e) {
-                logger.error(e);
-                e.printStackTrace();
-                throw new ProcessorException(e);
-            }
-        }
-        return values;
-    }
 }

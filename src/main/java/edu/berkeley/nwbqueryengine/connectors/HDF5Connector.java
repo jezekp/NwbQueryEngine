@@ -122,35 +122,34 @@ public class HDF5Connector implements Connector<String> {
         return res;
     }
 
+    public Object next() throws ConnectorException {
+        Object value = null;
+        int selectCursorResult = HDFql.cursorNext(cursor);
+        if(selectCursorResult == HDFql.SUCCESS) {
+            HDFqlUtil util = new HDFqlUtil();
+            try {
+                value = util.getValue(cursor);
+            } catch (Exception e) {
+                throw new ConnectorException(e);
+            }
+        }
+
+
+        logger.debug("selected value: " + value + ", " + ((value == null) ? "null" : value.getClass().getName()));
+        return value;
+    }
+
     @Override
-    public List<Object> getValues(String entity) throws ConnectorException {
-        List<Object> values = new ArrayList<>();
+    public void getValues(String entity) throws ConnectorException {
         synchronized (this) {
             connect(obj);
-            logger.debug("valuesType: " + values.getClass().getName());
             String selectQuery = "SELECT FROM " + entity;
             logger.debug("Select: " + selectQuery);
             int selectStatus = HDFql.execute(selectQuery);
             logger.debug("selectStatus: " + selectStatus);
-            int selectCursorResult;
-            while ((selectCursorResult = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
-                HDFqlUtil util = new HDFqlUtil();
-                Object value = null;
-                try {
-                    value = util.getValue(cursor);
-                } catch (Exception e) {
-                    throw new ConnectorException(e);
-                }
-                if (value != null) {
-                    values.add(value);
-                }
-                logger.debug("selected value: " + value + ", " + ((value == null) ? "null" : value.getClass().getName()));
-            }
-            logger.debug("SelectCursorResult: " + selectCursorResult);
-            logger.debug("objectValue: " + values);
+
             disconnect(obj);
         }
-        return values;
     }
 }
 
