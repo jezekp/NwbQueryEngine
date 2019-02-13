@@ -70,7 +70,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                     Expression rightSide = item.getRightSideSibling();
                     logger.debug("Operator: " + item.getOperator() + ", RightSide: " + rightSide);
                     if (StringUtils.isBlank(arithmeticalOperator)) {
-                        for (Object value : new LinkedList<>(values)) {
+                        for (Object value : values) {
                             logger.debug("Value: " + value);
                             partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
                         }
@@ -88,7 +88,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                         }
                         JexlExpression func = jexl.createExpression(jexlExpression);
                         Object x2 = ValuesUtil.getModifiedCopy(expressionValue);
-                        for (Object value : new LinkedList<>(values)) {
+                        for (Object value : values) {
                             logger.debug("Value: " + value);
                             Object x1 = ValuesUtil.getModifiedCopy(value);
                             if (!isLike && !(x1 instanceof Number)) {
