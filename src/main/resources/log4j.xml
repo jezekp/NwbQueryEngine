@@ -27,7 +27,7 @@
     </appender>
 
     <root>
-        <level value="error"/>
+        <level value="debug"/>
         <appender-ref ref="detailedConsoleAppender"/>
         <appender-ref ref="detailedLogFileAppender"/>
     </root>

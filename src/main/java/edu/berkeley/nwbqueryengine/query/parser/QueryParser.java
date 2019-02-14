@@ -4,6 +4,7 @@ import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Operators;
 import edu.berkeley.nwbqueryengine.query.Query;
 import edu.berkeley.nwbqueryengine.util.BTreePrinter;
+import edu.berkeley.nwbqueryengine.util.BracketsUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,10 +34,6 @@ public class QueryParser implements Parser {
     public static String OTHERS_DELIMITER = "((?<=" + OTHERS + ")|(?=" + OTHERS + "))";
     public static String ASSIGN_DELIMITER = "((?<=" + ASSIGN + ")|(?=" + ASSIGN + "))";
 
-    //pattern for quotes = "\"([^\"]+)\""
-    //public static String BRACKETS_PATTERN = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
-    public static String BRACKETS_PATTERN = "(\"|').*?\\1(\\*SKIP)(\\*FAIL)|\\((?:[^()]|(\\?R))*\\)";
-    //\(([^]+)\)
 
 
     public Query parse(String expression) {
@@ -52,15 +49,14 @@ public class QueryParser implements Parser {
     private Expression parseInternal(Expression e) {
         Expression node = new Expression(e.getExpressionValue(), e.getOperator(), e.getParent());
         String input = node.getExpressionValue().trim();
-        //Expression is group_name=(expression)
-        //Find expression inside brackets [] or ()
-        Matcher brackets = Pattern.compile(BRACKETS_PATTERN).matcher(input);
         int subValueStartingIndex = 0;
         Expression res = node;
         String previousOperator = "";
         String previousLeftSide = "";
-        while (brackets.find()) {
-            String subValue = input.substring(subValueStartingIndex, brackets.end(0));
+        BracketsUtil bracketsUtil = new BracketsUtil(input);
+        bracketsUtil.parse();
+        while (bracketsUtil.next()) {
+            String subValue = input.substring(subValueStartingIndex, bracketsUtil.nextEnd());
             //left side of each subtreee is a group_name, right side is an expression like expression | expression or expression & expression
             //parse it recursively, goes over all expressions like epochs=(a|b|c)
             subValueStartingIndex += subValue.length();

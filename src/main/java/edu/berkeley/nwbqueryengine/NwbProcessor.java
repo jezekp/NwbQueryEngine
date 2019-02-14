@@ -32,6 +32,7 @@ public class NwbProcessor implements Processor<NwbResult> {
     private Log logger = LogFactory.getLog(getClass());
     private JexlEngine jexl = new Engine();
     private MapContext mc = new MapContext();
+    private final static String WILDCARD = Operators.WILDCARD.op();
 
     private Connector storageConnector;
 
@@ -83,7 +84,15 @@ public class NwbProcessor implements Processor<NwbResult> {
                             boolean isLike;
                             if (arithmeticalOperator.equals(Operators.CONTAINS.op())) {
                                 jexlExpression = "x1=~x2";
-                                expressionValue = ".*" + Pattern.quote(expressionValue) + ".*"; //find all substrings - is it a good or bad solution?
+                                String prefix = "";
+                                if(expressionValue.startsWith(WILDCARD)) {
+                                    prefix = ".*";
+                                }
+                                String sufix = "";
+                                if(expressionValue.endsWith(WILDCARD)) {
+                                    sufix = ".*";
+                                }
+                                expressionValue = prefix + "" + Pattern.quote(StringUtils.strip(expressionValue, WILDCARD) ) + "" + sufix; //find all substrings - is it a good or bad solution?
                                 isLike = true;
                             } else {
                                 jexlExpression = "x1" + arithmeticalOperator + "x2";
