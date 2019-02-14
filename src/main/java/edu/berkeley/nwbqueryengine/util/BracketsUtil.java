@@ -37,24 +37,28 @@ public class BracketsUtil {
         this.text = text;
     }
 
-    private List<String> parentheses;
+    private List<String> brackets;
     private List<Integer> indexes;
-    private int index = 0;
-    private int size = 0;
+    private int index;
+
+    private void init() {
+        index = 0;
+        brackets = new ArrayList<String>();
+        indexes = new LinkedList<>();
+    }
 
     public List<String> parse() {
-        parentheses = new ArrayList<String>();
-        indexes = new LinkedList<>();
+        init();
         int[] endsAt = new int[1];
         endsAt[0] = 0;
         int previousIndex = 0;
-        while(true) {
+        while (true) {
             int startsAt = text.indexOf("(", endsAt[0]);
             if (startsAt == -1) {
                 break;
             }
             String item = parse(text, startsAt, endsAt);
-            if(item != null) {
+            if (item != null) {
                 int currentIndex = text.indexOf(item, previousIndex) + item.length();
                 indexes.add(currentIndex);
                 previousIndex = currentIndex;
@@ -62,9 +66,9 @@ public class BracketsUtil {
             if (endsAt[0] == 0) {
                 break;
             }
-            parentheses.add(item);
+            brackets.add(item);
         }
-        return parentheses;
+        return brackets;
     }
 
     public int end(int group) {
@@ -72,12 +76,12 @@ public class BracketsUtil {
     }
 
     public boolean next() {
-        return size++ < parentheses.size();
+        return index++ < brackets.size();
     }
 
-    public int nextEnd() {
-        int localIndex = index++;
-        return localIndex < indexes.size() ? indexes.get(localIndex) : -1;
+    public int currentEnd() {
+        int localIndex = index - 1;
+        return localIndex < indexes.size() && localIndex >= 0 ? indexes.get(localIndex) : -1;
     }
 
     private String parse(String str, int startsAt, int[] endsAt) {
@@ -93,7 +97,7 @@ public class BracketsUtil {
                 } else {
                     opStack.pop();
                 }
-            }else if (str.charAt(i) == '(') {
+            } else if (str.charAt(i) == '(') {
                 opStack.push(i);
             }
 

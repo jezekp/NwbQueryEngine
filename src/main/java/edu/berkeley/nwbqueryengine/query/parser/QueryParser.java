@@ -9,9 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * Created by petr-jezek on 18.4.17*
  * <p>
@@ -56,7 +53,7 @@ public class QueryParser implements Parser {
         BracketsUtil bracketsUtil = new BracketsUtil(input);
         bracketsUtil.parse();
         while (bracketsUtil.next()) {
-            String subValue = input.substring(subValueStartingIndex, bracketsUtil.nextEnd());
+            String subValue = input.substring(subValueStartingIndex, bracketsUtil.currentEnd());
             //left side of each subtreee is a group_name, right side is an expression like expression | expression or expression & expression
             //parse it recursively, goes over all expressions like epochs=(a|b|c)
             subValueStartingIndex += subValue.length();
