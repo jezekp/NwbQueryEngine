@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /***********************************************************************************************************************
@@ -39,25 +40,32 @@ public class StringParserTest {
 
     @Test
     void complexQueryParserTest() {
-        List<String> res = get("epochs/Trial_306:(start_time < 1530) &  epochs/Trial_307:(stop_time>1530)").parse();
-        assertTrue (res.size() == 2);
+        BracketsUtil util = get("epochs/Trial_306:(start_time < 1530) &  epochs/Trial_307:(stop_time>1530)");
+        util.next();
+        assertTrue (util.getExpression().equals("(start_time < 1530)"));
+        util.next();
+        assertTrue (util.getExpression().equals("(stop_time>1530)"));
+        assertFalse(util.next());
     }
 
     @Test
     void innerBracketsQueryParserTest() {
-        List<String> res = get("/:(session_description LIKE %(PW)%)").parse();
-        assertTrue (res.size() == 1);
+        BracketsUtil util = get("/:(session_description LIKE %(PW)%)");
+        util.next();
+        assertTrue("(session_description LIKE %(PW)%)".equals(util.getExpression()));
+        assertFalse(util.next());
     }
 
     @Test
     void testIndexBracketsQueryParserTest() {
         String s = "epochs/Trial_306:(start_time < 1530)   &    epochs/Trial_307:(stop_time>1530)   |   epochs/Trial_306:(start_time < 1530)";
         BracketsUtil util = get(s);
-        List<String> res = util.parse();
-        assertTrue (res.size() == 3);
+
         int group0 = util.end(0);
         int group1 = util.end(1);
         int group2 = util.end(2);
-        assertTrue(group0 > 0);
+        assertTrue(group0 == 36);
+        assertTrue(group1 == 77);
+        assertTrue(group2 == 120);
     }
 }

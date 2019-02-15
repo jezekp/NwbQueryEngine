@@ -35,6 +35,7 @@ public class BracketsUtil {
 
     public BracketsUtil(final String text) {
         this.text = text;
+        parse();
     }
 
     private List<String> brackets;
@@ -47,7 +48,7 @@ public class BracketsUtil {
         indexes = new LinkedList<>();
     }
 
-    public List<String> parse() {
+    private List<String> parse() {
         init();
         int[] endsAt = new int[1];
         endsAt[0] = 0;
@@ -82,6 +83,18 @@ public class BracketsUtil {
     public int currentEnd() {
         int localIndex = index - 1;
         return localIndex < indexes.size() && localIndex >= 0 ? indexes.get(localIndex) : -1;
+    }
+
+    public String getExpression(int index) {
+        return  brackets.get(index);
+    }
+
+    public int getSize() {
+        return  brackets.size();
+    }
+
+    public String getExpression() {
+        return  brackets.get(index - 1);
     }
 
     private String parse(String str, int startsAt, int[] endsAt) {

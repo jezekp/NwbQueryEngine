@@ -51,7 +51,6 @@ public class QueryParser implements Parser {
         String previousOperator = "";
         String previousLeftSide = "";
         BracketsUtil bracketsUtil = new BracketsUtil(input);
-        bracketsUtil.parse();
         while (bracketsUtil.next()) {
             String subValue = input.substring(subValueStartingIndex, bracketsUtil.currentEnd());
             //left side of each subtreee is a group_name, right side is an expression like expression | expression or expression & expression
