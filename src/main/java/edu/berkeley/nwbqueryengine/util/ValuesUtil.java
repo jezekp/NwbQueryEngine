@@ -1,6 +1,7 @@
 package edu.berkeley.nwbqueryengine.util;
 
 import edu.berkeley.nwbqueryengine.data.NwbResult;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,7 +39,12 @@ public class ValuesUtil {
         Object copy = value;
         if (value instanceof String) {
             String stringValue = ((String) value);
-            copy = stringValue.replaceAll("\n", " ");
+            stringValue = stringValue.replaceAll("\n", " ");
+            stringValue = stringValue.replaceAll("\\P{Print}", "");
+            stringValue = StringUtils.strip(stringValue, "\u0000");
+            stringValue = stringValue.replaceAll("\u0000", "");
+            copy = stringValue;
+            logger.debug("Modified copy: " + copy);
         }
         return copy;
     }

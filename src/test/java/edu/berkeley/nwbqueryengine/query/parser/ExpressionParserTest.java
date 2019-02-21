@@ -39,7 +39,7 @@ class ExpressionParserTest {
 
     @BeforeAll
     static void init() {
-        System.loadLibrary("HDFql");
+        //System.loadLibrary("HDFql");
     }
 
     protected List<NwbResult> execute(String expression) {
@@ -49,8 +49,10 @@ class ExpressionParserTest {
             Query query = p.parse(expression);
             java.net.URL u = getClass().getClassLoader().getResource(file);
             HDF5Connector connector = new HDF5Connector(new File(u.getFile()));
+            connector.connect();
             NwbProcessor processor = new NwbProcessor(connector);
             res = processor.evaluate(query);
+            connector.disconnect();
         } catch (Exception e) {
             logger.error(e);
             fail(e.getMessage());
@@ -169,7 +171,7 @@ class ExpressionParserTest {
 
     @Test
     void andLikeCondition() {
-        List<NwbResult> res = execute("epochs:(tags LIKE Mis) & epochs:(tags LIKE %Hi%)");
+        List<NwbResult> res = execute("epochs:(tags LIKE Miss) & epochs:(tags LIKE Hi%)");
         assertTrue(res.size() == 2);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("Mis") ||
                 ((String) item.getValue()).contains("Hi")));
@@ -178,7 +180,7 @@ class ExpressionParserTest {
 
     @Test
     void andLikeCondition2() {
-        List<NwbResult> res = execute("epochs:(tags LIKE Mis & tags LIKE %Hi%)");
+        List<NwbResult> res = execute("epochs:(tags LIKE Miss & tags LIKE %Hi%)");
         assertTrue(res.size() == 2);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains("Mis") ||
                 ((String) item.getValue()).contains("Hi")));

@@ -9,21 +9,31 @@
 package as.hdfql;
 
 public class HDFqlJNI {
+
+		static
+		{
+			System.loadLibrary("HDFql");
+		}
+	
   public final static native long new_HDFqlCursor();
   public final static native void delete_HDFqlCursor(long jarg1);
   public final static native String VERSION_get();
-  public final static native int BUFFER_SIZE_get();
   public final static native int YES_get();
   public final static native int NO_get();
   public final static native int ENABLED_get();
   public final static native int DISABLED_get();
-  public final static native int DEFAULT_get();
   public final static native int UNLIMITED_get();
   public final static native int UNDEFINED_get();
   public final static native int GLOBAL_get();
   public final static native int LOCAL_get();
   public final static native int TRACKED_get();
   public final static native int INDEXED_get();
+  public final static native int CONTIGUOUS_get();
+  public final static native int COMPACT_get();
+  public final static native int CHUNKED_get();
+  public final static native int EARLY_get();
+  public final static native int INCREMENTAL_get();
+  public final static native int LATE_get();
   public final static native int DIRECTORY_get();
   public final static native int FILE_get();
   public final static native int GROUP_get();
@@ -32,9 +42,6 @@ public class HDFqlJNI {
   public final static native int SOFT_LINK_get();
   public final static native int HARD_LINK_get();
   public final static native int EXTERNAL_LINK_get();
-  public final static native int CONTIGUOUS_get();
-  public final static native int COMPACT_get();
-  public final static native int CHUNKED_get();
   public final static native int TINYINT_get();
   public final static native int UNSIGNED_TINYINT_get();
   public final static native int SMALLINT_get();
@@ -58,11 +65,19 @@ public class HDFqlJNI {
   public final static native int VARDOUBLE_get();
   public final static native int VARCHAR_get();
   public final static native int OPAQUE_get();
+  public final static native int BITFIELD_get();
+  public final static native int ENUMERATION_get();
+  public final static native int COMPOUND_get();
+  public final static native int ARRAY_get();
+  public final static native int REFERENCE_get();
   public final static native int NATIVE_ENDIAN_get();
   public final static native int LITTLE_ENDIAN_get();
   public final static native int BIG_ENDIAN_get();
   public final static native int ASCII_get();
   public final static native int UTF8_get();
+  public final static native int FILL_DEFAULT_get();
+  public final static native int FILL_USER_DEFINED_get();
+  public final static native int FILL_UNDEFINED_get();
   public final static native int EARLIEST_get();
   public final static native int LATEST_get();
   public final static native int VERSION_18_get();
@@ -72,6 +87,7 @@ public class HDFqlJNI {
   public final static native int ERROR_NO_ACCESS_get();
   public final static native int ERROR_NOT_OPEN_get();
   public final static native int ERROR_INVALID_FILE_get();
+  public final static native int ERROR_NOT_SUPPORTED_get();
   public final static native int ERROR_NOT_ENOUGH_SPACE_get();
   public final static native int ERROR_NOT_ENOUGH_MEMORY_get();
   public final static native int ERROR_ALREADY_EXISTS_get();
@@ -82,7 +98,7 @@ public class HDFqlJNI {
   public final static native int ERROR_OUTSIDE_LIMIT_get();
   public final static native int ERROR_NO_ADDRESS_get();
   public final static native int ERROR_UNEXPECTED_TYPE_get();
-  public final static native int ERROR_UNEXPECTED_DATATYPE_get();
+  public final static native int ERROR_UNEXPECTED_DATA_TYPE_get();
   public final static native int ERROR_NOT_REGISTERED_get();
   public final static native int ERROR_INVALID_REGULAR_EXPRESSION_get();
   public final static native int ERROR_UNKNOWN_get();
@@ -91,11 +107,13 @@ public class HDFqlJNI {
   public final static native int errorGetLine();
   public final static native int errorGetPosition();
   public final static native String errorGetMessage();
+  public final static native int mpiGetSize();
+  public final static native int mpiGetRank();
   public final static native int execute(String jarg1, int jarg2, int jarg3);
   public final static native int executeReset();
   public final static native void variableRegister(int jarg1, long jarg2);
   public final static native void variableUnregister(int jarg1);
-  public final static native int variableGetDatatype(int jarg1);
+  public final static native int variableGetDataType(int jarg1);
   public final static native int variableGetCount(int jarg1);
   public final static native int variableGetSize(int jarg1);
   public final static native int variableGetDimensionCount(int jarg1);
@@ -105,7 +123,7 @@ public class HDFqlJNI {
   public final static native int cursorUseDefault();
   public final static native int cursorClear(long jarg1, HDFqlCursor jarg1_);
   public final static native int cursorClone(long jarg1, HDFqlCursor jarg1_, long jarg2, HDFqlCursor jarg2_);
-  public final static native int cursorGetDatatype(long jarg1, HDFqlCursor jarg1_);
+  public final static native int cursorGetDataType(long jarg1, HDFqlCursor jarg1_);
   public final static native int cursorGetCount(long jarg1, HDFqlCursor jarg1_);
   public final static native int subcursorGetCount(long jarg1, HDFqlCursor jarg1_);
   public final static native int cursorGetPosition(long jarg1, HDFqlCursor jarg1_);
@@ -146,8 +164,7 @@ public class HDFqlJNI {
   public final static native long subcursorGetDouble(long jarg1, HDFqlCursor jarg1_);
   public final static native String cursorGetChar(long jarg1, HDFqlCursor jarg1_);
   public final static native String subcursorGetChar(long jarg1, HDFqlCursor jarg1_);
-  public final static native int variableCreate(int jarg1, int jarg2);
-  public final static native void variableDestroy(int jarg1);
+  public final static native void javaSetEnvironment();
   public final static native void variableSetChar(int jarg1, char jarg2, int jarg3);
   public final static native void variableSetShort(int jarg1, short jarg2, int jarg3);
   public final static native void variableSetInt(int jarg1, int jarg2, int jarg3);

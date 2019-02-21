@@ -47,6 +47,7 @@ public class NwbProcessor implements Processor<NwbResult> {
         List<EntityWrapper> entityWrappers;
 
         try {
+            storageConnector.connect();
             entityWrappers = storageConnector.processSearch(query);
         } catch (Exception e) {
             logger.error(e);
@@ -92,15 +93,17 @@ public class NwbProcessor implements Processor<NwbResult> {
                                 if(expressionValue.endsWith(WILDCARD)) {
                                     sufix = ".*";
                                 }
-                                expressionValue = prefix + "" + Pattern.quote(StringUtils.strip(expressionValue, WILDCARD) ) + "" + sufix; //find all substrings - is it a good or bad solution?
+                                expressionValue = prefix + "" + StringUtils.strip(expressionValue, WILDCARD) + "" + sufix; //find all substrings - is it a good or bad solution?
                                 isLike = true;
                             } else {
                                 jexlExpression = "x1" + arithmeticalOperator + "x2";
                                 isLike = false;
                             }
+                            logger.debug("Expression value: " + expressionValue);
                             JexlExpression func = jexl.createExpression(jexlExpression);
                             Object x2 = ValuesUtil.getModifiedCopy(expressionValue);
                             while ((value = storageConnector.next()) != null) {
+
                                 logger.debug("Value: " + value);
                                 Object x1 = ValuesUtil.getModifiedCopy(value);
                                 if (!isLike && !(x1 instanceof Number)) {
@@ -115,8 +118,10 @@ public class NwbProcessor implements Processor<NwbResult> {
                                 if (res) {
                                     partialResult.add(new NwbResult(entity, value, partialExpression.getStorage()));
                                 }
+
                             }
                         }
+
                     } catch (ConnectorException e) {
                         throw new ProcessorException(e);
                     }
@@ -186,6 +191,11 @@ public class NwbProcessor implements Processor<NwbResult> {
 
         completeResult.forEach(name -> logger.debug(name));
 
+        try {
+            storageConnector.disconnect();
+        } catch (ConnectorException e) {
+            logger.error(e);
+        }
         return completeResult;
     }
 

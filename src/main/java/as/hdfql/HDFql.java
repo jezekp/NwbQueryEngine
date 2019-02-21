@@ -8,187 +8,108 @@
 
 package as.hdfql;
 
-		import java.util.regex.Pattern;
-		import java.util.regex.Matcher;
-	
 public class HDFql implements HDFqlConstants {
 
-		private static Variable variableList[] = {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null};
-		private static Pattern patternFromMemory = Pattern.compile("(?i)FROM\\s+MEMORY\\s+(\\d+)(?:\\s+SIZE\\s+(\\d+))?");
-		private static Pattern patternIntoMemory = Pattern.compile("(?i)INTO\\s+MEMORY\\s+(\\d+)(?:\\s+SIZE\\s+(\\d+))?");
+		private static Variable variableList[] = {null, null, null, null, null, null, null, null};
+
+		static
+		{
+			javaSetEnvironment();
+		}
+
+		public HDFql()   // INFO: set constructor visibility to private to disable instantiation of the class
+		{
+		}
 
 		private static class Variable
 		{
 			public Object variable;
-			public int datatype;
-			public int size;
-			public int fromSize;
-			public int intoSize;
-			public int fromMemory;
-			public int intoMemory;
+			public int dataType;
 
-			public Variable(Object variable, int datatype, int size)
+			public Variable(Object variable, int dataType)
 			{
 				this.variable = variable;
-				this.datatype = datatype;
-				this.size = size;
-				this.fromSize = Integer.MAX_VALUE;
-				this.intoSize = Integer.MAX_VALUE;
-				this.fromMemory = 0;
-				this.intoMemory = 0;
+				this.dataType = dataType;
+			}
+		}
+
+		private static int variableOperation(int type, int number, int size)
+		{
+			int dataType;
+
+			dataType = variableList[number].dataType;
+			if (type == 0)   // INFO: CREATE DATASET, CREATE ATTRIBUTE OR INSERT operations
+			{
+				if (dataType == TINYINT)
+				{
+					return variableCopyFromChar(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == SMALLINT)
+				{
+					return variableCopyFromShort(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == INT)
+				{
+					return variableCopyFromInt(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == BIGINT)
+				{
+					return variableCopyFromLong(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == FLOAT)
+				{
+					return variableCopyFromFloat(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == DOUBLE)
+				{
+					return variableCopyFromDouble(variableList[number].variable, number, size, 0);
+				}
+				else   // VARCHAR
+				{
+					return variableCopyFromString(variableList[number].variable, number, size, 0);
+				}
+			}
+			else   // INFO: SELECT OR SHOW operations
+			{
+				if (dataType == TINYINT)
+				{
+					return variableCopyIntoChar(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == SMALLINT)
+				{
+					return variableCopyIntoShort(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == INT)
+				{
+					return variableCopyIntoInt(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == BIGINT)
+				{
+					return variableCopyIntoLong(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == FLOAT)
+				{
+					return variableCopyIntoFloat(variableList[number].variable, number, size, 0);
+				}
+				else if (dataType == DOUBLE)
+				{
+					return variableCopyIntoDouble(variableList[number].variable, number, size, 0);
+				}
+				else   // VARCHAR
+				{
+					return variableCopyIntoString(variableList[number].variable, number, size, 0);
+				}
 			}
 		}
 
 		public static int execute(String script)
 		{
-			Matcher matcher;
-			int datatype;
-			int status;
-			int i;
-
-
 			if (script == null)
 			{
 				return executeReset();
 			}
-
-			status = SUCCESS;
-			matcher = patternFromMemory.matcher(script);	// "INSERT" OPERATION
-			while(matcher.find())
-			{
-				i = Integer.parseInt(matcher.group(1));
-				if (i > -1 && i < 16)
-				{
-					if (variableList[i] != null && variableList[i].fromMemory == 0)
-					{
-						status = variableCreate(i, variableList[i].size);
-						if (status != SUCCESS)
-						{
-							break;
-						}
-						variableList[i].fromMemory = 1;
-						if (matcher.group(2) != null)
-						{
-							variableList[i].fromSize = Integer.parseInt(matcher.group(2));
-						}
-						datatype = variableList[i].datatype;
-						if (datatype == TINYINT)
-						{
-							variableCopyFromChar(variableList[i].variable, i, variableList[i].fromSize, 0);
-						}
-						else if (datatype == SMALLINT)
-						{
-							variableCopyFromShort(variableList[i].variable, i, variableList[i].fromSize, 0);
-						}
-						else if (datatype == INT)
-						{
-							variableCopyFromInt(variableList[i].variable, i, variableList[i].fromSize, 0);
-						}
-						else if (datatype == BIGINT)
-						{
-							variableCopyFromLong(variableList[i].variable, i, variableList[i].fromSize, 0);
-						}
-						else if (datatype == FLOAT)
-						{
-							variableCopyFromFloat(variableList[i].variable, i, variableList[i].fromSize, 0);
-						}
-						else if (datatype == DOUBLE)
-						{
-							variableCopyFromDouble(variableList[i].variable, i, variableList[i].fromSize, 0);
-						}
-						else
-						{
-							variableCopyFromString(variableList[i].variable, i, variableList[i].fromSize, 0);
-						}
-					}
-				}
-			}
-
-			if (status == SUCCESS)
-			{
-				matcher = patternIntoMemory.matcher(script);	// "SELECT" OPERATION
-				while(matcher.find())
-				{
-					i = Integer.parseInt(matcher.group(1));
-					if (i > -1 && i < 16)
-					{
-						if (variableList[i] != null && variableList[i].fromMemory == 0 && variableList[i].intoMemory == 0)
-						{
-							//status = variableCreate(i, variableList[i].size);
-							status = variableCreate(i, UNDEFINED);
-							if (status != SUCCESS)
-							{
-								break;
-							}
-							variableList[i].intoMemory = 1;
-						}
-						if (matcher.group(2) != null)
-						{
-							variableList[i].intoSize = Integer.parseInt(matcher.group(2));
-						}
-					}
-				}
-
-				if (status == SUCCESS)
-				{
-					status = execute(script, script.length(), JAVA);
-
-					for(i = 0; i < 16; i++)
-					{
-						if (variableList[i] != null && variableList[i].intoMemory == 1)
-						{
-							datatype = variableList[i].datatype;
-							if (datatype == TINYINT)
-							{
-								variableCopyIntoChar(variableList[i].variable, i, variableList[i].intoSize, 0);
-							}
-							else if (datatype == SMALLINT)
-							{
-								variableCopyIntoShort(variableList[i].variable, i, variableList[i].intoSize, 0);
-							}
-							else if (datatype == INT)
-							{
-								variableCopyIntoInt(variableList[i].variable, i, variableList[i].intoSize, 0);
-							}
-							else if (datatype == BIGINT)
-							{
-								variableCopyIntoLong(variableList[i].variable, i, variableList[i].intoSize, 0);
-							}
-							else if (datatype == FLOAT)
-							{
-								variableCopyIntoFloat(variableList[i].variable, i, variableList[i].intoSize, 0);
-							}
-							else if (datatype == DOUBLE)
-							{
-								variableCopyIntoDouble(variableList[i].variable, i, variableList[i].intoSize, 0);
-							}
-							else
-							{
-								variableCopyIntoString(variableList[i].variable, i, variableList[i].intoSize, 0);
-							}
-						}
-					}
-				}
-			}
-
-			for(i = 0; i < 16; i++)
-			{
-				if (variableList[i] != null)
-				{
-					if (variableList[i].fromMemory == 1 || variableList[i].intoMemory == 1)
-					{
-						variableList[i].fromSize = Integer.MAX_VALUE;
-						variableList[i].intoSize = Integer.MAX_VALUE;
-						variableList[i].fromMemory = 0;
-						variableList[i].intoMemory = 0;
-						//variableDestroy(i);
-					}
-				}
-			}
-
-			return status;
+			return execute(script, script.length(), JAVA);
 		}
-
 
 		public static int cursorInitialize()
 		{
@@ -205,9 +126,9 @@ public class HDFql implements HDFqlConstants {
 			return cursorClone(null, cursorClone);
 		}
 
-		public static int cursorGetDatatype()
+		public static int cursorGetDataType()
 		{
-			return cursorGetDatatype(null);
+			return cursorGetDataType(null);
 		}
 
 		public static int cursorGetCount()
@@ -300,102 +221,102 @@ public class HDFql implements HDFqlConstants {
 			return subcursorGetSize(null);
 		}
 
-		public static Byte cursorGetTinyInt()
+		public static java.lang.Byte cursorGetTinyInt()
 		{
 			return cursorGetTinyInt(null);
 		}
 
-		public static Byte subcursorGetTinyInt()
+		public static java.lang.Byte subcursorGetTinyInt()
 		{
 			return subcursorGetTinyInt(null);
 		}
 
-		public static Byte cursorGetUnsignedTinyInt()
+		public static java.lang.Byte cursorGetUnsignedTinyInt()
 		{
 			return cursorGetUnsignedTinyInt(null);
 		}
 
-		public static Byte subcursorGetUnsignedTinyInt()
+		public static java.lang.Byte subcursorGetUnsignedTinyInt()
 		{
 			return subcursorGetUnsignedTinyInt(null);
 		}
 
-		public static Short cursorGetSmallInt()
+		public static java.lang.Short cursorGetSmallInt()
 		{
 			return cursorGetSmallInt(null);
 		}
 
-		public static Short subcursorGetSmallInt()
+		public static java.lang.Short subcursorGetSmallInt()
 		{
 			return subcursorGetSmallInt(null);
 		}
 
-		public static Short cursorGetUnsignedSmallInt()
+		public static java.lang.Short cursorGetUnsignedSmallInt()
 		{
 			return cursorGetUnsignedSmallInt(null);
 		}
 
-		public static Short subcursorGetUnsignedSmallInt()
+		public static java.lang.Short subcursorGetUnsignedSmallInt()
 		{
 			return subcursorGetUnsignedSmallInt(null);
 		}
 
-		public static Integer cursorGetInt()
+		public static java.lang.Integer cursorGetInt()
 		{
 			return cursorGetInt(null);
 		}
 
-		public static Integer subcursorGetInt()
+		public static java.lang.Integer subcursorGetInt()
 		{
 			return subcursorGetInt(null);
 		}
 
-		public static Integer cursorGetUnsignedInt()
+		public static java.lang.Integer cursorGetUnsignedInt()
 		{
 			return cursorGetUnsignedInt(null);
 		}
 
-		public static Integer subcursorGetUnsignedInt()
+		public static java.lang.Integer subcursorGetUnsignedInt()
 		{
 			return subcursorGetUnsignedInt(null);
 		}
 
-		public static Long cursorGetBigInt()
+		public static java.lang.Long cursorGetBigInt()
 		{
 			return cursorGetBigInt(null);
 		}
 
-		public static Long subcursorGetBigInt()
+		public static java.lang.Long subcursorGetBigInt()
 		{
 			return subcursorGetBigInt(null);
 		}
 
-		public static Long cursorGetUnsignedBigInt()
+		public static java.lang.Long cursorGetUnsignedBigInt()
 		{
 			return cursorGetUnsignedBigInt(null);
 		}
 
-		public static Long subcursorGetUnsignedBigInt()
+		public static java.lang.Long subcursorGetUnsignedBigInt()
 		{
 			return subcursorGetUnsignedBigInt(null);
 		}
 
-		public static Float cursorGetFloat()
+		public static java.lang.Float cursorGetFloat()
 		{
 			return cursorGetFloat(null);
 		}
 
-		public static Float subcursorGetFloat()
+		public static java.lang.Float subcursorGetFloat()
 		{
 			return subcursorGetFloat(null);
 		}
 
-		public static Double cursorGetDouble()
+		public static java.lang.Double cursorGetDouble()
 		{
 			return cursorGetDouble(null);
 		}
 
-		public static Double subcursorGetDouble()
+		public static java.lang.Double subcursorGetDouble()
 		{
 			return subcursorGetDouble(null);
 		}
@@ -414,49 +335,47 @@ public class HDFql implements HDFqlConstants {
 		{
 			Object type;
 			Object tmp;
-			int datatype;
-			int size;
-			int slot;
+			int dataType;
+			int number;
 			int i;
 
 			if (variable == null)
 			{
 				return ERROR_NO_ADDRESS;
 			}
-			if (variable.getClass().isArray() == false)	// INFO: only arrays are allowed (otherwise it is not possible to have a "real" reference of the object being registered)
+			if (variable.getClass().isArray() == false)   // INFO: only arrays are allowed (otherwise it is not possible to have a "real" reference of the object being registered)
 			{
-				return ERROR_UNEXPECTED_DATATYPE;
+				return ERROR_UNEXPECTED_DATA_TYPE;
 			}
-			slot = -1;
-			for(i = 0; i < 16; i++)
+			number = -1;
+			for(i = 0; i < 8; i++)
 			{
 				if (variableList[i] == null)
 				{
-					if (slot == -1)
+					if (number == -1)
 					{
-						slot = i;
+						number = i;
 					}
 				}
 				else
 				{
 					if (variable.equals(variableList[i].variable))
 					{
-						return SUCCESS;
+						return i;
 					}
 				}
 			}
-			if (slot == -1)
+			if (number == -1)
 			{
 				return ERROR_FULL;
 			}
 			type = null;
 			tmp = variable;
-			size = 1;
 			try
 			{
 				while(true)
 				{
-					size *= java.lang.reflect.Array.getLength(tmp);
+					java.lang.reflect.Array.getLength(tmp);
 					type = tmp.getClass().getComponentType();
 					tmp = java.lang.reflect.Array.get(tmp, 0);
 				}
@@ -464,48 +383,41 @@ public class HDFql implements HDFqlConstants {
 			catch(Exception e)
 			{
 			}
-			if (type == byte.class || type == Byte.class)
+			if (type == byte.class || type == Byte.class)   // INFO: it includes the OPAQUE data type as well
 			{
-				datatype = TINYINT;
-				size *= 1;
+				dataType = TINYINT;
 			}
 			else if (type == short.class || type == Short.class)
 			{
-				datatype = SMALLINT;
-				size *= 2;
+				dataType = SMALLINT;
 			}
 			else if (type == int.class || type == Integer.class)
 			{
-				datatype = INT;
-				size *= 4;
+				dataType = INT;
 			}
 			else if (type == long.class || type == Long.class)
 			{
-				datatype = BIGINT;
-				size *= 8;
+				dataType = BIGINT;
 			}
 			else if (type == float.class || type == Float.class)
 			{
-				datatype = FLOAT;
-				size *= 4;
+				dataType = FLOAT;
 			}
 			else if (type == double.class || type == Double.class)
 			{
-				datatype = DOUBLE;
-				size *= 8;
+				dataType = DOUBLE;
 			}
 			else if (type == String.class)
 			{
-				datatype = VARCHAR;
-				size += variableCalculateSize(variable, 0);
+				dataType = VARCHAR;
 			}
 			else
 			{
-				return ERROR_UNEXPECTED_DATATYPE;
+				return ERROR_UNEXPECTED_DATA_TYPE;
 			}
-			variableList[slot] = new Variable(variable, datatype, size);
-			variableRegister(slot, 0);
-			return SUCCESS;
+			variableList[number] = new Variable(variable, dataType);
+			variableRegister(number, 0);
+			return number;
 		}
 
 		public static int variableUnregister(Object variable)
@@ -516,7 +428,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				return ERROR_NO_ADDRESS;
 			}
-			for(i = 0; i < 16; i++)
+			for(i = 0; i < 8; i++)
 			{
 				if (variableList[i] != null && variable.equals(variableList[i].variable))
 				{
@@ -536,7 +448,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				return ERROR_NO_ADDRESS;
 			}
-			for(i = 0; i < 16; i++)
+			for(i = 0; i < 8; i++)
 			{
 				if (variableList[i] != null && variable.equals(variableList[i].variable))
 				{
@@ -546,7 +458,7 @@ public class HDFql implements HDFqlConstants {
 			return ERROR_NOT_REGISTERED;
 		}
 
-		public static int variableGetDatatype(Object variable)
+		public static int variableGetDataType(Object variable)
 		{
 			int i;
 
@@ -554,11 +466,11 @@ public class HDFql implements HDFqlConstants {
 			{
 				return ERROR_NO_ADDRESS;
 			}
-			for(i = 0; i < 16; i++)
+			for(i = 0; i < 8; i++)
 			{
 				if (variableList[i] != null && variable.equals(variableList[i].variable))
 				{
-					return variableGetDatatype(i);
+					return variableGetDataType(i);
 				}
 			}
 			return ERROR_NOT_REGISTERED;
@@ -572,7 +484,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				return ERROR_NO_ADDRESS;
 			}
-			for(i = 0; i < 16; i++)
+			for(i = 0; i < 8; i++)
 			{
 				if (variableList[i] != null && variable.equals(variableList[i].variable))
 				{
@@ -590,7 +502,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				return ERROR_NO_ADDRESS;
 			}
-			for(i = 0; i < 16; i++)
+			for(i = 0; i < 8; i++)
 			{
 				if (variableList[i] != null && variable.equals(variableList[i].variable))
 				{
@@ -608,7 +520,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				return ERROR_NO_ADDRESS;
 			}
-			for(i = 0; i < 16; i++)
+			for(i = 0; i < 8; i++)
 			{
 				if (variableList[i] != null && variable.equals(variableList[i].variable))
 				{
@@ -626,7 +538,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				return ERROR_NO_ADDRESS;
 			}
-			for(i = 0; i < 16; i++)
+			for(i = 0; i < 8; i++)
 			{
 				if (variableList[i] != null && variable.equals(variableList[i].variable))
 				{
@@ -636,7 +548,7 @@ public class HDFql implements HDFqlConstants {
 			return ERROR_NOT_REGISTERED;
 		}
 
-		private static int variableCopyFromChar(Object variable, int index, int size, int count)
+		private static int variableCopyFromChar(Object variable, int number, int size, int count)
 		{
 			Object element;
 			boolean flag;
@@ -656,7 +568,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyFromChar(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyFromChar(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
@@ -666,11 +578,11 @@ public class HDFql implements HDFqlConstants {
 					element = java.lang.reflect.Array.get(variable, i);
 					if (element == null)
 					{
-						variableSetChar(index, (char) 0, count);
+						variableSetChar(number, (char) 0, count);
 					}
 					else
 					{
-						variableSetChar(index, (char) ((byte) element), count);
+						variableSetChar(number, (char) ((byte) element), count);
 					}
 					count++;
 				}
@@ -678,7 +590,7 @@ public class HDFql implements HDFqlConstants {
 			return count;
 		}
 
-		private static int variableCopyFromShort(Object variable, int index, int size, int count)
+		private static int variableCopyFromShort(Object variable, int number, int size, int count)
 		{
 			Object element;
 			boolean flag;
@@ -698,7 +610,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyFromShort(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyFromShort(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
@@ -708,11 +620,11 @@ public class HDFql implements HDFqlConstants {
 					element = java.lang.reflect.Array.get(variable, i);
 					if (element == null)
 					{
-						variableSetShort(index, (short) 0, count);
+						variableSetShort(number, (short) 0, count);
 					}
 					else
 					{
-						variableSetShort(index, (short) element, count);
+						variableSetShort(number, (short) element, count);
 					}
 					count += 2;
 				}
@@ -720,7 +632,7 @@ public class HDFql implements HDFqlConstants {
 			return count;
 		}
 
-		private static int variableCopyFromInt(Object variable, int index, int size, int count)
+		private static int variableCopyFromInt(Object variable, int number, int size, int count)
 		{
 			Object element;
 			boolean flag;
@@ -740,7 +652,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyFromInt(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyFromInt(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
@@ -750,11 +662,11 @@ public class HDFql implements HDFqlConstants {
 					element = java.lang.reflect.Array.get(variable, i);
 					if (element == null)
 					{
-						variableSetInt(index, 0, count);
+						variableSetInt(number, 0, count);
 					}
 					else
 					{
-						variableSetInt(index, (int) element, count);
+						variableSetInt(number, (int) element, count);
 					}
 					count += 4;
 				}
@@ -762,7 +674,7 @@ public class HDFql implements HDFqlConstants {
 			return count;
 		}
 
-		private static int variableCopyFromLong(Object variable, int index, int size, int count)
+		private static int variableCopyFromLong(Object variable, int number, int size, int count)
 		{
 			Object element;
 			boolean flag;
@@ -782,7 +694,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyFromLong(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyFromLong(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
@@ -792,11 +704,11 @@ public class HDFql implements HDFqlConstants {
 					element = java.lang.reflect.Array.get(variable, i);
 					if (element == null)
 					{
-						variableSetLong(index, (long) 0, count);
+						variableSetLong(number, (long) 0, count);
 					}
 					else
 					{
-						variableSetLong(index, (long) element, count);
+						variableSetLong(number, (long) element, count);
 					}
 					count += 8;
 				}
@@ -804,7 +716,7 @@ public class HDFql implements HDFqlConstants {
 			return count;
 		}
 
-		private static int variableCopyFromFloat(Object variable, int index, int size, int count)
+		private static int variableCopyFromFloat(Object variable, int number, int size, int count)
 		{
 			Object element;
 			boolean flag;
@@ -824,7 +736,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyFromFloat(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyFromFloat(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
@@ -834,11 +746,11 @@ public class HDFql implements HDFqlConstants {
 					element = java.lang.reflect.Array.get(variable, i);
 					if (element == null)
 					{
-						variableSetFloat(index, (float) 0, count);
+						variableSetFloat(number, (float) 0, count);
 					}
 					else
 					{
-						variableSetFloat(index, (float) element, count);
+						variableSetFloat(number, (float) element, count);
 					}
 					count += 4;
 				}
@@ -846,7 +758,7 @@ public class HDFql implements HDFqlConstants {
 			return count;
 		}
 
-		private static int variableCopyFromDouble(Object variable, int index, int size, int count)
+		private static int variableCopyFromDouble(Object variable, int number, int size, int count)
 		{
 			Object element;
 			boolean flag;
@@ -866,7 +778,7 @@ public class HDFql implements HDFqlConstants {
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyFromDouble(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyFromDouble(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
@@ -876,11 +788,11 @@ public class HDFql implements HDFqlConstants {
 					element = java.lang.reflect.Array.get(variable, i);
 					if (element == null)
 					{
-						variableSetDouble(index, (double) 0, count);
+						variableSetDouble(number, (double) 0, count);
 					}
 					else
 					{
-						variableSetDouble(index, (double) element, count);
+						variableSetDouble(number, (double) element, count);
 					}
 					count += 8;
 				}
@@ -888,9 +800,50 @@ public class HDFql implements HDFqlConstants {
 			return count;
 		}
 
-		private static int variableCopyFromString(Object variable, int index, int size, int count)
+		private static int variableCopyFromString(Object variable, int number, int size, int count)
 		{
 			Object element;
+			boolean flag;
+			int length;
+			int i;
+
+			length = java.lang.reflect.Array.getLength(variable);
+			try
+			{
+				flag = java.lang.reflect.Array.get(variable, 0).getClass().isArray();
+			}
+			catch(Exception e)
+			{
+				flag = false;
+			}
+			if (flag)
+			{
+				for(i = 0; i < length && count < size; i++)
+				{
+					count = variableCopyFromString(java.lang.reflect.Array.get(variable, i), number, size, count);
+				}
+			}
+			else
+			{
+				for(i = 0; i < length && count < size; i++)
+				{
+					element = java.lang.reflect.Array.get(variable, i);
+					if (element == null)
+					{
+						variableSetString(number, "", count, 0);
+					}
+					else
+					{
+						variableSetString(number, (String) element, count, ((String) element).length());
+					}
+					count++;
+				}
+			}
+			return count;
+		}
+
+		private static int variableCopyIntoChar(Object variable, int number, int size, int count)
+		{
 			boolean flag;
 			int length;
 			int i;
@@ -909,58 +862,14 @@ public class HDFql implements HDFqlConstants {
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyFromString(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyIntoChar(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					element = java.lang.reflect.Array.get(variable, i);
-					if (element == null)
-					{
-						variableSetString(index, "", count, 0);
-						count++;
-					}
-					else
-					{
-						j = ((String) element).length();
-						variableSetString(index, (String) element, count, j);
-						count += j + 1;
-					}
-				}
-			}
-			return count;
-		}
-
-		private static int variableCopyIntoChar(Object variable, int index, int size, int count)
-		{
-			boolean flag;
-			int length;
-			int i;
-			int j;
-
-			length = java.lang.reflect.Array.getLength(variable);
-			try
-			{
-				flag = java.lang.reflect.Array.get(variable, 0).getClass().isArray();
-			}
-			catch(Exception e)
-			{
-				flag = false;
-			}
-			if (flag)
-			{
-				for(i = 0; i < length; i++)
-				{
-					count = variableCopyIntoChar(java.lang.reflect.Array.get(variable, i), index, size, count);
-				}
-			}
-			else
-			{
-				for(i = 0; i < length && count < size; i++)
-				{
-					j = variableGetChar(index, count);
+					j = variableGetChar(number, count);
 					java.lang.reflect.Array.set(variable, i, (byte) j);
 					count++;
 				}
@@ -968,7 +877,7 @@ public class HDFql implements HDFqlConstants {
 			return count;
 		}
 
-		private static int variableCopyIntoShort(Object variable, int index, int size, int count)
+		private static int variableCopyIntoShort(Object variable, int number, int size, int count)
 		{
 			boolean flag;
 			int length;
@@ -985,23 +894,23 @@ public class HDFql implements HDFqlConstants {
 			}
 			if (flag)
 			{
-				for(i = 0; i < length; i++)
+				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyIntoShort(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyIntoShort(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					java.lang.reflect.Array.set(variable, i, variableGetShort(index, count));
+					java.lang.reflect.Array.set(variable, i, variableGetShort(number, count));
 					count += 2;
 				}
 			}
 			return count;
 		}
 
-		private static int variableCopyIntoInt(Object variable, int index, int size, int count)
+		private static int variableCopyIntoInt(Object variable, int number, int size, int count)
 		{
 			boolean flag;
 			int length;
@@ -1018,23 +927,23 @@ public class HDFql implements HDFqlConstants {
 			}
 			if (flag)
 			{
-				for(i = 0; i < length; i++)
+				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyIntoInt(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyIntoInt(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					java.lang.reflect.Array.set(variable, i, variableGetInt(index, count));
+					java.lang.reflect.Array.set(variable, i, variableGetInt(number, count));
 					count += 4;
 				}
 			}
 			return count;
 		}
 
-		private static int variableCopyIntoLong(Object variable, int index, int size, int count)
+		private static int variableCopyIntoLong(Object variable, int number, int size, int count)
 		{
 			boolean flag;
 			int length;
@@ -1051,23 +960,23 @@ public class HDFql implements HDFqlConstants {
 			}
 			if (flag)
 			{
-				for(i = 0; i < length; i++)
+				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyIntoLong(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyIntoLong(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					java.lang.reflect.Array.set(variable, i, variableGetLong(index, count));
+					java.lang.reflect.Array.set(variable, i, variableGetLong(number, count));
 					count += 8;
 				}
 			}
 			return count;
 		}
 
-		private static int variableCopyIntoFloat(Object variable, int index, int size, int count)
+		private static int variableCopyIntoFloat(Object variable, int number, int size, int count)
 		{
 			boolean flag;
 			int length;
@@ -1086,21 +995,21 @@ public class HDFql implements HDFqlConstants {
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyIntoFloat(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyIntoFloat(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
 			{
-				for(i = 0; i < length; i++)
+				for(i = 0; i < length && count < size; i++)
 				{
-					java.lang.reflect.Array.set(variable, i, variableGetFloat(index, count));
+					java.lang.reflect.Array.set(variable, i, variableGetFloat(number, count));
 					count += 4;
 				}
 			}
 			return count;
 		}
 
-		private static int variableCopyIntoDouble(Object variable, int index, int size, int count)
+		private static int variableCopyIntoDouble(Object variable, int number, int size, int count)
 		{
 			boolean flag;
 			int length;
@@ -1117,23 +1026,23 @@ public class HDFql implements HDFqlConstants {
 			}
 			if (flag)
 			{
-				for(i = 0; i < length; i++)
+				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyIntoDouble(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyIntoDouble(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					java.lang.reflect.Array.set(variable, i, variableGetDouble(index, count));
+					java.lang.reflect.Array.set(variable, i, variableGetDouble(number, count));
 					count += 8;
 				}
 			}
 			return count;
 		}
 
-		private static int variableCopyIntoString(Object variable, int index, int size, int count)
+		private static int variableCopyIntoString(Object variable, int number, int size, int count)
 		{
 			boolean flag;
 			int length;
@@ -1150,57 +1059,20 @@ public class HDFql implements HDFqlConstants {
 			}
 			if (flag)
 			{
-				for(i = 0; i < length; i++)
+				for(i = 0; i < length && count < size; i++)
 				{
-					count = variableCopyIntoString(java.lang.reflect.Array.get(variable, i), index, size, count);
+					count = variableCopyIntoString(java.lang.reflect.Array.get(variable, i), number, size, count);
 				}
 			}
 			else
 			{
 				for(i = 0; i < length && count < size; i++)
 				{
-					java.lang.reflect.Array.set(variable, i, variableGetString(index, count));
+					java.lang.reflect.Array.set(variable, i, variableGetString(number, count));
 					count++;
 				}
 			}
 			return count;
-		}
-
-		private static int variableCalculateSize(Object variable, int size)
-		{
-			Object element;
-			boolean flag;
-			int length;
-			int i;
-
-			length = java.lang.reflect.Array.getLength(variable);
-			try
-			{
-				flag = java.lang.reflect.Array.get(variable, 0).getClass().isArray();
-			}
-			catch(Exception e)
-			{
-				flag = false;
-			}
-			if (flag)
-			{
-				for(i = 0; i < length; i++)
-				{
-					size = variableCalculateSize(java.lang.reflect.Array.get(variable, i), size);
-				}
-			}
-			else
-			{
-				for(i = 0; i < length; i++)
-				{
-					element = java.lang.reflect.Array.get(variable, i);
-					if (element != null)
-					{
-						size += ((String) element).length();
-					}
-				}
-			}
-			return size;
 		}
 	
   public static int executeGetStatus() {
@@ -1219,8 +1091,16 @@ public class HDFql implements HDFqlConstants {
     return HDFqlJNI.errorGetMessage();
   }
 
-  private static int execute(String arg0, int arg1, int arg2) {
-    return HDFqlJNI.execute(arg0, arg1, arg2);
+  public static int mpiGetSize() {
+    return HDFqlJNI.mpiGetSize();
+  }
+
+  public static int mpiGetRank() {
+    return HDFqlJNI.mpiGetRank();
+  }
+
+  private static int execute(String script, int script_size, int programming_language) {
+    return HDFqlJNI.execute(script, script_size, programming_language);
   }
 
   private static int executeReset() {
@@ -1235,8 +1115,8 @@ public class HDFql implements HDFqlConstants {
     HDFqlJNI.variableUnregister(number);
   }
 
-  private static int variableGetDatatype(int number) {
-    return HDFqlJNI.variableGetDatatype(number);
+  private static int variableGetDataType(int number) {
+    return HDFqlJNI.variableGetDataType(number);
   }
 
   private static int variableGetCount(int number) {
@@ -1275,8 +1155,8 @@ public class HDFql implements HDFqlConstants {
     return HDFqlJNI.cursorClone(HDFqlCursor.getCPtr(cursorOriginal), cursorOriginal, HDFqlCursor.getCPtr(cursorClone), cursorClone);
   }
 
-  public static int cursorGetDatatype(HDFqlCursor cursor) {
-    return HDFqlJNI.cursorGetDatatype(HDFqlCursor.getCPtr(cursor), cursor);
+  public static int cursorGetDataType(HDFqlCursor cursor) {
+    return HDFqlJNI.cursorGetDataType(HDFqlCursor.getCPtr(cursor), cursor);
   }
 
   public static int cursorGetCount(HDFqlCursor cursor) {
@@ -1351,7 +1231,7 @@ public class HDFql implements HDFqlConstants {
     return HDFqlJNI.subcursorGetSize(HDFqlCursor.getCPtr(cursor), cursor);
   }
 
-  public static Byte cursorGetTinyInt(HDFqlCursor cursor) {
+  public static java.lang.Byte cursorGetTinyInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetTinyInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1360,11 +1240,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Byte((byte) convertChar(pointer));
+			return new java.lang.Byte((byte) convertChar(pointer));
 		}
 	}
 
-  public static Byte subcursorGetTinyInt(HDFqlCursor cursor) {
+  public static java.lang.Byte subcursorGetTinyInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetTinyInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1373,11 +1253,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Byte((byte) convertChar(pointer));
+			return new java.lang.Byte((byte) convertChar(pointer));
 		}
 	}
 
-  public static Byte cursorGetUnsignedTinyInt(HDFqlCursor cursor) {
+  public static java.lang.Byte cursorGetUnsignedTinyInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetUnsignedTinyInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1386,11 +1266,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Byte((byte) convertChar(pointer));
+			return new java.lang.Byte((byte) convertChar(pointer));
 		}
 	}
 
-  public static Byte subcursorGetUnsignedTinyInt(HDFqlCursor cursor) {
+  public static java.lang.Byte subcursorGetUnsignedTinyInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetUnsignedTinyInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1399,11 +1279,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Byte((byte) convertChar(pointer));
+			return new java.lang.Byte((byte) convertChar(pointer));
 		}
 	}
 
-  public static Short cursorGetSmallInt(HDFqlCursor cursor) {
+  public static java.lang.Short cursorGetSmallInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetSmallInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1412,11 +1292,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Short(convertShort(pointer));
+			return new java.lang.Short(convertShort(pointer));
 		}
 	}
 
-  public static Short subcursorGetSmallInt(HDFqlCursor cursor) {
+  public static java.lang.Short subcursorGetSmallInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetSmallInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1425,11 +1305,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Short(convertShort(pointer));
+			return new java.lang.Short(convertShort(pointer));
 		}
 	}
 
-  public static Short cursorGetUnsignedSmallInt(HDFqlCursor cursor) {
+  public static java.lang.Short cursorGetUnsignedSmallInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetUnsignedSmallInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1438,11 +1318,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Short(convertShort(pointer));
+			return new java.lang.Short(convertShort(pointer));
 		}
 	}
 
-  public static Short subcursorGetUnsignedSmallInt(HDFqlCursor cursor) {
+  public static java.lang.Short subcursorGetUnsignedSmallInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetUnsignedSmallInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1451,11 +1331,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Short(convertShort(pointer));
+			return new java.lang.Short(convertShort(pointer));
 		}
 	}
 
-  public static Integer cursorGetInt(HDFqlCursor cursor) {
+  public static java.lang.Integer cursorGetInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1464,11 +1344,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Integer(convertInt(pointer));
+			return new java.lang.Integer(convertInt(pointer));
 		}
 	}
 
-  public static Integer subcursorGetInt(HDFqlCursor cursor) {
+  public static java.lang.Integer subcursorGetInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1477,11 +1357,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Integer(convertInt(pointer));
+			return new java.lang.Integer(convertInt(pointer));
 		}
 	}
 
-  public static Integer cursorGetUnsignedInt(HDFqlCursor cursor) {
+  public static java.lang.Integer cursorGetUnsignedInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetUnsignedInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1490,11 +1370,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Integer(convertInt(pointer));
+			return new java.lang.Integer(convertInt(pointer));
 		}
 	}
 
-  public static Integer subcursorGetUnsignedInt(HDFqlCursor cursor) {
+  public static java.lang.Integer subcursorGetUnsignedInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetUnsignedInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1503,11 +1383,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Integer(convertInt(pointer));
+			return new java.lang.Integer(convertInt(pointer));
 		}
 	}
 
-  public static Long cursorGetBigInt(HDFqlCursor cursor) {
+  public static java.lang.Long cursorGetBigInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetBigInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1516,11 +1396,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Long(convertLong(pointer));
+			return new java.lang.Long(convertLong(pointer));
 		}
 	}
 
-  public static Long subcursorGetBigInt(HDFqlCursor cursor) {
+  public static java.lang.Long subcursorGetBigInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetBigInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1529,11 +1409,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Long(convertLong(pointer));
+			return new java.lang.Long(convertLong(pointer));
 		}
 	}
 
-  public static Long cursorGetUnsignedBigInt(HDFqlCursor cursor) {
+  public static java.lang.Long cursorGetUnsignedBigInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetUnsignedBigInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1542,11 +1422,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Long(convertLong(pointer));
+			return new java.lang.Long(convertLong(pointer));
 		}
 	}
 
-  public static Long subcursorGetUnsignedBigInt(HDFqlCursor cursor) {
+  public static java.lang.Long subcursorGetUnsignedBigInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetUnsignedBigInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1555,11 +1435,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Long(convertLong(pointer));
+			return new java.lang.Long(convertLong(pointer));
 		}
 	}
 
-  public static Float cursorGetFloat(HDFqlCursor cursor) {
+  public static java.lang.Float cursorGetFloat(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetFloat(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1568,11 +1448,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Float(convertFloat(pointer));
+			return new java.lang.Float(convertFloat(pointer));
 		}
 	}
 
-  public static Float subcursorGetFloat(HDFqlCursor cursor) {
+  public static java.lang.Float subcursorGetFloat(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetFloat(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1581,11 +1461,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Float(convertFloat(pointer));
+			return new java.lang.Float(convertFloat(pointer));
 		}
 	}
 
-  public static Double cursorGetDouble(HDFqlCursor cursor) {
+  public static java.lang.Double cursorGetDouble(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetDouble(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1594,11 +1474,11 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Double(convertDouble(pointer));
+			return new java.lang.Double(convertDouble(pointer));
 		}
 	}
 
-  public static Double subcursorGetDouble(HDFqlCursor cursor) {
+  public static java.lang.Double subcursorGetDouble(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetDouble(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
@@ -1607,7 +1487,7 @@ public class HDFql implements HDFqlConstants {
 		}
 		else
 		{
-			return new Double(convertDouble(pointer));
+			return new java.lang.Double(convertDouble(pointer));
 		}
 	}
 
@@ -1619,12 +1499,8 @@ public class HDFql implements HDFqlConstants {
     return HDFqlJNI.subcursorGetChar(HDFqlCursor.getCPtr(cursor), cursor);
   }
 
-  private static int variableCreate(int number, int size) {
-    return HDFqlJNI.variableCreate(number, size);
-  }
-
-  private static void variableDestroy(int number) {
-    HDFqlJNI.variableDestroy(number);
+  private static void javaSetEnvironment() {
+    HDFqlJNI.javaSetEnvironment();
   }
 
   private static void variableSetChar(int number, char data, int position) {
@@ -1687,28 +1563,28 @@ public class HDFql implements HDFqlConstants {
     return HDFqlJNI.getCanonicalPath(objectName);
   }
 
-  private static char convertChar(long arg0) {
-    return HDFqlJNI.convertChar(arg0);
+  private static char convertChar(long pointer) {
+    return HDFqlJNI.convertChar(pointer);
   }
 
-  private static short convertShort(long arg0) {
-    return HDFqlJNI.convertShort(arg0);
+  private static short convertShort(long pointer) {
+    return HDFqlJNI.convertShort(pointer);
   }
 
-  private static int convertInt(long arg0) {
-    return HDFqlJNI.convertInt(arg0);
+  private static int convertInt(long pointer) {
+    return HDFqlJNI.convertInt(pointer);
   }
 
-  private static long convertLong(long arg0) {
-    return HDFqlJNI.convertLong(arg0);
+  private static long convertLong(long pointer) {
+    return HDFqlJNI.convertLong(pointer);
   }
 
-  private static float convertFloat(long arg0) {
-    return HDFqlJNI.convertFloat(arg0);
+  private static float convertFloat(long pointer) {
+    return HDFqlJNI.convertFloat(pointer);
   }
 
-  private static double convertDouble(long arg0) {
-    return HDFqlJNI.convertDouble(arg0);
+  private static double convertDouble(long pointer) {
+    return HDFqlJNI.convertDouble(pointer);
   }
 
 }

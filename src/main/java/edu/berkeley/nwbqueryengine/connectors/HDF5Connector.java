@@ -1,7 +1,6 @@
 package edu.berkeley.nwbqueryengine.connectors;
 
 import as.hdfql.HDFql;
-import as.hdfql.HDFqlCursor;
 import edu.berkeley.nwbqueryengine.data.EntityWrapper;
 import edu.berkeley.nwbqueryengine.query.Expression;
 import edu.berkeley.nwbqueryengine.query.Query;
@@ -22,11 +21,8 @@ public class HDF5Connector implements Connector<String> {
 
     private Log logger = LogFactory.getLog(getClass());
     private File obj;
-    private HDFqlCursor cursor = new HDFqlCursor();
-
 
     public HDF5Connector(File obj) {
-        HDFql.cursorUse(cursor);
         this.obj = obj;
 
     }
@@ -51,25 +47,25 @@ public class HDF5Connector implements Connector<String> {
                     } else if (leftSide.equals("*")) {
                         leftSide = "**";
                     }
+
                     String queryString = "SHOW LIKE " + queryPrefix + "" + leftSide + "/" + queryPrefix + "" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
                     logger.debug(queryString);
                     int executeLikeRes;
-                    int attempts = 1;
-                    connect(obj);
+
                     synchronized (this) {
-                        while ((executeLikeRes = HDFql.execute(queryString)) != HDFql.SUCCESS && attempts-- > 0) {
-//                    HDFql.cursorClear(cursor);
-//                    HDFql.cursorInitialize(cursor);
+                        HDFql.cursorClear();
+                        HDFql.cursorInitialize();
+                        while ((executeLikeRes = HDFql.execute(queryString)) != HDFql.SUCCESS) {
                             logger.error("Error: " + HDFql.errorGetMessage());
                         }
                         logger.debug("ExecuteLikeRes: " + executeLikeRes);
 
                         int cursorRes;
-                        while ((cursorRes = HDFql.cursorNext(cursor)) == HDFql.SUCCESS) {
-                            String cursorGetChar = HDFql.cursorGetChar(cursor);
+                        while ((cursorRes = HDFql.cursorNext()) == HDFql.SUCCESS) {
+                            String cursorGetChar = HDFql.cursorGetChar();
                             if (cursorGetChar.endsWith(expressionValue)) {
                                 showResults.add(cursorGetChar);
-                                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDatatype(cursor));
+                                logger.debug("Like: " + cursorGetChar + " -- " + HDFql.cursorGetDataType());
                             }
                         }
 
@@ -77,9 +73,6 @@ public class HDF5Connector implements Connector<String> {
                         logger.debug("cursorRes:" + cursorRes);
 
                     }
-                    disconnect(obj);
-
-
                 }
                 partialExpressions.add(new EntityWrapper(showResults, item, fileName, subQuery));
             }
@@ -88,22 +81,29 @@ public class HDF5Connector implements Connector<String> {
     }
 
 
-    public void connect(File obj) throws ConnectorException {
+    protected void connect(File obj) throws ConnectorException {
         synchronized (this) {
             if (logger.isDebugEnabled()) {
+                HDFql.cursorClear();
+                HDFql.cursorInitialize();
                 HDFql.execute("ENABLE DEBUG");
             }
             String useFileQuery = "USE READONLY FILE " + obj.getAbsolutePath();
             logger.debug("Use file query: " + useFileQuery);
+            HDFql.cursorClear();
+            HDFql.cursorInitialize();
             HDFql.execute(useFileQuery);
+            HDFql.cursorClear();
+            HDFql.cursorInitialize();
             HDFql.execute("SHOW USE FILE");
-            HDFql.cursorFirst(cursor);
-            logger.debug("File in use: " + HDFql.cursorGetChar(cursor));
+            //logger.debug("File in use: " + HDFql.cursorGetChar(cursor));
         }
     }
 
 
-    public void disconnect(File obj) throws ConnectorException {
+    protected void disconnect(File obj) throws ConnectorException {
+        HDFql.cursorClear();
+        HDFql.cursorInitialize();
         int closeResult = HDFql.execute("CLOSE FILE " + obj.getAbsolutePath());
         logger.debug("Closing file: " + obj.getAbsolutePath() + ", resultCode: " + closeResult);
 
@@ -124,11 +124,10 @@ public class HDF5Connector implements Connector<String> {
 
     public Object next() throws ConnectorException {
         Object value = null;
-        int selectCursorResult = HDFql.cursorNext(cursor);
-        if(selectCursorResult == HDFql.SUCCESS) {
+        if(HDFql.cursorNext() == HDFql.SUCCESS) {
             HDFqlUtil util = new HDFqlUtil();
             try {
-                value = util.getValue(cursor);
+                value = util.getValue();
             } catch (Exception e) {
                 throw new ConnectorException(e);
             }
@@ -140,15 +139,26 @@ public class HDF5Connector implements Connector<String> {
     }
 
     @Override
+    public void disconnect() throws ConnectorException {
+        disconnect(obj);
+    }
+
+    @Override
+    public void connect() throws ConnectorException {
+        connect(obj);
+
+
+    }
+
+    @Override
     public void getValues(String entity) throws ConnectorException {
         synchronized (this) {
-            connect(obj);
             String selectQuery = "SELECT FROM " + entity;
             logger.debug("Select: " + selectQuery);
+            HDFql.cursorClear();
+            HDFql.cursorInitialize();
             int selectStatus = HDFql.execute(selectQuery);
             logger.debug("selectStatus: " + selectStatus);
-
-            disconnect(obj);
         }
     }
 }

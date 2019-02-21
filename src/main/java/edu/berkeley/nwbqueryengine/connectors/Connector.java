@@ -17,4 +17,8 @@ public interface Connector<Entity> {
     List<EntityWrapper> processSearch(Query query) throws ConnectorException;
 
     Object next() throws ConnectorException;
+
+    void disconnect() throws ConnectorException;
+
+    void connect() throws ConnectorException;
 }

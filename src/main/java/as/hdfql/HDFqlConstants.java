@@ -8,23 +8,24 @@
 
 package as.hdfql;
 
-		import java.util.regex.Pattern;
-		import java.util.regex.Matcher;
-	
 public interface HDFqlConstants {
   public final static String VERSION = HDFqlJNI.VERSION_get();
-  public final static int BUFFER_SIZE = HDFqlJNI.BUFFER_SIZE_get();
   public final static int YES = HDFqlJNI.YES_get();
   public final static int NO = HDFqlJNI.NO_get();
   public final static int ENABLED = HDFqlJNI.ENABLED_get();
   public final static int DISABLED = HDFqlJNI.DISABLED_get();
-  public final static int DEFAULT = HDFqlJNI.DEFAULT_get();
   public final static int UNLIMITED = HDFqlJNI.UNLIMITED_get();
   public final static int UNDEFINED = HDFqlJNI.UNDEFINED_get();
   public final static int GLOBAL = HDFqlJNI.GLOBAL_get();
   public final static int LOCAL = HDFqlJNI.LOCAL_get();
   public final static int TRACKED = HDFqlJNI.TRACKED_get();
   public final static int INDEXED = HDFqlJNI.INDEXED_get();
+  public final static int CONTIGUOUS = HDFqlJNI.CONTIGUOUS_get();
+  public final static int COMPACT = HDFqlJNI.COMPACT_get();
+  public final static int CHUNKED = HDFqlJNI.CHUNKED_get();
+  public final static int EARLY = HDFqlJNI.EARLY_get();
+  public final static int INCREMENTAL = HDFqlJNI.INCREMENTAL_get();
+  public final static int LATE = HDFqlJNI.LATE_get();
   public final static int DIRECTORY = HDFqlJNI.DIRECTORY_get();
   public final static int FILE = HDFqlJNI.FILE_get();
   public final static int GROUP = HDFqlJNI.GROUP_get();
@@ -33,9 +34,6 @@ public interface HDFqlConstants {
   public final static int SOFT_LINK = HDFqlJNI.SOFT_LINK_get();
   public final static int HARD_LINK = HDFqlJNI.HARD_LINK_get();
   public final static int EXTERNAL_LINK = HDFqlJNI.EXTERNAL_LINK_get();
-  public final static int CONTIGUOUS = HDFqlJNI.CONTIGUOUS_get();
-  public final static int COMPACT = HDFqlJNI.COMPACT_get();
-  public final static int CHUNKED = HDFqlJNI.CHUNKED_get();
   public final static int TINYINT = HDFqlJNI.TINYINT_get();
   public final static int UNSIGNED_TINYINT = HDFqlJNI.UNSIGNED_TINYINT_get();
   public final static int SMALLINT = HDFqlJNI.SMALLINT_get();
@@ -59,11 +57,19 @@ public interface HDFqlConstants {
   public final static int VARDOUBLE = HDFqlJNI.VARDOUBLE_get();
   public final static int VARCHAR = HDFqlJNI.VARCHAR_get();
   public final static int OPAQUE = HDFqlJNI.OPAQUE_get();
+  public final static int BITFIELD = HDFqlJNI.BITFIELD_get();
+  public final static int ENUMERATION = HDFqlJNI.ENUMERATION_get();
+  public final static int COMPOUND = HDFqlJNI.COMPOUND_get();
+  public final static int ARRAY = HDFqlJNI.ARRAY_get();
+  public final static int REFERENCE = HDFqlJNI.REFERENCE_get();
   public final static int NATIVE_ENDIAN = HDFqlJNI.NATIVE_ENDIAN_get();
   public final static int LITTLE_ENDIAN = HDFqlJNI.LITTLE_ENDIAN_get();
   public final static int BIG_ENDIAN = HDFqlJNI.BIG_ENDIAN_get();
   public final static int ASCII = HDFqlJNI.ASCII_get();
   public final static int UTF8 = HDFqlJNI.UTF8_get();
+  public final static int FILL_DEFAULT = HDFqlJNI.FILL_DEFAULT_get();
+  public final static int FILL_USER_DEFINED = HDFqlJNI.FILL_USER_DEFINED_get();
+  public final static int FILL_UNDEFINED = HDFqlJNI.FILL_UNDEFINED_get();
   public final static int EARLIEST = HDFqlJNI.EARLIEST_get();
   public final static int LATEST = HDFqlJNI.LATEST_get();
   public final static int VERSION_18 = HDFqlJNI.VERSION_18_get();
@@ -73,6 +79,7 @@ public interface HDFqlConstants {
   public final static int ERROR_NO_ACCESS = HDFqlJNI.ERROR_NO_ACCESS_get();
   public final static int ERROR_NOT_OPEN = HDFqlJNI.ERROR_NOT_OPEN_get();
   public final static int ERROR_INVALID_FILE = HDFqlJNI.ERROR_INVALID_FILE_get();
+  public final static int ERROR_NOT_SUPPORTED = HDFqlJNI.ERROR_NOT_SUPPORTED_get();
   public final static int ERROR_NOT_ENOUGH_SPACE = HDFqlJNI.ERROR_NOT_ENOUGH_SPACE_get();
   public final static int ERROR_NOT_ENOUGH_MEMORY = HDFqlJNI.ERROR_NOT_ENOUGH_MEMORY_get();
   public final static int ERROR_ALREADY_EXISTS = HDFqlJNI.ERROR_ALREADY_EXISTS_get();
@@ -83,7 +90,7 @@ public interface HDFqlConstants {
   public final static int ERROR_OUTSIDE_LIMIT = HDFqlJNI.ERROR_OUTSIDE_LIMIT_get();
   public final static int ERROR_NO_ADDRESS = HDFqlJNI.ERROR_NO_ADDRESS_get();
   public final static int ERROR_UNEXPECTED_TYPE = HDFqlJNI.ERROR_UNEXPECTED_TYPE_get();
-  public final static int ERROR_UNEXPECTED_DATATYPE = HDFqlJNI.ERROR_UNEXPECTED_DATATYPE_get();
+  public final static int ERROR_UNEXPECTED_DATA_TYPE = HDFqlJNI.ERROR_UNEXPECTED_DATA_TYPE_get();
   public final static int ERROR_NOT_REGISTERED = HDFqlJNI.ERROR_NOT_REGISTERED_get();
   public final static int ERROR_INVALID_REGULAR_EXPRESSION = HDFqlJNI.ERROR_INVALID_REGULAR_EXPRESSION_get();
   public final static int ERROR_UNKNOWN = HDFqlJNI.ERROR_UNKNOWN_get();
