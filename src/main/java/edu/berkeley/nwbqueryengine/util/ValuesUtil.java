@@ -40,9 +40,6 @@ public class ValuesUtil {
         if (value instanceof String) {
             String stringValue = ((String) value);
             stringValue = stringValue.replaceAll("\n", " ");
-            stringValue = stringValue.replaceAll("\\P{Print}", "");
-            stringValue = StringUtils.strip(stringValue, "\u0000");
-            stringValue = stringValue.replaceAll("\u0000", "");
             copy = stringValue;
             logger.debug("Modified copy: " + copy);
         }

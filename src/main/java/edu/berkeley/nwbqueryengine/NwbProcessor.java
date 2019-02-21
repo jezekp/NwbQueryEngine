@@ -93,7 +93,7 @@ public class NwbProcessor implements Processor<NwbResult> {
                                 if(expressionValue.endsWith(WILDCARD)) {
                                     sufix = ".*";
                                 }
-                                expressionValue = prefix + "" + StringUtils.strip(expressionValue, WILDCARD) + "" + sufix; //find all substrings - is it a good or bad solution?
+                                expressionValue = prefix + "" + Pattern.quote(StringUtils.strip(expressionValue, WILDCARD)) + "" + sufix; //find all substrings - is it a good or bad solution?
                                 isLike = true;
                             } else {
                                 jexlExpression = "x1" + arithmeticalOperator + "x2";
