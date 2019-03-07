@@ -55,7 +55,7 @@ public class HDF5Connector implements Connector<String> {
                     synchronized (this) {
                         HDFql.cursorClear();
                         HDFql.cursorInitialize();
-                        while ((executeLikeRes = HDFql.execute(queryString)) != HDFql.SUCCESS) {
+                        if ((executeLikeRes = HDFql.execute(queryString)) != HDFql.SUCCESS) {
                             logger.error("Error: " + HDFql.errorGetMessage());
                         }
                         logger.debug("ExecuteLikeRes: " + executeLikeRes);
