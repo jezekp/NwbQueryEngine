@@ -246,7 +246,7 @@ class ExpressionParserTest {
         List<NwbResult> res = execute("/:(session_start_time <  " + find +")");
         assertTrue(res.size() == 1);
         Date d = sdfyyyyMMdd.parse(find);
-        res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).before(d)));
+        res.forEach(item -> assertTrue(((Date)item.getValue()).before(d)));
 
     }
 
@@ -256,7 +256,7 @@ class ExpressionParserTest {
         List<NwbResult> res = execute("/:(session_start_time > " + find +")");
         assertTrue(res.size() == 1);
         Date d = sdfyyyyMMdd.parse(find);
-        res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).after(d)));
+        res.forEach(item -> assertTrue(((Date)item.getValue()).after(d)));
     }
 
     @Test
@@ -279,7 +279,7 @@ class ExpressionParserTest {
         List<NwbResult> res = execute("/:(session_start_time < " + find +")");
         assertTrue(res.size() == 1);
         Date d = sdfyyyy.parse(find);
-        res.forEach(item -> assertTrue(((Date) DateUtil.tryParse((String)item.getValue())).before(d)));
+        res.forEach(item -> assertTrue(((Date)item.getValue()).before(d)));
 
     }
 
