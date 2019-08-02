@@ -17,7 +17,7 @@ public class HDFql implements HDFqlConstants {
 			javaSetEnvironment();
 		}
 
-		public HDFql()   // INFO: set constructor visibility to private to disable instantiation of the class
+		private HDFql()   // INFO: set constructor visibility to private to disable instantiation of the class
 		{
 		}
 
@@ -104,11 +104,34 @@ public class HDFql implements HDFqlConstants {
 
 		public static int execute(String script)
 		{
+			int status;
+			int i;
+
 			if (script == null)
 			{
 				return executeReset();
 			}
-			return execute(script, script.length(), JAVA);
+
+			status = execute(script, script.length(), JAVA);
+			if ((status & 0x100) != 0)   // INFO: check if a transient variable was used
+			{
+				for(i = 0; i < 8; i++)
+				{
+					if ((status & (1 << (i + 9))) != 0)
+					{
+						variableList[i] = null;
+					}
+				}
+				status &= 0x000000FF;
+			}
+			if (status > 127)
+			{
+				return status - 256;
+			}
+			else
+			{
+				return status;
+			}
 		}
 
 		public static int cursorInitialize()
@@ -221,102 +244,102 @@ public class HDFql implements HDFqlConstants {
 			return subcursorGetSize(null);
 		}
 
-		public static java.lang.Byte cursorGetTinyInt()
+		public static Byte cursorGetTinyInt()
 		{
 			return cursorGetTinyInt(null);
 		}
 
-		public static java.lang.Byte subcursorGetTinyInt()
+		public static Byte subcursorGetTinyInt()
 		{
 			return subcursorGetTinyInt(null);
 		}
 
-		public static java.lang.Byte cursorGetUnsignedTinyInt()
+		public static Byte cursorGetUnsignedTinyInt()
 		{
 			return cursorGetUnsignedTinyInt(null);
 		}
 
-		public static java.lang.Byte subcursorGetUnsignedTinyInt()
+		public static Byte subcursorGetUnsignedTinyInt()
 		{
 			return subcursorGetUnsignedTinyInt(null);
 		}
 
-		public static java.lang.Short cursorGetSmallInt()
+		public static Short cursorGetSmallInt()
 		{
 			return cursorGetSmallInt(null);
 		}
 
-		public static java.lang.Short subcursorGetSmallInt()
+		public static Short subcursorGetSmallInt()
 		{
 			return subcursorGetSmallInt(null);
 		}
 
-		public static java.lang.Short cursorGetUnsignedSmallInt()
+		public static Short cursorGetUnsignedSmallInt()
 		{
 			return cursorGetUnsignedSmallInt(null);
 		}
 
-		public static java.lang.Short subcursorGetUnsignedSmallInt()
+		public static Short subcursorGetUnsignedSmallInt()
 		{
 			return subcursorGetUnsignedSmallInt(null);
 		}
 
-		public static java.lang.Integer cursorGetInt()
+		public static Integer cursorGetInt()
 		{
 			return cursorGetInt(null);
 		}
 
-		public static java.lang.Integer subcursorGetInt()
+		public static Integer subcursorGetInt()
 		{
 			return subcursorGetInt(null);
 		}
 
-		public static java.lang.Integer cursorGetUnsignedInt()
+		public static Integer cursorGetUnsignedInt()
 		{
 			return cursorGetUnsignedInt(null);
 		}
 
-		public static java.lang.Integer subcursorGetUnsignedInt()
+		public static Integer subcursorGetUnsignedInt()
 		{
 			return subcursorGetUnsignedInt(null);
 		}
 
-		public static java.lang.Long cursorGetBigInt()
+		public static Long cursorGetBigInt()
 		{
 			return cursorGetBigInt(null);
 		}
 
-		public static java.lang.Long subcursorGetBigInt()
+		public static Long subcursorGetBigInt()
 		{
 			return subcursorGetBigInt(null);
 		}
 
-		public static java.lang.Long cursorGetUnsignedBigInt()
+		public static Long cursorGetUnsignedBigInt()
 		{
 			return cursorGetUnsignedBigInt(null);
 		}
 
-		public static java.lang.Long subcursorGetUnsignedBigInt()
+		public static Long subcursorGetUnsignedBigInt()
 		{
 			return subcursorGetUnsignedBigInt(null);
 		}
 
-		public static java.lang.Float cursorGetFloat()
+		public static Float cursorGetFloat()
 		{
 			return cursorGetFloat(null);
 		}
 
-		public static java.lang.Float subcursorGetFloat()
+		public static Float subcursorGetFloat()
 		{
 			return subcursorGetFloat(null);
 		}
 
-		public static java.lang.Double cursorGetDouble()
+		public static Double cursorGetDouble()
 		{
 			return cursorGetDouble(null);
 		}
 
-		public static java.lang.Double subcursorGetDouble()
+		public static Double subcursorGetDouble()
 		{
 			return subcursorGetDouble(null);
 		}
@@ -361,6 +384,7 @@ public class HDFql implements HDFqlConstants {
 				{
 					if (variable.equals(variableList[i].variable))
 					{
+						variableRegister(i, 0, NO);
 						return i;
 					}
 				}
@@ -416,7 +440,97 @@ public class HDFql implements HDFqlConstants {
 				return ERROR_UNEXPECTED_DATA_TYPE;
 			}
 			variableList[number] = new Variable(variable, dataType);
-			variableRegister(number, 0);
+			variableRegister(number, 0, NO);
+			return number;
+		}
+
+		public static int variableTransientRegister(Object variable)
+		{
+			Object type;
+			Object tmp;
+			int dataType;
+			int number;
+			int i;
+
+			if (variable == null)
+			{
+				return ERROR_NO_ADDRESS;
+			}
+			if (variable.getClass().isArray() == false)   // INFO: only arrays are allowed (otherwise it is not possible to have a "real" reference of the object being registered)
+			{
+				return ERROR_UNEXPECTED_DATA_TYPE;
+			}
+			number = -1;
+			for(i = 0; i < 8; i++)
+			{
+				if (variableList[i] == null)
+				{
+					if (number == -1)
+					{
+						number = i;
+					}
+				}
+				else
+				{
+					if (variable.equals(variableList[i].variable))
+					{
+						variableRegister(i, 0, YES);
+						return i;
+					}
+				}
+			}
+			if (number == -1)
+			{
+				return ERROR_FULL;
+			}
+			type = null;
+			tmp = variable;
+			try
+			{
+				while(true)
+				{
+					java.lang.reflect.Array.getLength(tmp);
+					type = tmp.getClass().getComponentType();
+					tmp = java.lang.reflect.Array.get(tmp, 0);
+				}
+			}
+			catch(Exception e)
+			{
+			}
+			if (type == byte.class || type == Byte.class)   // INFO: it includes the OPAQUE data type as well
+			{
+				dataType = TINYINT;
+			}
+			else if (type == short.class || type == Short.class)
+			{
+				dataType = SMALLINT;
+			}
+			else if (type == int.class || type == Integer.class)
+			{
+				dataType = INT;
+			}
+			else if (type == long.class || type == Long.class)
+			{
+				dataType = BIGINT;
+			}
+			else if (type == float.class || type == Float.class)
+			{
+				dataType = FLOAT;
+			}
+			else if (type == double.class || type == Double.class)
+			{
+				dataType = DOUBLE;
+			}
+			else if (type == String.class)
+			{
+				dataType = VARCHAR;
+			}
+			else
+			{
+				return ERROR_UNEXPECTED_DATA_TYPE;
+			}
+			variableList[number] = new Variable(variable, dataType);
+			variableRegister(number, 0, YES);
 			return number;
 		}
 
@@ -438,6 +552,21 @@ public class HDFql implements HDFqlConstants {
 				}
 			}
 			return ERROR_NOT_REGISTERED;
+		}
+
+		public static int variableUnregisterAll()
+		{
+			int i;
+
+			for(i = 0; i < 8; i++)
+			{
+				if (variableList[i] != null)
+				{
+					variableUnregister(i);
+					variableList[i] = null;
+				}
+			}
+			return SUCCESS;
 		}
 
 		public static int variableGetNumber(Object variable)
@@ -1107,8 +1236,8 @@ public class HDFql implements HDFqlConstants {
     return HDFqlJNI.executeReset();
   }
 
-  private static void variableRegister(int number, long address) {
-    HDFqlJNI.variableRegister(number, address);
+  private static void variableRegister(int number, long address, int arg2) {
+    HDFqlJNI.variableRegister(number, address, arg2);
   }
 
   private static void variableUnregister(int number) {
@@ -1231,264 +1360,224 @@ public class HDFql implements HDFqlConstants {
     return HDFqlJNI.subcursorGetSize(HDFqlCursor.getCPtr(cursor), cursor);
   }
 
-  public static java.lang.Byte cursorGetTinyInt(HDFqlCursor cursor) {
+  public static Byte cursorGetTinyInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetTinyInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Byte((byte) convertChar(pointer));
-		}
+
+		return new Byte((byte) convertChar(pointer));
 	}
 
-  public static java.lang.Byte subcursorGetTinyInt(HDFqlCursor cursor) {
+  public static Byte subcursorGetTinyInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetTinyInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Byte((byte) convertChar(pointer));
-		}
+
+		return new Byte((byte) convertChar(pointer));
 	}
 
-  public static java.lang.Byte cursorGetUnsignedTinyInt(HDFqlCursor cursor) {
+  public static Byte cursorGetUnsignedTinyInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetUnsignedTinyInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Byte((byte) convertChar(pointer));
-		}
+
+		return new Byte((byte) convertChar(pointer));
 	}
 
-  public static java.lang.Byte subcursorGetUnsignedTinyInt(HDFqlCursor cursor) {
+  public static Byte subcursorGetUnsignedTinyInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetUnsignedTinyInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Byte((byte) convertChar(pointer));
-		}
+
+		return new Byte((byte) convertChar(pointer));
 	}
 
-  public static java.lang.Short cursorGetSmallInt(HDFqlCursor cursor) {
+  public static Short cursorGetSmallInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetSmallInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Short(convertShort(pointer));
-		}
+
+		return new Short(convertShort(pointer));
 	}
 
-  public static java.lang.Short subcursorGetSmallInt(HDFqlCursor cursor) {
+  public static Short subcursorGetSmallInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetSmallInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Short(convertShort(pointer));
-		}
+
+		return new Short(convertShort(pointer));
 	}
 
-  public static java.lang.Short cursorGetUnsignedSmallInt(HDFqlCursor cursor) {
+  public static Short cursorGetUnsignedSmallInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetUnsignedSmallInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Short(convertShort(pointer));
-		}
+
+		return new Short(convertShort(pointer));
 	}
 
-  public static java.lang.Short subcursorGetUnsignedSmallInt(HDFqlCursor cursor) {
+  public static Short subcursorGetUnsignedSmallInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetUnsignedSmallInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Short(convertShort(pointer));
-		}
+
+		return new Short(convertShort(pointer));
 	}
 
-  public static java.lang.Integer cursorGetInt(HDFqlCursor cursor) {
+  public static Integer cursorGetInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Integer(convertInt(pointer));
-		}
+
+		return new Integer(convertInt(pointer));
 	}
 
-  public static java.lang.Integer subcursorGetInt(HDFqlCursor cursor) {
+  public static Integer subcursorGetInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Integer(convertInt(pointer));
-		}
+
+		return new Integer(convertInt(pointer));
 	}
 
-  public static java.lang.Integer cursorGetUnsignedInt(HDFqlCursor cursor) {
+  public static Integer cursorGetUnsignedInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetUnsignedInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Integer(convertInt(pointer));
-		}
+
+		return new Integer(convertInt(pointer));
 	}
 
-  public static java.lang.Integer subcursorGetUnsignedInt(HDFqlCursor cursor) {
+  public static Integer subcursorGetUnsignedInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetUnsignedInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Integer(convertInt(pointer));
-		}
+
+		return new Integer(convertInt(pointer));
 	}
 
-  public static java.lang.Long cursorGetBigInt(HDFqlCursor cursor) {
+  public static Long cursorGetBigInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetBigInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Long(convertLong(pointer));
-		}
+
+		return new Long(convertLong(pointer));
 	}
 
-  public static java.lang.Long subcursorGetBigInt(HDFqlCursor cursor) {
+  public static Long subcursorGetBigInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetBigInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Long(convertLong(pointer));
-		}
+
+		return new Long(convertLong(pointer));
 	}
 
-  public static java.lang.Long cursorGetUnsignedBigInt(HDFqlCursor cursor) {
+  public static Long cursorGetUnsignedBigInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetUnsignedBigInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Long(convertLong(pointer));
-		}
+
+		return new Long(convertLong(pointer));
 	}
 
-  public static java.lang.Long subcursorGetUnsignedBigInt(HDFqlCursor cursor) {
+  public static Long subcursorGetUnsignedBigInt(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetUnsignedBigInt(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Long(convertLong(pointer));
-		}
+
+		return new Long(convertLong(pointer));
 	}
 
-  public static java.lang.Float cursorGetFloat(HDFqlCursor cursor) {
+  public static Float cursorGetFloat(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetFloat(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Float(convertFloat(pointer));
-		}
+
+		return new Float(convertFloat(pointer));
 	}
 
-  public static java.lang.Float subcursorGetFloat(HDFqlCursor cursor) {
+  public static Float subcursorGetFloat(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetFloat(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Float(convertFloat(pointer));
-		}
+
+		return new Float(convertFloat(pointer));
 	}
 
-  public static java.lang.Double cursorGetDouble(HDFqlCursor cursor) {
+  public static Double cursorGetDouble(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.cursorGetDouble(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Double(convertDouble(pointer));
-		}
+
+		return new Double(convertDouble(pointer));
 	}
 
-  public static java.lang.Double subcursorGetDouble(HDFqlCursor cursor) {
+  public static Double subcursorGetDouble(HDFqlCursor cursor) {
 		long pointer = HDFqlJNI.subcursorGetDouble(HDFqlCursor.getCPtr(cursor), cursor);
 
 		if (pointer == 0)
 		{
 			return null;
 		}
-		else
-		{
-			return new java.lang.Double(convertDouble(pointer));
-		}
+
+		return new Double(convertDouble(pointer));
 	}
 
   public static String cursorGetChar(HDFqlCursor cursor) {

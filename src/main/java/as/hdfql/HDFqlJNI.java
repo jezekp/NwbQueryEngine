@@ -40,7 +40,6 @@ public class HDFqlJNI {
   public final static native int DATASET_get();
   public final static native int ATTRIBUTE_get();
   public final static native int SOFT_LINK_get();
-  public final static native int HARD_LINK_get();
   public final static native int EXTERNAL_LINK_get();
   public final static native int TINYINT_get();
   public final static native int UNSIGNED_TINYINT_get();
@@ -70,7 +69,6 @@ public class HDFqlJNI {
   public final static native int COMPOUND_get();
   public final static native int ARRAY_get();
   public final static native int REFERENCE_get();
-  public final static native int NATIVE_ENDIAN_get();
   public final static native int LITTLE_ENDIAN_get();
   public final static native int BIG_ENDIAN_get();
   public final static native int ASCII_get();
@@ -99,6 +97,8 @@ public class HDFqlJNI {
   public final static native int ERROR_NO_ADDRESS_get();
   public final static native int ERROR_UNEXPECTED_TYPE_get();
   public final static native int ERROR_UNEXPECTED_DATA_TYPE_get();
+  public final static native int ERROR_UNEXPECTED_STORAGE_TYPE_get();
+  public final static native int ERROR_DANGLING_LINK_get();
   public final static native int ERROR_NOT_REGISTERED_get();
   public final static native int ERROR_INVALID_REGULAR_EXPRESSION_get();
   public final static native int ERROR_UNKNOWN_get();
@@ -111,7 +111,7 @@ public class HDFqlJNI {
   public final static native int mpiGetRank();
   public final static native int execute(String jarg1, int jarg2, int jarg3);
   public final static native int executeReset();
-  public final static native void variableRegister(int jarg1, long jarg2);
+  public final static native void variableRegister(int jarg1, long jarg2, int jarg3);
   public final static native void variableUnregister(int jarg1);
   public final static native int variableGetDataType(int jarg1);
   public final static native int variableGetCount(int jarg1);

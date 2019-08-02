@@ -32,7 +32,6 @@ public interface HDFqlConstants {
   public final static int DATASET = HDFqlJNI.DATASET_get();
   public final static int ATTRIBUTE = HDFqlJNI.ATTRIBUTE_get();
   public final static int SOFT_LINK = HDFqlJNI.SOFT_LINK_get();
-  public final static int HARD_LINK = HDFqlJNI.HARD_LINK_get();
   public final static int EXTERNAL_LINK = HDFqlJNI.EXTERNAL_LINK_get();
   public final static int TINYINT = HDFqlJNI.TINYINT_get();
   public final static int UNSIGNED_TINYINT = HDFqlJNI.UNSIGNED_TINYINT_get();
@@ -62,7 +61,6 @@ public interface HDFqlConstants {
   public final static int COMPOUND = HDFqlJNI.COMPOUND_get();
   public final static int ARRAY = HDFqlJNI.ARRAY_get();
   public final static int REFERENCE = HDFqlJNI.REFERENCE_get();
-  public final static int NATIVE_ENDIAN = HDFqlJNI.NATIVE_ENDIAN_get();
   public final static int LITTLE_ENDIAN = HDFqlJNI.LITTLE_ENDIAN_get();
   public final static int BIG_ENDIAN = HDFqlJNI.BIG_ENDIAN_get();
   public final static int ASCII = HDFqlJNI.ASCII_get();
@@ -91,6 +89,8 @@ public interface HDFqlConstants {
   public final static int ERROR_NO_ADDRESS = HDFqlJNI.ERROR_NO_ADDRESS_get();
   public final static int ERROR_UNEXPECTED_TYPE = HDFqlJNI.ERROR_UNEXPECTED_TYPE_get();
   public final static int ERROR_UNEXPECTED_DATA_TYPE = HDFqlJNI.ERROR_UNEXPECTED_DATA_TYPE_get();
+  public final static int ERROR_UNEXPECTED_STORAGE_TYPE = HDFqlJNI.ERROR_UNEXPECTED_STORAGE_TYPE_get();
+  public final static int ERROR_DANGLING_LINK = HDFqlJNI.ERROR_DANGLING_LINK_get();
   public final static int ERROR_NOT_REGISTERED = HDFqlJNI.ERROR_NOT_REGISTERED_get();
   public final static int ERROR_INVALID_REGULAR_EXPRESSION = HDFqlJNI.ERROR_INVALID_REGULAR_EXPRESSION_get();
   public final static int ERROR_UNKNOWN = HDFqlJNI.ERROR_UNKNOWN_get();

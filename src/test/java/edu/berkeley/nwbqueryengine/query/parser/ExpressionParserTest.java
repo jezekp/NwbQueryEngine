@@ -194,9 +194,10 @@ class ExpressionParserTest {
         res.forEach(item -> {
             String value = (String) item.getValue();
             String dataset = item.getDataSet();
-            assertTrue(value.contains("25") && dataset.equals("/general/subject/age") ||
-                    value.contains("2017-02-14T16:40:38.8414") && dataset.equals("/file_create_date") ||
-                    value.contains("Mus") && dataset.equals("/general/subject/species"));
+            boolean compare = value.contains("25") && dataset.equals("general/subject/age") ||
+                    value.contains("2017-02-14T16:40:38.8414") && dataset.equals("file_create_date") ||
+                    value.contains("Mus") && dataset.equals("general/subject/species");
+            assertTrue(compare);
         });
     }
 
@@ -207,9 +208,9 @@ class ExpressionParserTest {
         res.forEach(item -> {
             String value = (String) item.getValue();
             String dataset = item.getDataSet();
-            assertTrue(value.contains("25") && dataset.equals("/general/subject/age") ||
-                    value.contains("2017-02-14T16:40:38.8414") && dataset.equals("/file_create_date") ||
-                    value.contains("Mus") && dataset.equals("/general/subject/species"));
+            assertTrue(value.contains("25") && dataset.equals("general/subject/age") ||
+                    value.contains("2017-02-14T16:40:38.8414") && dataset.equals("file_create_date") ||
+                    value.contains("Mus") && dataset.equals("general/subject/species"));
         });
     }
 
@@ -217,15 +218,15 @@ class ExpressionParserTest {
     void andOverTwoDatasets() {
         List<NwbResult> res = execute("epochs/Trial_306:(start_time < 1530) & epochs/Trial_307:(stop_time>1530)");
         assertTrue(res.size() == 2);
-        res.forEach(item -> assertTrue((double)item.getValue() < 1530 && item.getDataSet().equals("epochs/Trial_306/start_time")
-    || (double)item.getValue() > 1530 && item.getDataSet().equals("epochs/Trial_307/stop_time")));
+        res.forEach(item -> assertTrue((double) item.getValue() < 1530 && item.getDataSet().equals("epochs/Trial_306/start_time")
+                || (double) item.getValue() > 1530 && item.getDataSet().equals("epochs/Trial_307/stop_time")));
 
     }
 
     @Test
     void bracketsTest() {
         String find = "(PW)";
-        List<NwbResult> res = execute("/:(session_description LIKE %"+ find +"%)");
+        List<NwbResult> res = execute("/:(session_description LIKE %" + find + "%)");
         assertTrue(res.size() == 1);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains(find)));
 
@@ -235,7 +236,7 @@ class ExpressionParserTest {
     @Test
     void timeLikeTest() {
         String find = "2013-02-07";
-        List<NwbResult> res = execute("/:(session_start_time LIKE %" + find +"%)");
+        List<NwbResult> res = execute("/:(session_start_time LIKE %" + find + "%)");
         assertTrue(res.size() == 1);
         res.forEach(item -> assertTrue(((String) item.getValue()).contains(find)));
     }
@@ -243,43 +244,43 @@ class ExpressionParserTest {
     @Test
     void dateBeforeTest() throws ParseException {
         String find = "2015-02-07";
-        List<NwbResult> res = execute("/:(session_start_time <  " + find +")");
+        List<NwbResult> res = execute("/:(session_start_time <  " + find + ")");
         assertTrue(res.size() == 1);
         Date d = sdfyyyyMMdd.parse(find);
-        res.forEach(item -> assertTrue(((Date)item.getValue()).before(d)));
+        res.forEach(item -> assertTrue(((Date) item.getValue()).before(d)));
 
     }
 
     @Test
     void dateAfterTest() throws ParseException {
         String find = "2013-02-06";
-        List<NwbResult> res = execute("/:(session_start_time > " + find +")");
+        List<NwbResult> res = execute("/:(session_start_time > " + find + ")");
         assertTrue(res.size() == 1);
         Date d = sdfyyyyMMdd.parse(find);
-        res.forEach(item -> assertTrue(((Date)item.getValue()).after(d)));
+        res.forEach(item -> assertTrue(((Date) item.getValue()).after(d)));
     }
 
     @Test
     void dateBeforeFalseTest() {
         String find = "2013-02-06";
-        List<NwbResult> res = execute("/:(session_start_time < %" + find +"%)");
+        List<NwbResult> res = execute("/:(session_start_time < %" + find + "%)");
         assertTrue(res.size() == 0);
     }
 
     @Test
     void dateAfter201801() throws ParseException {
         String find = "2018-01";
-        List<NwbResult> res = execute("/:(session_start_time > " + find +")");
+        List<NwbResult> res = execute("/:(session_start_time > " + find + ")");
         assertTrue(res.size() == 0);
     }
 
     @Test
     void dateBeforeTrueTest() throws ParseException {
         String find = "2018";
-        List<NwbResult> res = execute("/:(session_start_time < " + find +")");
+        List<NwbResult> res = execute("/:(session_start_time < " + find + ")");
         assertTrue(res.size() == 1);
         Date d = sdfyyyy.parse(find);
-        res.forEach(item -> assertTrue(((Date)item.getValue()).before(d)));
+        res.forEach(item -> assertTrue(((Date) item.getValue()).before(d)));
 
     }
 
