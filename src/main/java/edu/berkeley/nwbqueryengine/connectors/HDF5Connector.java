@@ -47,12 +47,12 @@ public class HDF5Connector implements Connector<String> {
                         queryPrefix = "";
                     } else if (leftSideCopy.equals("*")) {
                         leftSide = "**";
-                    } else if (leftSideCopy.startsWith("*/")) {
+                    } else if (leftSideCopy.startsWith("*")) {
                         queryPrefix = "**/";
                         leftSide = StringUtils.strip(leftSide,"*/");
                     }
                     String querySuffix = "";
-                    if(leftSideCopy.endsWith("/*")) {
+                    if(leftSideCopy.endsWith("*")) {
                         querySuffix = "**/";
                         leftSide = StringUtils.strip(leftSide, "/*");
                     }
