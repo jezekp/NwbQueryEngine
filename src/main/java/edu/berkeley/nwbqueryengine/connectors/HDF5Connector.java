@@ -41,14 +41,23 @@ public class HDF5Connector implements Connector<String> {
                 } else {
                     showResults = new LinkedList<>();
                     String leftSide = subQuery.getQueryLeftSide().getExpressionValue();
-                    String queryPrefix = "**/";
-                    if (leftSide.startsWith("/")) {
+                    String leftSideCopy = StringUtils.strip(leftSide, null); //only removes white spaces
+                    String queryPrefix = "";
+                    if (leftSideCopy.startsWith("/")) {
                         queryPrefix = "";
-                    } else if (leftSide.equals("*")) {
+                    } else if (leftSideCopy.equals("*")) {
                         leftSide = "**";
+                    } else if (leftSideCopy.startsWith("*/")) {
+                        queryPrefix = "**/";
+                        leftSide = StringUtils.strip(leftSide,"*/");
+                    }
+                    String querySuffix = "";
+                    if(leftSideCopy.endsWith("/*")) {
+                        querySuffix = "**/";
+                        leftSide = StringUtils.strip(leftSide, "/*");
                     }
 
-                    String queryString = "SHOW LIKE " + queryPrefix + "" + leftSide + "/" + queryPrefix + "" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
+                    String queryString = "SHOW LIKE " + queryPrefix + "" + leftSide + "/" + querySuffix + "" + StringUtils.strip(expressionValue.trim() + "/", "''\"\"");
                     logger.debug(queryString);
                     int executeLikeRes;
 
