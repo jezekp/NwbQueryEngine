@@ -57,4 +57,4 @@ Maven
         
 Logging
 ==
-logging (e. g. logging level, log file location) can be configured in src/main/resources. [log4j] (https://logging.apache.org/log4j/2.x/manual/configuration.html) library is used
+logging (e. g. logging level, log file location) can be configured in src/main/resources. [log4j](https://logging.apache.org/log4j/2.x/manual/configuration.html) library is used
