@@ -11,7 +11,8 @@ Prerequisites
 - For programmers 
 1. [Installed JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 2. [Installed Maven](https://maven.apache.org/download.cgi)
-3. Installed your favorite IDE
+3. [Installed git-lfs](https://git-lfs.github.com/)
+4. Installed your favorite IDE
 
 
 Running
