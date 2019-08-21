@@ -11,7 +11,8 @@ Prerequisites
 - For programmers 
 1. [Installed JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 2. [Installed Maven](https://maven.apache.org/download.cgi)
-3. Installed your favorite IDE
+3. [Installed git-lfs](https://git-lfs.github.com/)
+4. Installed your favorite IDE
 
 
 Running
@@ -54,3 +55,8 @@ Maven
             <id>snapshots</id>
             <url>http://eeg.kiv.zcu.cz:8081/nexus/content/repositories/snapshots/</url>
         </repository>
+        
+Logging
+==
+logging (e. g. logging level, log file location) can be configured in src/main/resources. [log4j](https://logging.apache.org/log4j/2.x/manual/configuration.html) library is used.
+Do not use degug level in production. It can dramatically affect performance
