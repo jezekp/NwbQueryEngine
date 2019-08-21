@@ -97,7 +97,7 @@ public class HDF5Connector implements Connector<String> {
                 HDFql.cursorInitialize();
                 HDFql.execute("ENABLE DEBUG");
             }
-            String useFileQuery = "USE READONLY FILE " + obj.getAbsolutePath();
+            String useFileQuery = "USE READONLY FILE \"" + obj.getAbsolutePath() + "\"";
             logger.debug("Use file query: " + useFileQuery);
             HDFql.cursorClear();
             HDFql.cursorInitialize();
