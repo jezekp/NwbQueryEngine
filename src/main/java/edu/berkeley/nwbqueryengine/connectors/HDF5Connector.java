@@ -162,7 +162,7 @@ public class HDF5Connector implements Connector<String> {
     @Override
     public void getValues(String entity) throws ConnectorException {
         synchronized (this) {
-            String selectQuery = "SELECT FROM " + entity;
+            String selectQuery = "SELECT FROM \"" + entity + "\"";
             logger.debug("Select: " + selectQuery);
             HDFql.cursorClear();
             HDFql.cursorInitialize();
