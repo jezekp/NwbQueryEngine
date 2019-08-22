@@ -31,16 +31,7 @@ public class FileInput implements Input<String, String> {
 
             File obj = new File(file);
             if (obj.isDirectory()) {
-                logger.debug("Goes through directory: " + obj);
-                for (File item : obj.listFiles(new FileFilter() {
-                    @Override
-                    public boolean accept(File pathname) {
-                        return pathname.getName().toLowerCase().endsWith(".nwb");
-                    }
-                })) {
-                    logger.info("Processing file: " + item + " in directory: " + obj);
-                    completeRes.addAll(processFile(item, query));
-                }
+                goRecursively(obj, completeRes, query);
             } else {
                 logger.info("Processing file: " + obj);
                 completeRes = processFile(obj, query);
@@ -66,5 +57,18 @@ public class FileInput implements Input<String, String> {
         });
         logger.info("I have: " + res.size());
         return res;
+    }
+
+    private void goRecursively(File obj, List<NwbResult> completeRes, Query query) throws Exception {
+        logger.debug("Go through the directory: " + obj);
+        for (File item : obj.listFiles()) {
+            if(item.isDirectory()) {
+                goRecursively(item, completeRes, query);
+            }
+            else if(item.getAbsolutePath().toLowerCase().endsWith(".nwb")) {
+                logger.info("Processing file: " + item + " in directory: " + obj);
+                completeRes.addAll(processFile(item, query));
+            }
+        }
     }
 }
