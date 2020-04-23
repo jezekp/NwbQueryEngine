@@ -57,6 +57,10 @@ Maven
         </repository>
         
 Logging
+==        
+If the tool is run from a command line the output is a triple containing the NWB file name, dataset path and founded value. If the tool is used as a library in a third-party program then this program is responsible for formatting the output.
+        
+Logging
 ==
 logging (e. g. logging level, log file location) can be configured in src/main/resources. [log4j](https://logging.apache.org/log4j/2.x/manual/configuration.html) library is used.
 Do not use degug level in production. It can dramatically affect performance
