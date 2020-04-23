@@ -56,7 +56,7 @@ Maven
             <url>http://eeg.kiv.zcu.cz:8081/nexus/content/repositories/snapshots/</url>
         </repository>
         
-Logging
+Output
 ==        
 If the tool is run from a command line the output is a triple containing the NWB file name, dataset path and founded value. If the tool is used as a library in a third-party program then this program is responsible for formatting the output.
         
