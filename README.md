@@ -58,7 +58,7 @@ Maven
         
 Output
 ==        
-If the tool is run from a command line the output is a triple containing the NWB file name, dataset path and founded value. If the tool is used as a library in a third-party program then this program is responsible for formatting the output.
+If the tool is run from a command line the output is a triple containing the NWB file name, dataset path and value. If the tool is used as a library in a third-party program then this program is responsible for formatting the output.
         
 Logging
 ==
